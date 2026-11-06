@@ -1,0 +1,21 @@
+{
+  "id": "multi-recursion-to_binary-x-reduce_init-max_by_key",
+  "kind": "multi",
+  "family": "recursion+reduce_init",
+  "bug_category": "recursion_base",
+  "bug_categories": [
+    "recursion_base",
+    "reduce_init"
+  ],
+  "bug_class": "递归基例错误 + 归约初值/比较器错误",
+  "bug_desc": "n=0 的基例返回空串，导致 0 的二进制表示丢失；max_by_key 直接比较元素本身，忽略 key 函数",
+  "module": "recursion+stats",
+  "src_path": "src/recursion.py,src/stats.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/recursion.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_binary_zero",
+  "reference": {
+    "src/recursion.py": "def to_binary(n):\n    if n == 0:\n        return \"0\"\n    if n == 1:\n        return \"1\"\n    return to_binary(n // 2) + str(n % 2)\n",
+    "src/stats.py": "def max_by_key(items, key):\n    if not items:\n        return None\n    best = items[0]\n    for it in items[1:]:\n        if key(it) > key(best):\n            best = it\n    return best\n"
+  },
+  "hidden_tests": "from recursion import to_binary\n\ndef test_binary_zero():\n    assert to_binary(0) == \"0\"\n\ndef test_binary_one():\n    assert to_binary(1) == \"1\"\n\ndef test_binary_five():\n    assert to_binary(5) == \"101\"\n\ndef test_binary_eight():\n    assert to_binary(8) == \"1000\"\n\n\nfrom stats import max_by_key\n\ndef test_max_by_key_dict():\n    rows = [{\"v\": 1}, {\"v\": 9}, {\"v\": 5}]\n    assert max_by_key(rows, lambda r: r[\"v\"]) == {\"v\": 9}\n\ndef test_max_by_key_empty():\n    assert max_by_key([], len) is None\n\ndef test_max_by_key_tie():\n    assert max_by_key([\"bb\", \"aa\"], len) == \"bb\"\n"
+}

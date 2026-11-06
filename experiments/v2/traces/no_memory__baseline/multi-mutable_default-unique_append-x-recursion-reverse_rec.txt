@@ -1,0 +1,81 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区结构，读取源码与测试。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (189B)
+      src/recursion.py  (94B)
+[dir] tests
+      tests/test_visible.py  (253B)
+[step 2] 思考: 读取两个源文件和可见测试。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 200}
+  观察: src/collect.py (7 行)
+   1| def unique_append(items, value, seen=set()):
+   2|     if seen is None:
+   3|         seen = set()
+   4|     if value in seen:
+   5|         return list(items)
+   6|     seen.add(value)
+   7|     return list(items) + [value]
+[step 3] 思考: 读取 recursion.py 和可见测试。
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 200}
+  观察: src/recursion.py (4 行)
+   1| def reverse_rec(s):
+   2|     if len(s) <= 1:
+   3|         return s
+   4|     return s[0] + reverse_rec(s[1:])
+[step 4] 思考: 读取可见测试，确认预期语义。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 200}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import unique_append
+   3| 
+   4| def test_unique_basic():
+   5|     assert unique_append([1, 2], 3) == [1, 2, 3]
+   6| 
+   7| 
+   8| 
+   9| def test_unique_leak():
+  10|     first = unique_append([], 7)
+  11|     second = unique_append([], 7)
+ 
+[step 5] 思考: 两处根因：collect.py 用了可变默认参数 seen=set() 导致跨调用泄漏，且未把 items 视为已见；recursion.py 拼接顺序错误导致未反转（且对 list 类型不通用）。先修 collect.py。
+  动作: edit_file {"path": "src/collect.py", "old": "def unique_append(items, value, seen=set()):\n    if seen is None:\n        seen = set()\n    if value in seen:\n        return list(items)\n    seen.add(value)\n   
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 6] 思考: 修复 recursion.py：反转应把首字符放在递归结果之后，且需正确处理空串/单元素。
+  动作: edit_file {"path": "src/recursion.py", "old": "def reverse_rec(s):\n    if len(s) <= 1:\n        return s\n    return s[0] + reverse_rec(s[1:])", "new": "def reverse_rec(s):\n    if len(s) <= 1:\n        return
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 7] 思考: 构造边界用例验证，并让实现先物化 items 以支持生成器/元组。先改进 collect 实现。
+  动作: edit_file {"path": "src/collect.py", "old": "def unique_append(items, value, seen=None):\n    if seen is None:\n        seen = set(items)\n    else:\n        seen = set(seen) | set(items)\n    if value in seen:
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 8] 思考: 运行可见测试并构造边界用例验证两个模块。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.11s
+
+[step 9] 思考: 构造边界用例验证两个模块的根因修复是否覆盖隐藏测试场景。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import unique_append\nfrom recursion import reverse_rec\nassert unique_append([],1)==[1]\nassert unique_append([],1)==[1]\nassert unique_ap
+  观察: exit=1
+
+[stderr]
+  File "./experiments/v2/work/no_memory__baseline/multi-mutable_default-unique_append-x-recursion-reverse_rec/.agent_tmp/run_1.py", line 13
+    assert unique_append(x for x in [1,2] if True,3)==[1,2,3]
+                         ^^^^^^^^^^^^^^^^^
+[step 10] 思考: 只是我测试脚本里生成器表达式需要加括号，修改后重跑。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import unique_append\nfrom recursion import reverse_rec\nassert unique_append([],1)==[1]\nassert unique_append([],1)==[1]\nassert unique_ap
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/no_memory__baseline/multi-mutable_default-unique_append-x-recursion-reverse_rec/.agent_tmp/run_2.py", line 18, in <module>
+    assert reverse_rec([1,2,3])==[3,2,1]
+           ^^^^
+[step 11] 思考: recursion 对 list 输入失败：s[0] 是元素而非序列。改用 s[:1] 保证类型一致。
+  动作: edit_file {"path": "src/recursion.py", "old": "    return reverse_rec(s[1:]) + s[0]", "new": "    return reverse_rec(s[1:]) + s[:1]"}
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 12] 思考: 重新跑边界用例与可见测试。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import unique_append\nfrom recursion import reverse_rec\nassert unique_append([],1)==[1]\nassert unique_append([],1)==[1]\nassert unique_ap
+  观察: exit=0
+all ok

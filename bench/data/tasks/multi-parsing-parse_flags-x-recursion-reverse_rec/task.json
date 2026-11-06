@@ -1,0 +1,21 @@
+{
+  "id": "multi-parsing-parse_flags-x-recursion-reverse_rec",
+  "kind": "multi",
+  "family": "parsing+recursion",
+  "bug_category": "parsing_robustness",
+  "bug_categories": [
+    "parsing_robustness",
+    "recursion_base"
+  ],
+  "bug_class": "解析边界情况 + 递归基例错误",
+  "bug_desc": "无值开关被解析成字符串 \"true\" 而不是布尔值；递归拼接顺序反了，结果等于原串",
+  "module": "parsing+recursion",
+  "src_path": "src/parsing.py,src/recursion.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_flag_boolean_type",
+  "reference": {
+    "src/parsing.py": "def parse_flags(argv):\n    out = {}\n    for token in argv:\n        if not token.startswith(\"--\"):\n            continue\n        body = token[2:]\n        if \"=\" in body:\n            k, v = body.split(\"=\", 1)\n            out[k] = v\n        else:\n            out[body] = True\n    return out\n",
+    "src/recursion.py": "def reverse_rec(s):\n    if len(s) <= 1:\n        return s\n    return reverse_rec(s[1:]) + s[0]\n"
+  },
+  "hidden_tests": "from parsing import parse_flags\n\ndef test_flag_boolean_type():\n    assert parse_flags([\"--verbose\"]) == {\"verbose\": True}\n\ndef test_flag_ignores_positional():\n    assert parse_flags([\"file.txt\", \"--x\"]) == {\"x\": True}\n\ndef test_flag_mixed():\n    assert parse_flags([\"--a\", \"--b=2\"]) == {\"a\": True, \"b\": \"2\"}\n\n\nfrom recursion import reverse_rec\n\ndef test_reverse_single():\n    assert reverse_rec(\"z\") == \"z\"\n\ndef test_reverse_empty():\n    assert reverse_rec(\"\") == \"\"\n\ndef test_reverse_long():\n    assert reverse_rec(\"abcdef\") == \"fedcba\"\n"
+}

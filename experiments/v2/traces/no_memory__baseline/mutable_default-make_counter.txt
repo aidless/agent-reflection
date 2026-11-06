@@ -1,0 +1,64 @@
+task: 仓库工作区里 src/collect.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/collect.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (137B)
+[dir] tests
+      tests/test_visible.py  (201B)
+[step 2] 思考: 查看源码与可见测试。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 80}
+  观察: src/collect.py (9 行)
+   1| def make_counter():
+   2|     state = {"n": 0}
+   3| 
+   4|     def inc():
+   5|         n = state["n"]
+   6|         state["n"] += 1
+   7|         return n
+   8| 
+   9|     return inc
+[step 3] 思考: 读取可见测试，理解预期行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 80}
+  观察: tests/test_visible.py (12 行)
+   1| 
+   2| from collect import make_counter
+   3| 
+   4| def test_counter_basic():
+   5|     c = make_counter()
+   6|     assert c() == 1
+   7| 
+   8| 
+   9| 
+  10| def test_counter_increments():
+  11|     c = make_counter()
+  12|     assert [c(), c(), c()] == [1, 2, 3
+[step 4] 思考: 可见测试期望首次调用返回 1，而当前实现是先返回后自增，返回 0/1/2。应将自增放在返回之前；state 每次调用新建，保证计数器之间相互独立（对应 mutable default 边界情况）。
+  动作: edit_file {"path": "src/collect.py", "old": "    def inc():\n        n = state[\"n\"]\n        state[\"n\"] += 1\n        return n", "new": "    def inc():\n        state[\"n\"] += 1\n        return state[\"n\"
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 5] 思考: 运行测试验证。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 6] 思考: 可见测试通过。再验证边界：多个计数器实例互相独立、可重复调用且不受默认参数共享影响。
+  动作: run_python {"code": "from src.collect import make_counter\nif True:\n    import sys\n    sys.path.insert(0,'src')\n    from collect import make_counter as mc\n    a=mc(); b=mc()\n    print(a(),a(),b(),a(),b())"}
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/no_memory__baseline/mutable_default-make_counter/.agent_tmp/run_1.py", line 1, in <module>
+    from src.collect import make_counter
+ModuleNotFoundError: No module named 'src'
+
+[step 7] 思考: 导入路径写错了，直接用 sys.path 指向 src 再验证边界。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import make_counter\ncheck=[]\na=make_counter(); b=make_counter()\ncheck.append(a()); check.append(a()); check.append(b()); check.append(a(
+  观察: exit=0
+[1, 2, 1, 3, 2]
+True
+
+[step 8] 思考: 计数器从 1 开始、多次调用递增、不同实例相互独立，边界情况均正确。可见测试全部通过，根因（先返回后自增，导致首值返回 0）已修复。
+  动作: finish {"summary": "修复 src/collect.py 的 make_counter：将 state[\"n\"] += 1 提前到返回之前，使计数器首次调用返回 1、后续依次递增；state 在每次 make_counter() 调用时新建，保证不同计数器实例互相独立。可见测试全部通过，并额外验证了多实例独立性与递增序列 [1,2,3] 等边界情况。"}
+  判定: 4 passed in 0.01s

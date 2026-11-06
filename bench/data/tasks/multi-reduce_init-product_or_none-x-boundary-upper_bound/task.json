@@ -1,0 +1,21 @@
+{
+  "id": "multi-reduce_init-product_or_none-x-boundary-upper_bound",
+  "kind": "multi",
+  "family": "reduce_init+boundary",
+  "bug_category": "reduce_init",
+  "bug_categories": [
+    "reduce_init",
+    "boundary_compare"
+  ],
+  "bug_class": "归约初值/比较器错误 + 二分/边界 off-by-one",
+  "bug_desc": "乘积初值写成 0，所有结果都变 0；upper_bound 把 <= 写成 <，重复元素后界错误",
+  "module": "stats+search",
+  "src_path": "src/stats.py,src/search.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_product_single",
+  "reference": {
+    "src/stats.py": "def product_or_none(values):\n    if not values:\n        return None\n    out = 1\n    for v in values:\n        out *= v\n    return out\n",
+    "src/search.py": "def upper_bound(arr, x):\n    lo, hi = 0, len(arr)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if arr[mid] <= x:\n            lo = mid + 1\n        else:\n            hi = mid\n    return lo\n"
+  },
+  "hidden_tests": "from stats import product_or_none\n\ndef test_product_empty():\n    assert product_or_none([]) is None\n\ndef test_product_single():\n    assert product_or_none([5]) == 5\n\ndef test_product_with_zero():\n    assert product_or_none([2, 0, 3]) == 0\n\n\nfrom search import upper_bound\n\ndef test_no_match_greater():\n    assert upper_bound([1, 2, 4], 3) == 2\n\ndef test_all_equal():\n    assert upper_bound([2, 2, 2], 2) == 3\n\ndef test_empty():\n    assert upper_bound([], 1) == 0\n"
+}

@@ -1,0 +1,65 @@
+task: 仓库工作区里 src/stats.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/stats.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区文件结构和相关源码/测试。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/stats.py  (171B)
+[dir] tests
+      tests/test_visible.py  (249B)
+[step 2] 思考: 读取源码和可见测试。
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 100}
+  观察: src/stats.py (8 行)
+   1| def max_by_key(items, key):
+   2|     if not items:
+   3|         return None
+   4|     best = items[0]
+   5|     for it in items[1:]:
+   6|         if it > best:
+   7|             best = it
+   8|     return best
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"tests/test_visible.py","start_l
+[step 4] 思考: 读取可见测试以了解预期行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 100}
+  观察: tests/test_visible.py (11 行)
+   1| 
+   2| from stats import max_by_key
+   3| 
+   4| def test_max_by_key_basic():
+   5|     assert max_by_key(["aa", "bbbb", "c"], len) == "bbbb"
+   6| 
+   7| 
+   8| 
+   9| def test_max_by_key_dict():
+  10|     rows = [{"v": 1}, {"v": 9}, {"v": 5}]
+  11|     assert max
+[step 5] 思考: 根因：函数完全忽略了 key 参数，直接按元素本身比较。改为按 key(it) 比较，并用迭代器实现以支持任意可迭代对象（生成器）和空输入。
+  动作: write_file {"path": "src/stats.py", "content": "def max_by_key(items, key):\n    it = iter(items)\n    try:\n        best = next(it)\n    except StopIteration:\n        return None\n    best_key = key(best)\n   
+  观察: 已写入 src/stats.py（306 字符）
+[step 6] 思考: 运行可见测试确认修复。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.08s
+
+[step 7] 思考: 增强兼容性：允许不传 key（默认按元素本身比较），并保持迭代器实现支持生成器与空输入。
+  动作: write_file {"path": "src/stats.py", "content": "def max_by_key(items, key=None):\n    if key is None:\n        def key(x):\n            return x\n    it = iter(items)\n    try:\n        best = next(it)\n    exce
+  观察: 已写入 src/stats.py（372 字符）
+[step 8] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args":{"selector": "tests"}</｜DSML｜ parameter>
+[step 9] 思考: 再跑一次全量可见测试确认最终版本通过。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 10] 思考: 修复完成：使用 key(it) 比较，支持空输入返回 None、任意可迭代对象（含生成器）、并行健壮，key 缺省按元素本身比较，并列时返回首个最大元素。
+  动作: finish {"summary": "重写 src/stats.py 的 max_by_key：改用 key(item) 作为比较依据（原来直接比较元素、忽略 key 参数）；改用迭代器支持空输入返回 None 和任意可迭代对象；key 可选，默认按元素自身；并列时保留最早出现的元素；每个元素只计算一次 key。"}
+  判定: 5 passed in 0.01s

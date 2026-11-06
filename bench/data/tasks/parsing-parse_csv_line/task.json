@@ -1,0 +1,16 @@
+{
+  "id": "parsing-parse_csv_line",
+  "kind": "single",
+  "family": "parsing",
+  "bug_category": "parsing_robustness",
+  "bug_class": "解析边界情况",
+  "bug_desc": "CSV 行解析用裸 split，忽略引号内的分隔符",
+  "module": "parsing",
+  "src_path": "src/parsing.py",
+  "prompt": "仓库工作区里 src/parsing.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/parsing.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_csv_quoted_comma",
+  "reference": {
+    "src/parsing.py": "def parse_csv_line(line):\n    parts = []\n    cur = \"\"\n    in_quotes = False\n    for ch in line:\n        if ch == '\"':\n            in_quotes = not in_quotes\n        elif ch == \",\" and not in_quotes:\n            parts.append(cur)\n            cur = \"\"\n        else:\n            cur += ch\n    parts.append(cur)\n    return parts\n"
+  },
+  "hidden_tests": "from parsing import parse_csv_line\n\ndef test_csv_quoted_comma():\n    assert parse_csv_line('1,\"x,y\",3') == [\"1\", \"x,y\", \"3\"]\n\ndef test_csv_trailing_empty():\n    assert parse_csv_line(\"a,b,\") == [\"a\", \"b\", \"\"]\n\ndef test_csv_single():\n    assert parse_csv_line(\"only\") == [\"only\"]\n\ndef test_csv_quoted_semicolon():\n    assert parse_csv_line('\"a;b\",c') == [\"a;b\", \"c\"]\n"
+}

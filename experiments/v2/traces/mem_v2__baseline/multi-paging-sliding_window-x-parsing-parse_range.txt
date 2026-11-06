@@ -1,0 +1,71 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/paging.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/paging.py  (146B)
+      src/parsing.py  (295B)
+[dir] tests
+      tests/test_visible.py  (221B)
+[step 2] 思考: 读取全部源码与测试
+  动作: read_file {"path": "src/paging.py", "start_line": 1, "end_line": 50}
+  观察: src/paging.py (4 行)
+   1| def sliding_window(items, k):
+   2|     if k < 1:
+   3|         raise ValueError("k must be >= 1")
+   4|     return [items[i:i + k] for i in range(len(items) - k)]
+[step 3] 思考: paging 的窗口数少了一个，需 +1；继续读 parsing 与测试
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 50}
+  观察: src/parsing.py (12 行)
+   1| def parse_range(spec):
+   2|     out = []
+   3|     for part in spec.split(","):
+   4|         part = part.strip()
+   5|         if not part:
+   6|             continue
+   7|         if "-" in part:
+   8|             a, b = part.split("-", 1)
+   9|             out.append(
+[step 4] 思考: 读可见测试确认预期语义
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 50}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from paging import sliding_window
+   3| 
+   4| def test_window_basic():
+   5|     assert sliding_window([1, 2, 3, 4], 2) == [[1, 2], [2, 3], [3, 4]]
+   6| 
+   7| 
+   8| 
+   9| def test_window_full_length():
+  10|     assert sliding_window([1, 2, 3], 3) == [[
+[step 5] 思考: 修 paging 窗口数量；修 parsing 支持范围展开、负数与降序
+  动作: write_file {"path": "src/paging.py", "content": "def sliding_window(items, k):\n    if k < 1:\n        raise ValueError(\"k must be >= 1\")\n    items = list(items)\n    n = len(items)\n    if k > n:\n        re
+  观察: 已写入 src/paging.py（216 字符）
+[step 6] 思考: 修复 parsing：范围展开为闭区间，支持负数与非法输入
+  动作: write_file {"path": "src/parsing.py", "content": "import re\n\n_RANGE_RE = re.compile(r\"^(-?\\d+)\\s*-\\s*(-?\\d+)$\")\n_NUM_RE = re.compile(r\"^-?\\d+$\")\n\n\ndef parse_range(spec):\n    out = []\n    if spec
+  观察: 已写入 src/parsing.py（700 字符）
+[step 7] 思考: 跑测试并验证边界用例
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 8] 思考: 构造边界用例验证两模块
+  动作: run_python {"code": "from src.paging import sliding_window\nfrom src.parsing import parse_range\nassert sliding_window([],1)==[]\nassert sliding_window([1],1)==[[1]]\nassert sliding_window([1,2],3)==[]\nassert s
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v2__baseline/multi-paging-sliding_window-x-parsing-parse_range/.agent_tmp/run_1.py", line 1, in <module>
+    from src.paging import sliding_window
+ModuleNotFoundError: No modu
+[step 9] 思考: 改用 sys.path 引入 src 目录验证
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom paging import sliding_window\nfrom parsing import parse_range\nassert sliding_window([],1)==[]\nassert sliding_window([1],1)==[[1]]\nassert sliding
+  观察: exit=0
+ok
+
+[step 10] 思考: 两模块缺陷已修，边界用例全部通过
+  动作: finish {"summary": "修 sliding_window 窗口数，重写 parse_range 支持区间展开"}
+  判定: 8 passed in 0.02s

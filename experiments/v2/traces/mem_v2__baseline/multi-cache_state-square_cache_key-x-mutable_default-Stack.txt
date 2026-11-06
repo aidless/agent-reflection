@@ -1,0 +1,94 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/state.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (303B)
+      src/state.py  (222B)
+[dir] tests
+      tests/test_visible.py  (230B)
+[step 2] 思考: 读取 state.py 和 collect.py 的完整内容。
+  动作: read_file {"path": "src/state.py", "start_line": 1, "end_line": 200}
+  观察: src/state.py (9 行)
+   1| class SquareCache:
+   2|     def __init__(self):
+   3|         self.cache = {}
+   4| 
+   5|     def get(self, x):
+   6|         key = type(x).__name__
+   7|         if key not in self.cache:
+   8|             self.cache[key] = x * x
+   9|         return self.cache[key]
+[step 3] 思考: state.py 的缺陷：缓存键仅用类型名，导致同类不同值互相污染。应改为用 x 本身作为键（可选含类型）。继续读 collect.py 与测试。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 200}
+  观察: src/collect.py (16 行)
+   1| class Stack:
+   2|     items = []
+   3| 
+   4|     def __init__(self):
+   5|         pass
+   6| 
+   7|     def push(self, x):
+   8|         self.items.append(x)
+   9| 
+  10|     def pop(self):
+  11|         if not self.items:
+  12|             raise IndexError("pop from e
+[step 4] 思考: 发现两处根因：state.py 缓存键只用类型名导致同类不同值串味；collect.py 的 items 是类属性导致所有 Stack 实例共享同一列表。先改 state.py：用 (类型名, 值) 作为键。
+  动作: edit_file {"path": "src/state.py", "old": "    def get(self, x):\n        key = type(x).__name__\n        if key not in self.cache:\n            self.cache[key] = x * x\n        return self.cache[key]", "new": 
+  观察: 已修改 src/state.py（替换 1 处）
+[step 5] 思考: 运行完整边界用例验证两处修复。
+  动作: run_python {"code": "import sys\nsys.path.insert(0, '.')\nfrom src.state import SquareCache\nfrom src.collect import Stack\nc = SquareCache()\nassert c.get(2) == 4\nassert c.get(3) == 9\nassert c.get(2) == 4\nas
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v2__baseline/multi-cache_state-square_cache_key-x-mutable_default-Stack/.agent_tmp/run_1.py", line 13, in <module>
+    assert s2.size() == 0
+           ^^^^^^^^^^^^^^
+Assertio
+[step 6] 思考: 实例隔离测试失败，说明 collect.py 的修改未生效或仍有类属性。读取当前 collect.py 确认。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 30}
+  观察: src/collect.py (16 行)
+   1| class Stack:
+   2|     items = []
+   3| 
+   4|     def __init__(self):
+   5|         pass
+   6| 
+   7|     def push(self, x):
+   8|         self.items.append(x)
+   9| 
+  10|     def pop(self):
+  11|         if not self.items:
+  12|             raise IndexError("pop from e
+[step 7] 思考: collect.py 未被修改（之前编辑未生效）。重新按精确片段修改：删除类属性 items，在 __init__ 中初始化实例属性。
+  动作: edit_file {"path": "src/collect.py", "old": "class Stack:\n    items = []\n\n    def __init__(self):\n        pass", "new": "class Stack:\n    def __init__(self):\n        self.items = []"}
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 8] 思考: 确认 state.py 内容是否已修复。
+  动作: read_file {"path": "src/state.py", "start_line": 1, "end_line": 20}
+  观察: src/state.py (9 行)
+   1| class SquareCache:
+   2|     def __init__(self):
+   3|         self.cache = {}
+   4| 
+   5|     def get(self, x):
+   6|         key = (type(x).__name__, x)
+   7|         if key not in self.cache:
+   8|             self.cache[key] = x * x
+   9|         return self.cache[key]
+[step 9] 思考: 两处源码均已修复，运行边界用例验证。
+  动作: run_python {"code": "import sys\nsys.path.insert(0, '.')\nfrom src.state import SquareCache\nfrom src.collect import Stack\nc = SquareCache()\nassert c.get(2) == 4\nassert c.get(3) == 9\nassert c.get(2) == 4\nas
+  观察: exit=0
+all ok
+
+[step 10] 思考: 边界用例全部通过，运行可见测试确认无回归。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.12s
+
+[step 11] 思考: 两处根因均已修复并用边界用例与可见测试验证通过：state.py 缓存键改为 (类型名, 值)，避免同类不同值串味；collect.py 的 items 改为实例属性，消除可变默认共享。
+  动作: finish {"summary": "修复 src/state.py：SquareCache.get 的缓存键由仅类型名改为 (type(x).__name__, x)，避免同类型不同值互相污染缓存（如 2 与 3、2 与 2.0）。修复 src/collect.py：移除类属性 items=[]，改为在 __init__ 中 self.items = []，使各 Stack 实例互相隔离；push/pop/
+  判定: 6 passed in 0.03s

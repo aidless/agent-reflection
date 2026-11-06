@@ -1,0 +1,73 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/recursion.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="args" string="false">{"path": "."}</｜DSML｜ pa
+[step 2] 思考: 先看工作区文件结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/recursion.py  (94B)
+      src/stats.py  (122B)
+[dir] tests
+      tests/test_visible.py  (175B)
+[step 3] 思考: 读取所有源码与可见测试
+  动作: read_file {"path": "src/recursion.py"}
+  观察: src/recursion.py (4 行)
+   1| def reverse_rec(s):
+   2|     if len(s) <= 1:
+   3|         return s
+   4|     return s[0] + reverse_rec(s[1:])
+[step 4] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "src/stats.py"}<
+[step 5] 思考: 读取 stats.py 与可见测试
+  动作: read_file {"path": "src/stats.py"}
+  观察: src/stats.py (4 行)
+   1| def clamp(value, lo, hi):
+   2|     if hi < lo:
+   3|         raise ValueError("hi must be >= lo")
+   4|     return min(lo, max(hi, value))
+[step 6] 思考: recursion.py 的 reverse_rec 返回 s[0] + 而非 s[-1] +，导致未反转；stats.py 的 clamp 中 min/max 顺序颠倒，实际应 max(lo, min(hi, value))。先看可见测试
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from recursion import reverse_rec
+   3| 
+   4| def test_reverse_simple():
+   5|     assert reverse_rec("abc") == "cba"
+   6| 
+   7| 
+   8| 
+   9| def test_reverse_long():
+  10|     assert reverse_rec("abcdef") == "fedcba"
+[step 7] 思考: 修复两处根因：reverse_rec 取错字符；clamp 的 min/max 嵌套颠倒。reverse_rec 改为健壮实现避免递归深度问题。
+  动作: write_file {"path": "src/recursion.py", "content": "def reverse_rec(s):\n    if len(s) <= 1:\n        return s\n    return s[-1] + reverse_rec(s[:-1])\n"}
+  观察: 已写入 src/recursion.py（96 字符）
+[step 8] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "src/stats.py", 
+[step 9] 思考: 修正 clamp 的 min/max 嵌套顺序
+  动作: edit_file {"path": "src/stats.py", "old": "    return min(lo, max(hi, value))", "new": "    return max(lo, min(hi, value))"}
+  观察: 已修改 src/stats.py（替换 1 处）
+[step 10] 思考: 跑可见测试并用边界用例验证
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom recursion import reverse_rec\nfrom stats import clamp\nprint(reverse_rec(''), reverse_rec('a'), reverse_rec('abc'))\nprint(clamp(5,0,10), clamp(-3,
+  观察: exit=0
+ a cba
+5 0 10 0 7
+
+[step 11] 思考: 两处修复验证通过，跑全量测试确认
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.15s
+
+[step 12] 思考: 可见测试通过，两处根因均已修复，边界用例验证正常
+  动作: finish {"summary": "修复两处缺陷：1) src/recursion.py 的 reverse_rec 原用 s[0] + reverse_rec(s[1:]) 未反转，改为 s[-1] + reverse_rec(s[:-1])；2) src/stats.py 的 clamp 原用 min(lo, max(hi, value)) 包裹颠倒，改为 max(lo, min(hi, value))
+  判定: 8 passed in 0.03s

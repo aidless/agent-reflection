@@ -1,0 +1,46 @@
+task: 仓库工作区里 src/collect.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/collect.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区文件和失败测试
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (189B)
+[dir] tests
+      tests/test_visible.py  (253B)
+[step 2] 思考: 读取源码与测试
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 60}
+  观察: src/collect.py (7 行)
+   1| def unique_append(items, value, seen=set()):
+   2|     if seen is None:
+   3|         seen = set()
+   4|     if value in seen:
+   5|         return list(items)
+   6|     seen.add(value)
+   7|     return list(items) + [value]
+[step 3] 思考: 源码是 unique_append，需看真实测试
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import unique_append
+   3| 
+   4| def test_unique_basic():
+   5|     assert unique_append([1, 2], 3) == [1, 2, 3]
+   6| 
+   7| 
+   8| 
+   9| def test_unique_leak():
+  10|     first = unique_append([], 7)
+  11|     second = unique_append([], 7)
+ 
+[step 4] 思考: 根因是默认参数 seen=set() 跨调用共享。改为 None 哨兵并在函数内新建集合。
+  动作: edit_file {"path": "src/collect.py", "old": "def unique_append(items, value, seen=set()):", "new": "def unique_append(items, value, seen=None):"}
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 5] 思考: 已改为 None 哨兵，函数体内已有初始化逻辑，运行测试
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 6] 思考: 根因已修复：可变默认参数改为 None 哨兵，函数内新建集合；可见测试通过，显式 seen 与重复值边界行为正确
+  动作: finish {"summary": "将 unique_append 的 seen=set() 默认参数改为 seen=None，函数内初始化，避免跨调用共享集合"}
+  判定: 4 passed in 0.01s

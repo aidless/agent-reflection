@@ -1,0 +1,21 @@
+{
+  "id": "multi-paging-chunk_list-x-reduce_init-argmax",
+  "kind": "multi",
+  "family": "paging+reduce_init",
+  "bug_category": "paging_index",
+  "bug_categories": [
+    "paging_index",
+    "reduce_init"
+  ],
+  "bug_class": "切片/分页 off-by-one + 归约初值/比较器错误",
+  "bug_desc": "分块循环终点少了 n，最后一块被丢掉；argmax 返回最大值本身而不是下标",
+  "module": "paging+stats",
+  "src_path": "src/paging.py,src/stats.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/paging.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_chunk_tail",
+  "reference": {
+    "src/paging.py": "def chunk_list(items, n):\n    if n < 1:\n        raise ValueError(\"n must be >= 1\")\n    return [items[i:i + n] for i in range(0, len(items), n)]\n",
+    "src/stats.py": "def argmax(values):\n    if not values:\n        return None\n    best_i, best_v = 0, values[0]\n    for i, v in enumerate(values[1:], start=1):\n        if v > best_v:\n            best_i, best_v = i, v\n    return best_i\n"
+  },
+  "hidden_tests": "from paging import chunk_list\n\ndef test_chunk_tail():\n    assert chunk_list([1, 2, 3, 4, 5], 2) == [[1, 2], [3, 4], [5]]\n\ndef test_chunk_single():\n    assert chunk_list([1, 2, 3], 9) == [[1, 2, 3]]\n\ndef test_chunk_empty():\n    assert chunk_list([], 2) == []\n\n\nfrom stats import argmax\n\ndef test_argmax_first():\n    assert argmax([9, 1]) == 0\n\ndef test_argmax_last():\n    assert argmax([1, 2, 8]) == 2\n\ndef test_argmax_empty():\n    assert argmax([]) is None\n\ndef test_argmax_equal():\n    assert argmax([3, 3]) == 0\n"
+}

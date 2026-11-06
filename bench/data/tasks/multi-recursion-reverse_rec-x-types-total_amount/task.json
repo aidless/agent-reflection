@@ -1,0 +1,21 @@
+{
+  "id": "multi-recursion-reverse_rec-x-types-total_amount",
+  "kind": "multi",
+  "family": "recursion+types",
+  "bug_category": "recursion_base",
+  "bug_categories": [
+    "recursion_base",
+    "type_conversion"
+  ],
+  "bug_class": "递归基例错误 + 类型转换/空值处理",
+  "bug_desc": "递归拼接顺序反了，结果等于原串；累加未过滤 None，遇到空值抛 TypeError",
+  "module": "recursion+normalize",
+  "src_path": "src/recursion.py,src/normalize.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/recursion.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_reverse_long",
+  "reference": {
+    "src/recursion.py": "def reverse_rec(s):\n    if len(s) <= 1:\n        return s\n    return reverse_rec(s[1:]) + s[0]\n",
+    "src/normalize.py": "def total_amount(values):\n    return sum(v for v in values if v is not None)\n"
+  },
+  "hidden_tests": "from recursion import reverse_rec\n\ndef test_reverse_single():\n    assert reverse_rec(\"z\") == \"z\"\n\ndef test_reverse_empty():\n    assert reverse_rec(\"\") == \"\"\n\ndef test_reverse_long():\n    assert reverse_rec(\"abcdef\") == \"fedcba\"\n\n\nfrom normalize import total_amount\n\ndef test_total_with_none():\n    assert total_amount([1, None, 3]) == 4\n\ndef test_total_all_none():\n    assert total_amount([None, None]) == 0\n\ndef test_total_empty():\n    assert total_amount([]) == 0\n\ndef test_total_with_zero():\n    assert total_amount([0, 5]) == 5\n"
+}

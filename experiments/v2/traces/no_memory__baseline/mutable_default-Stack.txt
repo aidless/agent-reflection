@@ -1,0 +1,58 @@
+task: 仓库工作区里 src/collect.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/collect.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="args" string="false">{"path": "."}</｜DSML｜ pa
+[step 2] 思考: 先列出工作区文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (303B)
+[dir] tests
+      tests/test_visible.py  (238B)
+[step 3] 思考: 读取源码与可见测试
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 120}
+  观察: src/collect.py (16 行)
+   1| class Stack:
+   2|     items = []
+   3| 
+   4|     def __init__(self):
+   5|         pass
+   6| 
+   7|     def push(self, x):
+   8|         self.items.append(x)
+   9| 
+  10|     def pop(self):
+  11|         if not self.items:
+  12|             raise IndexError("pop from e
+[step 4] 思考: 根因是 items 作为类属性在实例间共享。改为在 __init__ 中创建实例属性。先看测试确认接口。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 80}
+  观察: tests/test_visible.py (15 行)
+   1| 
+   2| from collect import Stack
+   3| 
+   4| def test_stack_basic():
+   5|     s = Stack()
+   6|     s.push(1)
+   7|     assert s.pop() == 1
+   8| 
+   9| 
+  10| 
+  11| def test_stack_instances_isolated():
+  12|     a, b = Stack(), Stack()
+  13|     a.push(1)
+  14|
+[step 5] 思考: 将 items 从共享类属性改为实例属性，避免跨实例污染
+  动作: edit_file {"path": "src/collect.py", "old": "class Stack:\n    items = []\n\n    def __init__(self):\n        pass", "new": "class Stack:\n    def __init__(self):\n        self.items = []"}
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 6] 思考: 跑测试确认
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.10s
+
+[step 7] 思考: 可见测试通过，根因（可变类属性共享）已修复，实例隔离生效。
+  动作: finish {"summary": "将 Stack 的 items 从共享类属性改为在 __init__ 中初始化的实例属性，修复实例间状态互相污染的问题"}
+  判定: 4 passed in 0.01s

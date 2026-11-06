@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+experiments/work/
+experiments/traces/
+experiments/smoke_work/
+experiments/smoke_traces/
+experiments/smoke_memory/
+experiments/memory/
+experiments/archive_pre_fix/
+logs/
+*.log
+.env

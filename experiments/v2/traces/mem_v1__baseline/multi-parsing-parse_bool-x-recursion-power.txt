@@ -1,0 +1,70 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和源码文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (44B)
+      src/recursion.py  (171B)
+[dir] tests
+      tests/test_visible.py  (165B)
+[step 2] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">src/parsing.py</｜DSML｜ par
+[step 3] 思考: 读取源码与可见测试
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 60}
+  观察: src/parsing.py (2 行)
+   1| def parse_bool(text):
+   2|     return bool(text)
+[step 4] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"src/recursion.py","start_line":
+[step 5] 思考: 查看 recursion.py 与可见测试
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 60}
+  观察: src/recursion.py (7 行)
+   1| def power(base, exp):
+   2|     if exp == 0:
+   3|         return 1
+   4|     if exp > 1:
+   5|         return base * power(base, exp - 1)
+   6|     half = power(base, exp // 2)
+   7|     return half * half
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"tests/test_visible.py","start_l
+[step 7] 思考: 查看可见测试
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_bool
+   3| 
+   4| def test_bool_true():
+   5|     assert parse_bool("yes") is True
+   6| 
+   7| 
+   8| 
+   9| def test_bool_false_string():
+  10|     assert parse_bool("false") is False
+[step 8] 解析失败：{"thought":"parse_bool 用 bool(text) 导致 'false' 为真；power 对 exp==1 返回 1（错）、负指数无限递归。修复两处。","action":"write_file","args":{"p
+[step 9] 思考: 重写 parsing.py，实现健壮的布尔解析
+  动作: write_file {"path": "src/parsing.py", "content": "_TRUE_VALUES = {\"true\", \"t\", \"yes\", \"y\", \"on\", \"1\"}\n_FALSE_VALUES = {\"false\", \"f\", \"no\", \"n\", \"off\", \"0\"}\n\n\ndef parse_bool(text):\n  
+  观察: 已写入 src/parsing.py（757 字符）
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="write_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "src/recursion.
+[step 11] 思考: 重写 recursion.py，正确处理 exp==1、负指数与快速幂
+  动作: write_file {"path": "src/recursion.py", "content": "def power(base, exp):\n    \"\"\"Return base ** exp for integer exponents (fast exponentiation).\"\"\"\n    if isinstance(exp, bool) or not isinstance(exp, int
+  观察: 已写入 src/recursion.py（407 字符）
+[step 12] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args" string="false">{"code": "import sys; sy

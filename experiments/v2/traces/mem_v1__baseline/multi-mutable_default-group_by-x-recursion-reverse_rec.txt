@@ -1,0 +1,76 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="path" string="true">.</｜DSML｜ parameter>
+</｜D
+[step 2] 思考: 先列出工作区文件，了解源码结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (117B)
+      src/recursion.py  (94B)
+[dir] tests
+      tests/test_visible.py  (312B)
+[step 3] 思考: 读取源码与可见测试。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 120}
+  观察: src/collect.py (4 行)
+   1| def group_by(items, key, out={}):
+   2|     for it in items:
+   3|         out.setdefault(key(it), []).append(it)
+   4|     return out
+[step 4] 思考: collect.py 有可变默认参数缺陷。继续读 recursion.py 和测试。
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 120}
+  观察: src/recursion.py (4 行)
+   1| def reverse_rec(s):
+   2|     if len(s) <= 1:
+   3|         return s
+   4|     return s[0] + reverse_rec(s[1:])
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">tests/test_visible.py</｜DS
+[step 6] 思考: 读取可见测试了解预期。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import group_by
+   3| 
+   4| def test_group_basic():
+   5|     assert group_by([1, 2, 3, 4], lambda x: x % 2) == {1: [1, 3], 0: [2, 4]}
+   6| 
+   7| 
+   8| 
+   9| def test_group_calls_independent():
+  10|     a = group_by([1, 2], lambda x: x % 2
+[step 7] 思考: collect.py 可变默认参数；recursion.py 反转逻辑错误(s[0]+rest 未反转)且深递归会触发 RecursionError。修改两者。
+  动作: edit_file {"path": "src/collect.py", "old": "def group_by(items, key, out={}):\n    for it in items:\n        out.setdefault(key(it), []).append(it)\n    return out", "new": "def group_by(items, key, out=None):
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 8] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="path" string="true">src/recursion.py</｜DSML｜ p
+[step 9] 思考: 修正 reverse_rec：反转拼接顺序错误。直接切片反转更稳健，避免深递归 RecursionError。
+  动作: edit_file {"path": "src/recursion.py", "old": "def reverse_rec(s):\n    if len(s) <= 1:\n        return s\n    return s[0] + reverse_rec(s[1:])", "new": "def reverse_rec(s):\n    if len(s) <= 1:\n        return
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="code" string="true">import sys; sys.path.inse
+[step 11] 思考: 验证两个函数的各种边界情况，包括空、单元素、传入 out 的情况和字符串反转。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import group_by\nfrom recursion import reverse_rec\na=group_by([1,2,3],lambda x:x%2); b=group_by([10],lambda x:x%2)\nprint(a,b,group_by([],
+  观察: exit=0
+{1: [1, 3], 0: [2]} {0: [10]} {}
+{0: ['x', 2]} True
+'cba' '' 'a' 'ba' 'dcba' [3, 2, 1]
+
+[step 12] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="selector" string="true">tests</｜DSML｜ paramete

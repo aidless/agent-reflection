@@ -1,0 +1,87 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/paging.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="path" string="true">.</｜DSML｜ parameter>
+</｜D
+[step 2] 思考: 先列出工作区文件，了解结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/paging.py  (146B)
+      src/parsing.py  (295B)
+[dir] tests
+      tests/test_visible.py  (221B)
+[step 3] 思考: 读取所有源码与可见测试。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 200}
+  观察: src/parsing.py (12 行)
+   1| def parse_range(spec):
+   2|     out = []
+   3|     for part in spec.split(","):
+   4|         part = part.strip()
+   5|         if not part:
+   6|             continue
+   7|         if "-" in part:
+   8|             a, b = part.split("-", 1)
+   9|             out.append(
+[step 4] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">src/paging.py</｜DSML｜ para
+[step 5] 思考: 读取 paging.py 和可见测试。
+  动作: read_file {"path": "src/paging.py", "start_line": 1, "end_line": 50}
+  观察: src/paging.py (4 行)
+   1| def sliding_window(items, k):
+   2|     if k < 1:
+   3|         raise ValueError("k must be >= 1")
+   4|     return [items[i:i + k] for i in range(len(items) - k)]
+[step 6] 思考: 查看可见测试以确认预期行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 50}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from paging import sliding_window
+   3| 
+   4| def test_window_basic():
+   5|     assert sliding_window([1, 2, 3, 4], 2) == [[1, 2], [2, 3], [3, 4]]
+   6| 
+   7| 
+   8| 
+   9| def test_window_full_length():
+  10|     assert sliding_window([1, 2, 3], 3) == [[
+[step 7] 思考: paging 切片上限少了 +1，导致最后一个完整窗口丢失。parsing.parse_range 只解析了范围起点，应展开闭区间（含降序），并做健壮校验。
+  动作: edit_file {"path": "src/paging.py", "old": "    return [items[i:i + k] for i in range(len(items) - k)]", "new": "    return [items[i:i + k] for i in range(len(items) - k + 1)]"}
+  观察: 已修改 src/paging.py（替换 1 处）
+[step 8] 解析失败：
+
+<｜DSML」 calls>
+<｜DSML」 invoke name="write_file">
+<｜DSML」 parameter name="path">src/parsing.py</｜DSML」 parameter>
+<｜DSM
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="write_file">
+<｜DSML｜ parameter name="path" string="true">src/parsing.py</｜DSML｜ pa
+[step 10] 思考: 为避免截断，用 edit_file 精确替换 parse_range 函数体，实现范围展开与健壮校验。
+  动作: edit_file {"path": "src/parsing.py", "old": "def parse_range(spec):\n    out = []\n    for part in spec.split(\",\"):\n        part = part.strip()\n        if not part:\n            continue\n        if \"-\" i
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 11] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="code" string="true">import sys; sys.path.inse
+[step 12] 思考: 验证 paging 和 parsing 的行为，包括边界。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom paging import sliding_window\nfrom parsing import parse_range\nprint(sliding_window([1,2,3,4],2))\nprint(sliding_window([1,2,3],3))\nprint(sliding_
+  观察: exit=0
+[[1, 2], [2, 3], [3, 4]]
+[[1, 2, 3]]
+[]
+[[1]]
+[1, 2, 3]
+[3, 2, 1]
+[-2, -1, 0, 1, 2]
+[1, 3, 5, 6, 7]
+[1]

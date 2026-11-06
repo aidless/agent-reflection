@@ -1,0 +1,21 @@
+{
+  "id": "multi-recursion-count_nodes-x-reduce_init-argmax",
+  "kind": "multi",
+  "family": "recursion+reduce_init",
+  "bug_category": "recursion_base",
+  "bug_categories": [
+    "recursion_base",
+    "reduce_init"
+  ],
+  "bug_class": "递归基例错误 + 归约初值/比较器错误",
+  "bug_desc": "节点计数漏算自身，根节点未被计入；argmax 返回最大值本身而不是下标",
+  "module": "recursion+stats",
+  "src_path": "src/recursion.py,src/stats.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/recursion.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_count_nested",
+  "reference": {
+    "src/recursion.py": "def count_nodes(tree):\n    if not isinstance(tree, dict):\n        return 0\n    return 1 + sum(count_nodes(v) for v in tree.values())\n",
+    "src/stats.py": "def argmax(values):\n    if not values:\n        return None\n    best_i, best_v = 0, values[0]\n    for i, v in enumerate(values[1:], start=1):\n        if v > best_v:\n            best_i, best_v = i, v\n    return best_i\n"
+  },
+  "hidden_tests": "from recursion import count_nodes\n\ndef test_count_nested():\n    assert count_nodes({\"a\": {\"b\": {}}}) == 3\n\ndef test_count_empty():\n    assert count_nodes({}) == 1\n\ndef test_count_scalar():\n    assert count_nodes(5) == 0\n\n\nfrom stats import argmax\n\ndef test_argmax_first():\n    assert argmax([9, 1]) == 0\n\ndef test_argmax_last():\n    assert argmax([1, 2, 8]) == 2\n\ndef test_argmax_empty():\n    assert argmax([]) is None\n\ndef test_argmax_equal():\n    assert argmax([3, 3]) == 0\n"
+}

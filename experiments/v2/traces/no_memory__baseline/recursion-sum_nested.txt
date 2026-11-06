@@ -1,0 +1,41 @@
+task: 仓库工作区里 src/recursion.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/recursion.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看仓库结构，找到源码和测试文件。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/recursion.py  (111B)
+[dir] tests
+      tests/test_visible.py  (168B)
+[step 2] 思考: 读取源码和测试内容。
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 200}
+  观察: src/recursion.py (4 行)
+   1| def sum_nested(x):
+   2|     if isinstance(x, list) and x:
+   3|         return sum(sum_nested(i) for i in x)
+   4|     return x
+[step 3] 思考: 源码对所有空列表返回 [] 而非 0，会导致嵌套空列表求和报错；读取测试确认后修复。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 200}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from recursion import sum_nested
+   3| 
+   4| def test_sum_nested_simple():
+   5|     assert sum_nested([1, [2, [3]]]) == 6
+   6| 
+   7| 
+   8| 
+   9| def test_sum_empty_list():
+  10|     assert sum_nested([]) == 0
+[step 4] 思考: 测试确认空列表应返回0。当前源码 `isinstance(x, list) and x` 对空列表为假，直接返回 []，导致 `sum_nested([]) != 0`。应让空列表走递归求和分支并返回0。
+  动作: edit_file {"path": "src/recursion.py", "old": "def sum_nested(x):\n    if isinstance(x, list) and x:\n        return sum(sum_nested(i) for i in x)\n    return x", "new": "def sum_nested(x):\n    if isinstance(x
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 5] 思考: 修改后空列表会正确返回0。现在运行测试验证可见用例和边界行为。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.14s
+
+[step 6] 思考: 已修复空列表被误当作叶节点返回 [] 的根因；空列表现在通过列表分支求和得到 0，可见测试全部通过，嵌套空列表等边界也由同一逻辑覆盖。
+  动作: finish {"summary": "修改 src/recursion.py：将条件从 `isinstance(x, list) and x` 改为仅判断 `isinstance(x, list)`，并用 `sum(generator, 0)` 处理空列表返回 0；保留非列表值原样返回。可见测试 2 项全部通过。"}
+  判定: 6 passed in 0.04s

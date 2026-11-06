@@ -1,0 +1,23 @@
+[with_rollback] probe-1 PASS rollback_used=1 verified=True steps=10 tok=14399
+[no_rollback] probe-1 PASS rollback_used=0 verified=False steps=8 tok=11087
+[with_rollback] probe-2 PASS rollback_used=1 verified=True steps=10 tok=14204
+[no_rollback] probe-2 PASS rollback_used=0 verified=False steps=13 tok=25682
+[with_rollback] probe-3 PASS rollback_used=1 verified=True steps=12 tok=18793
+[no_rollback] probe-3 PASS rollback_used=0 verified=False steps=7 tok=11178
+[with_rollback] probe-4 PASS rollback_used=1 verified=True steps=10 tok=15822
+[no_rollback] probe-4 PASS rollback_used=0 verified=False steps=9 tok=15155
+[with_rollback] probe-5 PASS rollback_used=1 verified=True steps=12 tok=18776
+[no_rollback] probe-5 PASS rollback_used=0 verified=False steps=11 tok=26384
+[with_rollback] probe-big-1 PASS rollback_used=1 verified=True steps=11 tok=19334
+[no_rollback] probe-big-1 PASS rollback_used=0 verified=False steps=8 tok=16369
+[with_rollback] probe-big-2 PASS rollback_used=0 verified=False steps=6 tok=13891
+[no_rollback] probe-big-2 PASS rollback_used=0 verified=False steps=8 tok=16608
+[with_rollback] probe-big-3 PASS rollback_used=1 verified=True steps=9 tok=13956
+[no_rollback] probe-big-3 PASS rollback_used=0 verified=False steps=11 tok=20962
+[with_rollback] probe-huge-1 PASS rollback_used=1 verified=True steps=14 tok=38681
+[no_rollback] probe-huge-1 FAIL(wrong_fix) rollback_used=0 verified=False steps=16 tok=24967
+[with_rollback] probe-huge-2 PASS rollback_used=1 verified=True steps=13 tok=22131
+[no_rollback] probe-huge-2 FAIL(wrong_fix) rollback_used=0 verified=False steps=6 tok=16239
+with_rollback: 10/10 成功，回滚执行 9 次
+no_rollback: 8/10 成功，回滚执行 0 次
+结果: experiments/rollback_probe_v2.csv

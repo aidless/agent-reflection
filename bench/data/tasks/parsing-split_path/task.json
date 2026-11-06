@@ -1,0 +1,16 @@
+{
+  "id": "parsing-split_path",
+  "kind": "single",
+  "family": "parsing",
+  "bug_category": "parsing_robustness",
+  "bug_class": "解析边界情况",
+  "bug_desc": "路径切分未处理引号，带引号且含斜杠的分段被拆散",
+  "module": "parsing",
+  "src_path": "src/parsing.py",
+  "prompt": "仓库工作区里 src/parsing.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/parsing.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_path_quoted_slash",
+  "reference": {
+    "src/parsing.py": "def split_path(path):\n    out = []\n    cur = \"\"\n    in_quotes = False\n    for ch in path:\n        if ch == '\"':\n            in_quotes = not in_quotes\n        elif ch == \"/\" and not in_quotes:\n            if cur:\n                out.append(cur)\n            cur = \"\"\n        else:\n            cur += ch\n    if cur:\n        out.append(cur)\n    return out\n"
+  },
+  "hidden_tests": "from parsing import split_path\n\ndef test_path_quoted_slash():\n    assert split_path('a/\"b/c\"/d') == [\"a\", \"b/c\", \"d\"]\n\ndef test_path_leading_slash():\n    assert split_path(\"/a/b\") == [\"a\", \"b\"]\n\ndef test_path_empty():\n    assert split_path(\"\") == []\n"
+}

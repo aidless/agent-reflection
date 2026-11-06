@@ -1,0 +1,80 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (66B)
+      src/stats.py  (171B)
+[dir] tests
+      tests/test_visible.py  (249B)
+[step 2] 解析失败：Read all source files and visible test.
+[step 3] 思考: 读取所有源码与可见测试。
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 200}
+  观察: src/stats.py (8 行)
+   1| def max_by_key(items, key):
+   2|     if not items:
+   3|         return None
+   4|     best = items[0]
+   5|     for it in items[1:]:
+   6|         if it > best:
+   7|             best = it
+   8|     return best
+[step 4] 思考: stats.max_by_key 忽略 key 参数，应按 key 比较。继续读 normalize.py 与可见测试。
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 200}
+  观察: src/normalize.py (2 行)
+   1| def count_nonnull(values):
+   2|     return sum(1 for v in values if v)
+[step 5] 思考: count_nonnull 用 truthiness 会把 0、'' 视为空，应按 None 判断。读可见测试确认风格。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 200}
+  观察: tests/test_visible.py (11 行)
+   1| 
+   2| from stats import max_by_key
+   3| 
+   4| def test_max_by_key_basic():
+   5|     assert max_by_key(["aa", "bbbb", "c"], len) == "bbbb"
+   6| 
+   7| 
+   8| 
+   9| def test_max_by_key_dict():
+  10|     rows = [{"v": 1}, {"v": 9}, {"v": 5}]
+  11|     assert max
+[step 6] 思考: 修复两处缺陷：max_by_key 应按 key(it) 比较；count_nonnull 应统计非 None 值。
+  动作: edit_file {"path": "src/stats.py", "old": "    best = items[0]\n    for it in items[1:]:\n        if it > best:\n            best = it\n    return best", "new": "    best = items[0]\n    best_key = key(best)\n 
+  观察: 已修改 src/stats.py（替换 1 处）
+[step 7] 思考: 修复 normalize.count_nonnull 使用 is not None 判断。
+  动作: edit_file {"path": "src/normalize.py", "old": "    return sum(1 for v in values if v)", "new": "    return sum(1 for v in values if v is not None)"}
+  观察: 已修改 src/normalize.py（替换 1 处）
+[step 8] 思考: 运行可见测试并构造边界用例验证两模块。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom stats import max_by_key\nfrom normalize import count_nonnull\nassert max_by_key([],len) is None\nassert max_by_key([\"aa\",\"bbbb\",\"c\"],len)==\"
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v2__baseline/multi-reduce_init-max_by_key-x-types-count_nonnull/.agent_tmp/run_1.py", line 8, in <module>
+    assert count_nonnull([0,1,None,"",[],"a"])==4
+           ^^^^^^^^
+[step 9] 思考: 我的边界断言写错了：非 None 的 0,1,"",[],"a" 共 5 个。重跑修正后的验证。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom stats import max_by_key\nfrom normalize import count_nonnull\nassert max_by_key([],len) is None\nassert max_by_key([\"aa\",\"bbbb\",\"c\"],len)==\"
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v2__baseline/multi-reduce_init-max_by_key-x-types-count_nonnull/.agent_tmp/run_2.py", line 7, in <module>
+    assert max_by_key([5],len)==5
+           ^^^^^^^^^^^^^^^^^^^
+  Fi
+[step 10] 思考: 上一条断言本身用错 key（len 不能作用于 int），不是源码缺陷。修正验证用例。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom stats import max_by_key\nfrom normalize import count_nonnull\nassert max_by_key([],len) is None\nassert max_by_key([\"aa\",\"bbbb\",\"c\"],len)==\"
+  观察: exit=0
+ok
+
+[step 11] 思考: 边界用例全部通过，运行可见测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.13s
+
+[step 12] 思考: 两个模块缺陷均已修复：max_by_key 按 key 比较（支持空序列返回 None），count_nonnull 按 is not None 统计。可见测试与自构造边界用例均通过。
+  动作: finish {"summary": "修复 src/stats.py: max_by_key 之前忽略 key 参数直接比较元素，改为按 key(it) 比较并维护 best_key；修复 src/normalize.py: count_nonnull 之前用 truthiness 判断会漏计 0、''、[] 等，改为 v is not None。已验证空列表、单元素、负数 key、字典 key、含 None
+  判定: 9 passed in 0.03s

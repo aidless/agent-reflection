@@ -1,0 +1,75 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="args" string="false">{"path": "."}</｜DSML｜ pa
+[step 2] 思考: 先列出工作区文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (118B)
+      src/stats.py  (120B)
+[dir] tests
+      tests/test_visible.py  (203B)
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "src/parsing.py"
+[step 4] 思考: 读取 parsing.py
+  动作: read_file {"path": "src/parsing.py"}
+  观察: src/parsing.py (4 行)
+   1| def parse_float_list(text):
+   2|     if not text.strip():
+   3|         return []
+   4|     return [float(x) for x in text.split(",")]
+[step 5] 思考: 读取 stats.py 和测试
+  动作: read_file {"path": "src/stats.py"}
+  观察: src/stats.py (6 行)
+   1| def sum_positives(values):
+   2|     total = 1
+   3|     for v in values:
+   4|         if v > 0:
+   5|             total += v
+   6|     return total
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "tests/test_visi
+[step 7] 思考: 读取可见测试
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_float_list
+   3| 
+   4| def test_floats_simple():
+   5|     assert parse_float_list("1.5,2.5") == [1.5, 2.5]
+   6| 
+   7| 
+   8| 
+   9| def test_floats_double_comma():
+  10|     assert parse_float_list("1,,2") == [1.0, 2.0]
+[step 8] 思考: 发现两处缺陷：parse_float_list 未跳过空段/空白；sum_positives 初值应为 0
+  动作: edit_file {"path": "src/parsing.py", "old": "def parse_float_list(text):\n    if not text.strip():\n        return []\n    return [float(x) for x in text.split(\",\")]", "new": "def parse_float_list(text):\n   
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="args" string="false">{"new": "def sum_positive
+[step 10] 思考: 修复 sum_positives 初值
+  动作: edit_file {"path": "src/stats.py", "old": "def sum_positives(values):\n    total = 1\n    for v in values:\n        if v > 0:\n            total += v\n    return total", "new": "def sum_positives(values):\n    
+  观察: 已修改 src/stats.py（替换 1 处）
+[step 11] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args" string="false">{"code": "import sys; sy
+[step 12] 思考: 验证边界用例
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_float_list\nfrom stats import sum_positives\nprint(parse_float_list(''), parse_float_list('  '), parse_float_list('1,,2'), par
+  观察: exit=0
+[] [] [1.0, 2.0] [1.5, 2.0]
+0 0 3.5

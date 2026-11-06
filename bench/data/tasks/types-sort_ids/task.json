@@ -1,0 +1,16 @@
+{
+  "id": "types-sort_ids",
+  "kind": "single",
+  "family": "types",
+  "bug_category": "type_conversion",
+  "bug_class": "类型转换/空值处理",
+  "bug_desc": "排序按字符串字典序，\"10\" 排在 \"2\" 前",
+  "module": "normalize",
+  "src_path": "src/normalize.py",
+  "prompt": "仓库工作区里 src/normalize.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/normalize.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_sort_numeric_order",
+  "reference": {
+    "src/normalize.py": "def sort_ids(ids):\n    return sorted(int(i) for i in ids)\n"
+  },
+  "hidden_tests": "from normalize import sort_ids\n\ndef test_sort_numeric_order():\n    assert sort_ids([\"10\", \"2\", \"1\"]) == [1, 2, 10]\n\ndef test_sort_negative():\n    assert sort_ids([\"-5\", \"3\"]) == [-5, 3]\n\ndef test_sort_returns_ints():\n    assert all(isinstance(x, int) for x in sort_ids([\"4\"]))\n"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "multi-paging-drop_head-x-parsing-parse_flags",
+  "kind": "multi",
+  "family": "paging+parsing",
+  "bug_category": "paging_index",
+  "bug_categories": [
+    "paging_index",
+    "parsing_robustness"
+  ],
+  "bug_class": "切片/分页 off-by-one + 解析边界情况",
+  "bug_desc": "丢弃前 n 个被写成 n-1 个；无值开关被解析成字符串 \"true\" 而不是布尔值",
+  "module": "paging+parsing",
+  "src_path": "src/paging.py,src/parsing.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/paging.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_drop_all",
+  "reference": {
+    "src/paging.py": "def drop_head(items, n):\n    if n <= 0:\n        return list(items)\n    return items[n:]\n",
+    "src/parsing.py": "def parse_flags(argv):\n    out = {}\n    for token in argv:\n        if not token.startswith(\"--\"):\n            continue\n        body = token[2:]\n        if \"=\" in body:\n            k, v = body.split(\"=\", 1)\n            out[k] = v\n        else:\n            out[body] = True\n    return out\n"
+  },
+  "hidden_tests": "from paging import drop_head\n\ndef test_drop_all():\n    assert drop_head([1, 2], 2) == []\n\ndef test_drop_zero():\n    assert drop_head([1, 2], 0) == [1, 2]\n\ndef test_drop_one():\n    assert drop_head([1, 2, 3], 1) == [2, 3]\n\n\nfrom parsing import parse_flags\n\ndef test_flag_boolean_type():\n    assert parse_flags([\"--verbose\"]) == {\"verbose\": True}\n\ndef test_flag_ignores_positional():\n    assert parse_flags([\"file.txt\", \"--x\"]) == {\"x\": True}\n\ndef test_flag_mixed():\n    assert parse_flags([\"--a\", \"--b=2\"]) == {\"a\": True, \"b\": \"2\"}\n"
+}

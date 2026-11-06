@@ -1,0 +1,56 @@
+task: 仓库工作区里 src/state.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/state.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区文件结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/state.py  (436B)
+[dir] tests
+      tests/test_visible.py  (322B)
+[step 2] 思考: 读取源码和测试文件
+  动作: read_file {"path": "src/state.py"}
+  观察: src/state.py (16 行)
+   1| class LRUCache:
+   2|     def __init__(self, capacity):
+   3|         self.capacity = capacity
+   4|         self.data = {}
+   5| 
+   6|     def get(self, key):
+   7|         if key not in self.data:
+   8|             return None
+   9|         return self.data[key]
+  10| 
+ 
+[step 3] 思考: 读取可见测试
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (18 行)
+   1| 
+   2| from state import LRUCache
+   3| 
+   4| def test_lru_put_get():
+   5|     c = LRUCache(2)
+   6|     c.put("a", 1)
+   7|     assert c.get("a") == 1
+   8| 
+   9| 
+  10| 
+  11| def test_lru_evicts_least_recently_used():
+  12|     c = LRUCache(2)
+  13|     c.put
+[step 4] 思考: get 未将访问的键移到最近使用位置，是根因；还需处理 capacity<=0 的边界。
+  动作: write_file {"path": "src/state.py", "content": "class LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.data = {}\n\n    def get(self, key):\n        if key not in self
+  观察: 已写入 src/state.py（545 字符）
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D
+[step 6] 思考: 运行测试验证修复
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.14s
+
+[step 7] 思考: 可见测试通过；get 在命中时会把键移到末尾（最近使用），put 更新已有键也会移到末尾，capacity<=0 时不缓存，符合 LRU 语义与边界情况。
+  动作: finish {"summary": "修复 src/state.py：get 命中时将该键移到字典末尾以标记为最近使用；put 更新已有键时旧值移除后重新插入末尾；当 capacity<=0 时直接忽略写入，避免向非正容量缓存插入数据。可见测试 2 passed。"}
+  判定: 4 passed in 0.03s

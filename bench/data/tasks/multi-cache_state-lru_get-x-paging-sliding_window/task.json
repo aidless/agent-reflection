@@ -1,0 +1,21 @@
+{
+  "id": "multi-cache_state-lru_get-x-paging-sliding_window",
+  "kind": "multi",
+  "family": "cache_state+paging",
+  "bug_category": "cache_state",
+  "bug_categories": [
+    "cache_state",
+    "paging_index"
+  ],
+  "bug_class": "状态/缓存失效错误 + 切片/分页 off-by-one",
+  "bug_desc": "get 没有刷新最近使用顺序，淘汰了刚访问的键；窗口滑动次数少算一次，最后一个窗口缺失",
+  "module": "state+paging",
+  "src_path": "src/state.py,src/paging.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/state.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_lru_evicts_least_recently_used",
+  "reference": {
+    "src/state.py": "class LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.data = {}\n\n    def get(self, key):\n        if key not in self.data:\n            return None\n        value = self.data.pop(key)\n        self.data[key] = value\n        return value\n\n    def put(self, key, value):\n        if key in self.data:\n            self.data.pop(key)\n        elif len(self.data) >= self.capacity:\n            self.data.pop(next(iter(self.data)))\n        self.data[key] = value\n",
+    "src/paging.py": "def sliding_window(items, k):\n    if k < 1:\n        raise ValueError(\"k must be >= 1\")\n    return [items[i:i + k] for i in range(len(items) - k + 1)]\n"
+  },
+  "hidden_tests": "from state import LRUCache\n\ndef test_lru_evicts_least_recently_used():\n    c = LRUCache(2)\n    c.put(\"a\", 1)\n    c.put(\"b\", 2)\n    assert c.get(\"a\") == 1\n    c.put(\"c\", 3)\n    assert c.get(\"a\") == 1\n    assert c.get(\"b\") is None\n\ndef test_lru_missing():\n    assert LRUCache(2).get(\"x\") is None\n\n\nfrom paging import sliding_window\n\ndef test_window_full_length():\n    assert sliding_window([1, 2, 3], 3) == [[1, 2, 3]]\n\ndef test_window_larger_than_list():\n    assert sliding_window([1], 5) == []\n\ndef test_window_one():\n    assert sliding_window([1, 2], 1) == [[1], [2]]\n"
+}

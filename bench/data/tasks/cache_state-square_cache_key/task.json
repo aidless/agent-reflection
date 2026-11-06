@@ -1,0 +1,16 @@
+{
+  "id": "cache_state-square_cache_key",
+  "kind": "single",
+  "family": "cache_state",
+  "bug_category": "cache_state",
+  "bug_class": "状态/缓存失效错误",
+  "bug_desc": "缓存键只用类型名，所有同类型输入互相覆盖",
+  "module": "state",
+  "src_path": "src/state.py",
+  "prompt": "仓库工作区里 src/state.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/state.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_square_distinct_values",
+  "reference": {
+    "src/state.py": "class SquareCache:\n    def __init__(self):\n        self.cache = {}\n\n    def get(self, x):\n        key = x\n        if key not in self.cache:\n            self.cache[key] = x * x\n        return self.cache[key]\n"
+  },
+  "hidden_tests": "from state import SquareCache\n\ndef test_square_distinct_values():\n    c = SquareCache()\n    assert c.get(2) == 4\n    assert c.get(3) == 9\n    assert c.get(2) == 4\n\ndef test_cache_size():\n    c = SquareCache()\n    c.get(2)\n    c.get(3)\n    assert len(c.cache) == 2\n"
+}

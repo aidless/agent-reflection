@@ -1,0 +1,80 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，查看整体结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (137B)
+      src/recursion.py  (111B)
+[dir] tests
+      tests/test_visible.py  (201B)
+[step 2] 思考: 读取 src 下两个源文件和可见测试，了解全部代码。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 200}
+  观察: src/collect.py (9 行)
+   1| def make_counter():
+   2|     state = {"n": 0}
+   3| 
+   4|     def inc():
+   5|         n = state["n"]
+   6|         state["n"] += 1
+   7|         return n
+   8| 
+   9|     return inc
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"src/recursion.py","start_line":
+[step 4] 思考: 读取 src/recursion.py。
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 200}
+  观察: src/recursion.py (4 行)
+   1| def sum_nested(x):
+   2|     if isinstance(x, list) and x:
+   3|         return sum(sum_nested(i) for i in x)
+   4|     return x
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"tests/test_visible.py","start_l
+[step 6] 思考: 读取可见测试，了解预期行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 200}
+  观察: tests/test_visible.py (12 行)
+   1| 
+   2| from collect import make_counter
+   3| 
+   4| def test_counter_basic():
+   5|     c = make_counter()
+   6|     assert c() == 1
+   7| 
+   8| 
+   9| 
+  10| def test_counter_increments():
+  11|     c = make_counter()
+  12|     assert [c(), c(), c()] == [1, 2, 3
+[step 7] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="args":{"path":"src/collect.py","old":"    def 
+[step 8] 思考: 修复 collect.py：计数器应返回递增后的值（测试预期 1,2,3）。recursion.py 的 sum_nested 有几个缺陷：空列表返回 x 即返回了 []（应返回 0），嵌套列表中的非数字会报错，且字符串等不可加。需要递归求和所有叶子。先修 collect.py。
+  动作: edit_file {"path": "src/collect.py", "old": "    def inc():\n        n = state[\"n\"]\n        state[\"n\"] += 1\n        return n", "new": "    def inc():\n        state[\"n\"] += 1\n        return state[\"n\"
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 9] 思考: 修复 recursion.py：空列表应返回 0 而不是 []，递归对 list/tuple 求和，叶子原样返回。
+  动作: edit_file {"path": "src/recursion.py", "old": "def sum_nested(x):\n    if isinstance(x, list) and x:\n        return sum(sum_nested(i) for i in x)\n    return x", "new": "def sum_nested(x):\n    if isinstance(x
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args":{"code":"import sys; sys.path.insert(0,
+[step 11] 思考: 验证两个模块的边界行为。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import make_counter\nfrom recursion import sum_nested\nc=make_counter()\nassert [c(),c(),c()]==[1,2,3]\nc2=make_counter()\nassert c2()==1\n
+  观察: exit=0
+6 0 5 0
+
+[step 12] 思考: 边界验证通过：嵌套求和6、空列表0、标量5、空子列表0。运行全量测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.19s

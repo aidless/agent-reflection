@@ -1,0 +1,71 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/recursion.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看仓库结构，了解所有源码模块。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (126B)
+      src/recursion.py  (186B)
+[dir] tests
+      tests/test_visible.py  (191B)
+[step 2] 思考: 读取所有源码和测试。
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 100}
+  观察: src/recursion.py (8 行)
+   1| def flatten(items):
+   2|     out = []
+   3|     for it in items:
+   4|         if isinstance(it, list) and it:
+   5|             out.extend(flatten(it))
+   6|         else:
+   7|             out.append(it)
+   8|     return out
+[step 3] 解析失败：Bug: empty list should extend nothing, but current code appends empty list itself. Fix: isinstance(it, list) -> flatten 
+[step 4] 思考: recursion.flatten 对空列表错误地把空列表本身 append 了。需要改为 isinstance(it, list) 就递归。继续读取 normalize.py 和测试。
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 100}
+  观察: src/normalize.py (5 行)
+   1| def safe_int(value, default=0):
+   2|     try:
+   3|         return int(value)
+   4|     except (TypeError, ValueError):
+   5|         return default
+[step 5] 思考: 读取可见测试，并检查 int() 可能抛出的 OverflowError 边界。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from recursion import flatten
+   3| 
+   4| def test_flatten_simple():
+   5|     assert flatten([1, [2, 3]]) == [1, 2, 3]
+   6| 
+   7| 
+   8| 
+   9| def test_flatten_empty_nested():
+  10|     assert flatten([1, [], [2, [3]]]) == [1, 2, 3]
+[step 6] 思考: 两个缺陷：1) flatten 对空列表误 append；2) safe_int 未捕获 OverflowError（如 int(float('inf'))）。修复两处。
+  动作: edit_file {"path": "src/recursion.py", "old": "        if isinstance(it, list) and it:", "new": "        if isinstance(it, list):"}
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 7] 思考: 修复 safe_int 捕获 OverflowError。
+  动作: edit_file {"path": "src/normalize.py", "old": "    except (TypeError, ValueError):", "new": "    except (TypeError, ValueError, OverflowError):"}
+  观察: 已修改 src/normalize.py（替换 1 处）
+[step 8] 思考: 验证修复：运行可见测试并构造边界用例。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom recursion import flatten\nfrom normalize import safe_int\nprint(flatten([1,[],[2,[3]]]))\nprint(flatten([]))\nprint(flatten([[],[]]))\nprint(safe_i
+  观察: exit=0
+[1, 2, 3]
+[]
+[]
+0
+0
+0
+12
+3
+
+[step 9] 思考: 边界用例全部通过，跑一遍可见测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.11s
+
+[step 10] 思考: 可见测试通过，两处根因均已修复：flatten 空列表处理、safe_int 捕获 OverflowError。
+  动作: finish {"summary": "修复 src/recursion.py 的 flatten：空列表不再被 append，改为对任意 list 都递归展平；修复 src/normalize.py 的 safe_int：异常捕获增加 OverflowError，处理 int(float('inf')) 等溢出输入。"}
+  判定: 1 failed, 8 passed in 0.05s
+  反思异常: reflection_parse_failed: We need answer only JSON. Need analyze failure trajectory. Need identify missed bug category among allowed. We need produce lesson. Need understand task and trajectory. It says hidden tests check all  || We need answer directly JSON first char {, no reasoning/explanation. Need infer desired JSON fields: bug_category, symptom, root_cause, fix_pattern, language_constraints, rule. Need provide based on s

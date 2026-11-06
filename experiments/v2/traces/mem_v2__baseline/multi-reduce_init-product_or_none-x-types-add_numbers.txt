@@ -1,0 +1,67 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (40B)
+      src/stats.py  (133B)
+[dir] tests
+      tests/test_visible.py  (173B)
+[step 2] 思考: 读取源码与测试
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 100}
+  观察: src/stats.py (7 行)
+   1| def product_or_none(values):
+   2|     if not values:
+   3|         return None
+   4|     out = 0
+   5|     for v in values:
+   6|         out *= v
+   7|     return out
+[step 3] 思考: product 初值应为1
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 100}
+  观察: src/normalize.py (2 行)
+   1| def add_numbers(a, b):
+   2|     return a + b
+[step 4] 思考: 查看可见测试与仓库其他线索
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 80}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from stats import product_or_none
+   3| 
+   4| def test_product_basic():
+   5|     assert product_or_none([2, 3, 4]) == 24
+   6| 
+   7| 
+   8| 
+   9| def test_product_single():
+  10|     assert product_or_none([5]) == 5
+[step 5] 思考: 两模块各有缺陷：product 初值0；add_numbers 未做类型转换
+  动作: write_file {"path": "src/stats.py", "content": "def product_or_none(values):\n    if not values:\n        return None\n    out = 1\n    for v in values:\n        out *= v\n    return out\n"}
+  观察: 已写入 src/stats.py（133 字符）
+[step 6] 思考: add_numbers 需支持数字字符串类型转换
+  动作: write_file {"path": "src/normalize.py", "content": "def _to_number(x):\n    if isinstance(x, bool):\n        return int(x)\n    if isinstance(x, (int, float)):\n        return x\n    if isinstance(x, str):\n    
+  观察: 已写入 src/normalize.py（351 字符）
+[step 7] 思考: 运行测试并验证边界
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.08s
+
+[step 8] 思考: 构造边界用例验证
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom stats import product_or_none\nfrom normalize import add_numbers\nassert product_or_none([]) is None\nassert product_or_none([0,5])==0\nassert produ
+  观察: exit=0
+ok
+
+[step 9] 思考: 增强 product 对可迭代对象(生成器/元组)的鲁棒性
+  动作: write_file {"path": "src/stats.py", "content": "def product_or_none(values):\n    if not hasattr(values, \"__len__\"):\n        values = list(values)\n    if not values:\n        return None\n    out = 1\n    fo
+  观察: 已写入 src/stats.py（202 字符）
+[step 10] 思考: 再次跑测试确认
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 11] 思考: 两模块缺陷已修，边界用例通过
+  动作: finish {"summary": "stats.product_or_none 初值0改1、支持无len可迭代；normalize.add_numbers 增加数字字符串/布尔类型转换"}
+  判定: 8 passed in 0.02s

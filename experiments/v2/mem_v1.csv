@@ -1,0 +1,253 @@
+arm,task_id,family,success,judge_detail,failure_mode,steps,calls,tool_calls,plan_calls,reflect_calls,prompt_tokens,completion_tokens,reflect_tokens,total_tokens,cached_tokens,latency_s,rollback_used,rollback_verified,rollback_checks,test_runs,memory_injected,memory_injected_count,error
+mem_v1__baseline,multi-types-sort_ids-x-boundary-first_nonnegative,types+boundary,1,9 passed in 0.02s,,9,10,8,1,0,9614,2245,0,11859,2432,72.9,0,0,0,1,,0,
+mem_v1__baseline,recursion-count_nodes,recursion,1,5 passed in 0.01s,,12,13,8,1,0,15753,4254,0,20007,5504,127.6,0,0,1,2,,0,
+mem_v1__baseline,multi-cache_state-batch_flush-x-mutable_default-merge_defaults,cache_state+mutable_default,1,7 passed in 0.02s,,11,12,8,1,0,16724,2570,0,19294,9216,64.1,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-mean_nonempty-x-types-total_amount,reduce_init+types,0,"4 failed, 5 passed in 0.05s",wrong_fix,12,13,5,1,2,12863,2365,2397,17625,10624,79.7,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-reduce_init-argmax-x-types-format_price,reduce_init+types,1,9 passed in 0.02s,,12,13,10,1,0,15404,3004,0,18408,12544,51.5,0,0,0,1,,0,
+mem_v1__baseline,reduce_init-mean_nonempty,reduce_init,1,5 passed in 0.01s,,11,12,6,1,0,12097,1227,0,13324,1024,68.9,0,0,1,2,,0,
+mem_v1__baseline,multi-mutable_default-make_counter-x-parsing-parse_bool,mutable_default+parsing,1,8 passed in 0.02s,,12,13,11,1,0,18482,2709,0,21191,12288,42.9,0,0,1,2,,0,
+mem_v1__baseline,multi-boundary-lower_bound-x-paging-sliding_window,boundary+paging,1,9 passed in 0.02s,,10,11,8,1,0,10867,1677,0,12544,8320,38.5,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-min_or_none-x-cache_state-square_cache_key,reduce_init+cache_state,1,7 passed in 0.02s,,12,13,6,1,0,15203,1704,0,16907,1536,86.5,0,0,0,0,,0,
+mem_v1__baseline,multi-recursion-tree_height-x-types-add_numbers,recursion+types,1,8 passed in 0.02s,,12,13,7,1,0,15860,3904,0,19764,1152,124.7,0,0,0,0,,0,
+mem_v1__baseline,paging-last_page,paging,1,5 passed in 0.01s,,8,9,7,1,0,7643,1530,0,9173,4608,31.7,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-merge_defaults-x-paging-last_page,mutable_default+paging,1,8 passed in 0.02s,,11,12,8,1,0,12418,2825,0,15243,4992,56.2,0,0,0,1,,0,
+mem_v1__baseline,parsing-parse_range,parsing,1,5 passed in 0.01s,,12,13,7,1,0,16125,2522,0,18647,13056,51.3,0,0,0,1,,0,
+mem_v1__baseline,multi-paging-sliding_window-x-reduce_init-clamp,paging+reduce_init,1,8 passed in 0.02s,,10,11,8,1,0,11071,1084,0,12155,8448,33.5,0,0,0,1,,0,
+mem_v1__baseline,multi-cache_state-token_bucket-x-paging-page_items,cache_state+paging,0,"4 failed, 4 passed in 0.04s",wrong_fix,12,13,10,1,2,33983,13796,2559,50338,27904,192.5,0,0,1,1,,0,reflection_parse_failed: We need answer only JSON object. Need analyze trajectory. Need produce structured lesson. Must include real function/file/command names in root_cause or fix_pattern. Need infe
+mem_v1__baseline,types-sort_ids,types,1,5 passed in 0.01s,,7,8,6,1,0,7730,1001,0,8731,4992,32.6,0,0,1,2,,0,
+mem_v1__baseline,multi-types-format_price-x-cache_state-shared_cache,types+cache_state,1,8 passed in 0.02s,,10,11,8,1,0,10102,2973,0,13075,7296,46.9,0,0,0,1,,0,
+mem_v1__baseline,multi-cache_state-counter_reset-x-mutable_default-append_tag,cache_state+mutable_default,1,6 passed in 0.02s,,12,13,6,1,0,13606,1828,0,15434,11008,42.1,0,0,0,0,,0,
+mem_v1__baseline,types-total_amount,types,1,6 passed in 0.01s,,8,9,6,1,0,7364,1862,0,9226,1152,48.3,0,0,0,1,,0,
+mem_v1__baseline,reduce_init-max_by_key,reduce_init,1,5 passed in 0.01s,,10,11,7,1,0,10993,1462,0,12455,8832,34.6,0,0,0,2,,0,
+mem_v1__baseline,multi-parsing-parse_range-x-reduce_init-argmax,parsing+reduce_init,1,9 passed in 0.02s,,11,12,9,1,0,21494,5519,0,27013,15104,128.5,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-unique_append-x-paging-sliding_window,mutable_default+paging,1,7 passed in 0.02s,,12,13,6,1,0,15193,1653,0,16846,1408,38.2,0,0,0,0,,0,
+mem_v1__baseline,cache_state-batch_flush,cache_state,1,4 passed in 0.01s,,9,10,7,1,0,10148,868,0,11016,7808,28.4,0,0,1,2,,0,
+mem_v1__baseline,multi-boundary-insert_position_desc-x-paging-drop_head,boundary+paging,1,8 passed in 0.02s,,12,13,8,1,0,15248,3138,0,18386,10624,120.8,0,0,0,1,,0,
+mem_v1__baseline,multi-cache_state-token_bucket-x-mutable_default-add_metric,cache_state+mutable_default,1,7 passed in 0.02s,,12,13,6,1,0,16145,5013,0,21158,1024,67.7,0,0,0,0,,0,
+mem_v1__baseline,multi-boundary-search_rotated-x-cache_state-batch_flush,boundary+cache_state,1,8 passed in 0.02s,,12,13,12,1,0,31711,4760,0,36471,26496,57.2,0,0,2,3,,0,
+mem_v1__baseline,multi-paging-page_items-x-types-join_ids,paging+types,1,9 passed in 0.02s,,11,12,10,1,0,13743,2071,0,15814,9728,102.0,0,0,0,1,,0,
+mem_v1__baseline,paging-page_items,paging,1,6 passed in 0.02s,,8,9,7,1,0,8033,1092,0,9125,6016,24.4,0,0,0,1,,0,
+mem_v1__baseline,boundary-insert_position_desc,boundary,0,"2 failed, 3 passed in 0.03s",llm_error,1,1,0,1,2,145,200,1736,2081,0,98.6,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-boundary-upper_bound-x-mutable_default-unique_append,boundary+mutable_default,1,7 passed in 0.02s,,12,13,7,1,0,14445,3947,0,18392,12032,65.9,0,0,0,0,,0,
+mem_v1__baseline,mutable_default-collect_pairs,mutable_default,0,4 failed in 0.04s,llm_error,1,1,0,1,2,148,200,1889,2237,0,47.4,0,0,0,0,,0,reflection_parse_failed: 我们需要回答一个JSON对象，不要推理过程。需要分析失败Agent执行，产出结构化教训。任务：src/collect.py有缺陷，tests/test_visible.py失败，需定位并修复根因，通过隐藏测试，tests只读，修好调用finish。最终判定: 4 failed in 0.04s。执行轨迹只给了任务和最终判定，无详细操作。我们需要推断
+mem_v1__baseline,multi-types-add_numbers-x-mutable_default-unique_append,types+mutable_default,1,7 passed in 0.02s,,10,11,9,1,0,12201,3647,0,15848,8832,55.8,0,0,0,1,,0,
+mem_v1__baseline,multi-paging-between_inclusive-x-recursion-to_binary,paging+recursion,1,9 passed in 0.02s,,12,13,7,1,0,15395,2285,0,17680,11136,157.7,0,0,0,1,,0,
+mem_v1__baseline,multi-parsing-parse_csv_line-x-reduce_init-min_or_none,parsing+reduce_init,0,"4 failed, 5 passed in 0.04s",llm_error,1,1,0,1,0,155,200,0,355,0,79.4,0,0,0,0,,0,"reflect_llm_error: 重试 3 次仍失败: HTTP 429: {""error"":{""code"":null,""message"":""OpenCode Go: Upstream request failed: [overloaded] the server is overloaded; retry shortly"",""param"":null,""type"":""rate_limit_err"
+mem_v1__baseline,multi-recursion-tree_height-x-reduce_init-sum_positives,recursion+reduce_init,1,8 passed in 0.02s,,12,13,11,1,0,18937,2108,0,21045,11776,93.4,0,0,0,2,,0,
+mem_v1__baseline,multi-types-safe_int-x-boundary-upper_bound,types+boundary,1,9 passed in 0.02s,,12,13,8,1,0,14802,3694,0,18496,9472,119.7,0,0,1,1,,0,
+mem_v1__baseline,parsing-parse_csv_line,parsing,1,6 passed in 0.02s,,10,11,8,1,0,11753,3644,0,15397,6912,154.2,0,0,0,2,,0,
+mem_v1__baseline,multi-paging-drop_head-x-types-count_nonnull,paging+types,1,9 passed in 0.02s,,12,13,9,1,0,15288,1860,0,17148,10752,101.0,0,0,0,1,,0,
+mem_v1__baseline,multi-types-join_ids-x-cache_state-ttl_cache,types+cache_state,1,7 passed in 0.14s,,12,13,10,1,0,15648,2342,0,17990,9984,148.8,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-mean_nonempty-x-boundary-search_rotated,reduce_init+boundary,1,9 passed in 0.02s,,12,13,6,1,0,14260,3127,0,17387,9984,151.2,0,0,0,0,,0,
+mem_v1__baseline,multi-mutable_default-group_by-x-parsing-parse_range,mutable_default+parsing,0,"1 failed, 6 passed in 0.04s",wrong_fix,12,13,5,1,2,13986,3097,2503,19586,11392,88.6,0,0,0,0,,0,"reflection_parse_failed: We need answer only JSON object, no reasoning. Need analyze failed agent execution and produce transferable structured lessons. Must include scenario, error_type, root_cause, "
+mem_v1__baseline,multi-parsing-parse_range-x-types-sort_ids,parsing+types,0,"6 failed, 2 passed in 0.05s",wrong_fix,12,13,7,1,0,17656,2745,0,20401,14464,79.3,0,0,1,1,,0,"reflect_llm_error: 重试 3 次仍失败: HTTP 429: {""error"":{""code"":null,""message"":""OpenCode Go: Upstream request failed: [overloaded] the server is overloaded; retry shortly"",""param"":null,""type"":""rate_limit_err"
+mem_v1__baseline,multi-paging-take_tail-x-recursion-reverse_rec,paging+recursion,1,7 passed in 0.02s,,12,13,12,1,0,24042,4214,0,28256,19072,70.7,0,0,0,2,,0,
+mem_v1__baseline,multi-types-safe_int-x-mutable_default-collect_pairs,types+mutable_default,1,8 passed in 0.02s,,12,13,6,1,0,14651,1842,0,16493,11904,42.3,0,0,1,1,,0,
+mem_v1__baseline,multi-mutable_default-add_metric-x-paging-paginate_pairs,mutable_default+paging,1,8 passed in 0.02s,,12,13,10,1,0,17571,3619,0,21190,0,78.1,0,0,0,0,,0,
+mem_v1__baseline,multi-reduce_init-second_largest-x-boundary-count_occurrences,reduce_init+boundary,1,10 passed in 0.02s,,12,13,8,1,0,17056,2198,0,19254,8960,115.4,0,0,0,0,,0,
+mem_v1__baseline,multi-paging-page_items-x-parsing-parse_csv_line,paging+parsing,1,10 passed in 0.02s,,12,13,11,1,0,18484,3757,0,22241,14592,54.9,0,0,0,0,,0,
+mem_v1__baseline,multi-boundary-search_rotated-x-parsing-parse_range,boundary+parsing,1,9 passed in 0.02s,,11,12,9,1,0,15213,3161,0,18374,10624,129.7,0,0,0,1,,0,
+mem_v1__baseline,multi-paging-last_page-x-parsing-parse_float_list,paging+parsing,0,"5 failed, 4 passed in 0.04s",llm_error,1,1,0,1,0,154,200,0,354,0,72.1,0,0,0,0,,0,"reflect_llm_error: 重试 3 次仍失败: HTTP 429: {""error"":{""code"":null,""message"":""OpenCode Go: Upstream request failed: [overloaded] the server is overloaded; retry shortly"",""param"":null,""type"":""rate_limit_err"
+mem_v1__baseline,reduce_init-clamp,reduce_init,0,"3 failed, 2 passed in 0.03s",llm_error,1,1,0,1,2,148,200,1897,2245,0,67.9,0,0,0,0,,0,"reflection_parse_failed: {""scenario"":""修复 src/stats.py 使 tests/test_visible.py 通过并满足隐藏边界测试；最终 pytest 结果为 3 failed, 2 passed，说明修复只覆盖了部分可见用例，边界分支仍未通过"",""error_type"":""边界条件遗漏与过早判定完成"",""root_cause"":""只围绕 tests"
+mem_v1__baseline,mutable_default-unique_append,mutable_default,1,4 passed in 0.01s,,9,10,8,1,0,10403,2572,0,12975,8192,53.5,0,0,0,1,,0,
+mem_v1__baseline,reduce_init-argmax,reduce_init,1,6 passed in 0.01s,,6,7,5,1,0,5170,615,0,5785,3712,17.4,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-merge_defaults-x-recursion-to_binary,mutable_default+recursion,1,9 passed in 0.02s,,11,12,9,1,0,14156,2333,0,16489,11008,39.0,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-product_or_none-x-cache_state-token_bucket,reduce_init+cache_state,1,7 passed in 0.02s,,12,13,9,1,0,14424,2593,0,17017,11776,50.7,0,0,0,1,,0,
+mem_v1__baseline,mutable_default-merge_defaults,mutable_default,1,5 passed in 0.01s,,7,8,5,1,0,6491,1235,0,7726,3712,68.6,0,0,0,1,,0,
+mem_v1__baseline,boundary-last_le,boundary,1,6 passed in 0.02s,,7,8,6,1,0,6795,1209,0,8004,4864,28.7,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-max_by_key-x-cache_state-counter_reset,reduce_init+cache_state,0,"1 failed, 6 passed in 0.06s",wrong_fix,12,13,5,1,2,14482,3154,2427,20063,11776,64.0,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-paging-sliding_window-x-types-sort_ids,paging+types,0,"3 failed, 5 passed in 0.04s",wrong_fix,12,13,11,1,2,18818,5122,2431,26371,13312,147.4,0,0,1,1,,0,reflection_retry_ok
+mem_v1__baseline,multi-mutable_default-Stack-x-parsing-parse_float_list,mutable_default+parsing,1,8 passed in 0.02s,,12,13,8,1,0,14116,1880,0,15996,11392,30.2,0,0,0,1,,0,
+mem_v1__baseline,multi-paging-chunk_list-x-types-compare_values,paging+types,0,"6 failed, 2 passed in 0.08s",wrong_fix,12,13,11,1,2,17738,4839,2327,24904,14208,107.8,0,0,1,1,,0,reflection_retry_ok
+mem_v1__baseline,multi-boundary-last_le-x-mutable_default-merge_defaults,boundary+mutable_default,1,9 passed in 0.05s,,12,13,9,1,0,14240,2958,0,17198,11264,38.2,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-add_metric-x-parsing-parse_csv_line,mutable_default+parsing,1,9 passed in 0.02s,,12,13,9,1,0,15268,4012,0,19280,8704,197.8,0,0,0,1,,0,
+mem_v1__baseline,boundary-lower_bound,boundary,1,6 passed in 0.02s,,7,8,6,1,0,6630,911,0,7541,4864,25.1,0,0,0,1,,0,
+mem_v1__baseline,multi-types-join_ids-x-boundary-insert_position_desc,types+boundary,1,8 passed in 0.02s,,12,13,8,1,0,15796,3470,0,19266,11008,127.9,0,0,0,0,,0,
+mem_v1__baseline,multi-recursion-power-x-types-count_nonnull,recursion+types,1,10 passed in 0.02s,,12,13,8,1,0,16316,2561,0,18877,8448,157.7,0,0,1,1,,0,
+mem_v1__baseline,recursion-depth,recursion,1,6 passed in 0.01s,,12,13,8,1,0,14169,2187,0,16356,8704,79.1,0,0,0,2,,0,
+mem_v1__baseline,recursion-power,recursion,1,6 passed in 0.02s,,9,10,7,1,0,9409,1900,0,11309,7168,27.5,0,0,0,1,,0,
+mem_v1__baseline,cache_state-square_cache_key,cache_state,1,4 passed in 0.02s,,9,10,5,1,0,8914,1177,0,10091,5760,88.6,0,0,0,1,,0,
+mem_v1__baseline,multi-paging-page_items-x-reduce_init-second_largest,paging+reduce_init,1,10 passed in 0.02s,,12,13,8,1,0,15059,1619,0,16678,10880,133.9,0,0,0,1,,0,
+mem_v1__baseline,multi-types-count_nonnull-x-boundary-search_rotated,types+boundary,0,"1 failed, 9 passed in 0.04s",wrong_fix,12,13,5,1,1,15743,3205,1815,20763,9472,192.0,0,0,0,0,,0,"reflect_retry_llm_error: 重试 3 次仍失败: HTTP 429: {""error"":{""code"":null,""message"":""OpenCode Go: Upstream request failed: [overloaded] the server is overloaded; retry shortly"",""param"":null,""type"":""rate_lim"
+mem_v1__baseline,reduce_init-sum_positives,reduce_init,1,5 passed in 0.01s,,8,9,6,1,0,7380,927,0,8307,5376,23.5,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-clamp-x-cache_state-config_cache,reduce_init+cache_state,1,7 passed in 0.02s,,12,13,9,1,0,15061,2082,0,17143,12288,43.2,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-append_tag-x-recursion-depth,mutable_default+recursion,0,"5 failed, 3 passed in 0.04s",llm_error,1,1,0,1,2,154,200,1897,2251,0,53.3,0,0,0,0,,0,"reflection_parse_failed: {""scenario"":""src/ 下存在多模块缺陷，tests/test_visible.py 仅覆盖 src/collect.py，隐藏测试检查 src/ 全部模块"",""error_type"":""覆盖不足导致的过早收敛"",""root_cause"":""执行时把 tests/test_visible.py 通过当作完成标准，只修复了 src/col"
+mem_v1__baseline,multi-cache_state-square_cache_key-x-paging-last_page,cache_state+paging,1,7 passed in 0.02s,,12,13,10,1,0,19332,2716,0,22048,15744,44.0,0,0,0,0,,0,
+mem_v1__baseline,boundary-search_rotated,boundary,1,6 passed in 0.02s,,12,13,6,1,0,15973,2776,0,18749,12928,49.6,0,0,1,1,,0,
+mem_v1__baseline,multi-mutable_default-Stack-x-recursion-count_nodes,mutable_default+recursion,0,"2 failed, 5 passed in 0.04s",wrong_fix,12,13,5,1,2,16096,4619,2273,22988,11008,188.3,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-parsing-parse_duration-x-recursion-count_nodes,parsing+recursion,1,9 passed in 0.02s,,11,12,9,1,0,15261,2882,0,18143,12672,53.0,0,0,0,1,,0,
+mem_v1__baseline,multi-boundary-upper_bound-x-cache_state-lru_get,boundary+cache_state,1,7 passed in 0.02s,,10,11,8,1,0,12842,2117,0,14959,10240,28.7,0,0,0,1,,0,
+mem_v1__baseline,multi-parsing-split_path-x-reduce_init-product_or_none,parsing+reduce_init,1,8 passed in 0.02s,,12,13,8,1,0,15129,3647,0,18776,12288,53.0,0,0,0,1,,0,
+mem_v1__baseline,mutable_default-Stack,mutable_default,1,4 passed in 0.01s,,8,9,5,1,0,7941,1090,0,9031,4608,71.0,0,0,0,1,,0,
+mem_v1__baseline,multi-cache_state-config_cache-x-paging-take_tail,cache_state+paging,0,"3 failed, 4 passed in 0.04s",llm_error,1,0,0,0,2,0,0,1824,1824,0,85.0,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-mutable_default-add_metric-x-recursion-depth,mutable_default+recursion,1,9 passed in 0.02s,,9,10,7,1,0,9441,1234,0,10675,7296,23.7,0,0,0,1,,0,
+mem_v1__baseline,multi-paging-last_page-x-types-format_price,paging+types,1,8 passed in 0.02s,,11,12,8,1,0,12818,1703,0,14521,1536,28.9,0,0,0,1,,0,
+mem_v1__baseline,parsing-parse_duration,parsing,1,6 passed in 0.01s,,12,13,10,1,0,20879,3913,0,24792,17280,40.9,0,0,0,2,,0,
+mem_v1__baseline,boundary-count_occurrences,boundary,0,"2 failed, 4 passed in 0.06s",llm_error,1,1,0,1,2,145,200,1891,2236,0,56.8,0,0,0,0,,0,"reflection_parse_failed: {""scenario"":""仓库中 src/search.py 存在缺陷，tests/test_visible.py 只读且有失败用例；执行后 pytest 结果仍为 2 failed, 4 passed，说明修复未覆盖全部失败断言和边界情况。"",""error_type"":""边界条件遗漏与未闭环验证"",""root_cause"":""修改 src/sea"
+mem_v1__baseline,multi-parsing-parse_duration-x-reduce_init-clamp,parsing+reduce_init,0,"4 failed, 5 passed in 0.05s",wrong_fix,12,13,6,1,2,16874,6454,2372,25700,12288,140.0,0,0,1,1,,0,"reflection_parse_failed: We need answer only JSON object no reasoning. Need analyze trajectory failure produce structured lesson. Need include real function/file names/commands. Let's parse.
+
+Task: re"
+mem_v1__baseline,multi-boundary-lower_bound-x-parsing-parse_float_list,boundary+parsing,1,10 passed in 0.02s,,12,13,8,1,0,13971,3414,0,17385,11520,34.2,0,0,0,1,,0,
+mem_v1__baseline,multi-recursion-sum_nested-x-types-join_ids,recursion+types,1,9 passed in 0.02s,,9,10,8,1,0,9503,2183,0,11686,7296,27.1,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-collect_pairs-x-recursion-power,mutable_default+recursion,1,8 passed in 0.02s,,12,13,12,1,0,25606,3203,0,28809,21120,50.7,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-min_or_none-x-boundary-insert_position_desc,reduce_init+boundary,1,8 passed in 0.02s,,12,13,9,1,0,14094,2475,0,16569,11392,45.9,0,0,0,1,,0,
+mem_v1__baseline,boundary-first_nonnegative,boundary,0,"2 failed, 4 passed in 0.03s",llm_error,1,1,0,1,2,145,200,1671,2016,0,73.7,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,reduce_init-product_or_none,reduce_init,0,"3 failed, 2 passed in 0.03s",llm_error,1,1,0,1,2,148,196,1559,1903,0,49.6,0,0,0,0,,0,"reflection_parse_failed: We need answer only JSON object, no reasoning. Need analyze failed agent execution. We need infer likely scenario? Task says src/stats.py defect tests/test_visible.py failing,"
+mem_v1__baseline,multi-mutable_default-merge_defaults-x-parsing-split_path,mutable_default+parsing,0,"4 failed, 4 passed in 0.04s",wrong_fix,12,13,9,1,2,19100,6913,2743,28756,14080,138.7,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-parsing-parse_flags-x-recursion-reverse_rec,parsing+recursion,1,8 passed in 0.02s,,12,13,11,1,0,26824,5319,0,32143,22912,102.0,0,0,0,2,,0,
+mem_v1__baseline,multi-paging-drop_head-x-parsing-parse_flags,paging+parsing,0,"3 failed, 5 passed in 0.04s",wrong_fix,12,13,5,1,1,14933,2826,1155,18914,7936,40.5,0,0,0,0,,0,
+mem_v1__baseline,reduce_init-max_or_none,reduce_init,1,6 passed in 0.01s,,6,7,5,1,0,5329,847,0,6176,2432,28.3,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-sum_positives-x-types-compare_values,reduce_init+types,0,"7 failed, 1 passed in 0.04s",wrong_fix,12,13,5,1,2,14693,2448,2376,19517,9216,74.1,0,0,1,1,,0,"reflection_parse_failed: We need answer only JSON object. Need analyze failed agent execution, produce structured lesson. Must include actual function/file/command names from task. Need be specific ac"
+mem_v1__baseline,multi-recursion-to_binary-x-reduce_init-max_by_key,recursion+reduce_init,1,9 passed in 0.02s,,12,13,8,1,0,15932,2020,0,17952,12672,39.0,0,0,0,1,,0,
+mem_v1__baseline,multi-parsing-parse_kv-x-recursion-sum_nested,parsing+recursion,1,9 passed in 0.02s,,12,13,10,1,0,15490,2485,0,17975,12544,41.5,0,0,0,1,,0,
+mem_v1__baseline,multi-types-join_ids-x-mutable_default-make_counter,types+mutable_default,0,"2 failed, 5 passed in 0.04s",wrong_fix,12,13,6,1,0,14669,2832,0,17501,3584,76.7,0,0,0,0,,0,"reflect_llm_error: 重试 3 次仍失败: HTTP 429: {""error"":{""code"":null,""message"":""OpenCode Go: Upstream request failed: [overloaded] the server is overloaded; retry shortly"",""param"":null,""type"":""rate_limit_err"
+mem_v1__baseline,multi-reduce_init-mean_nonempty-x-cache_state-shared_cache,reduce_init+cache_state,1,8 passed in 0.02s,,12,13,8,1,0,18492,2569,0,21061,3968,34.6,0,0,0,1,,0,
+mem_v1__baseline,multi-cache_state-batch_flush-x-paging-paginate_pairs,cache_state+paging,0,"2 failed, 5 passed in 0.04s",wrong_fix,12,13,12,1,2,39260,7724,2794,49778,32768,171.7,1,1,2,2,,0,reflection_parse_failed: We need answer only JSON object. Need analyze failed agent execution and produce structured lesson. Must include real function/file/command names. Need infer task: repo src/ m
+mem_v1__baseline,multi-cache_state-lru_get-x-paging-sliding_window,cache_state+paging,1,7 passed in 0.02s,,12,13,9,1,0,15275,1948,0,17223,12544,28.6,0,0,0,1,,0,
+mem_v1__baseline,multi-parsing-parse_kv-x-types-format_price,parsing+types,1,8 passed in 0.07s,,12,13,10,1,0,13099,4325,0,17424,10368,51.0,0,0,0,0,,0,
+mem_v1__baseline,multi-reduce_init-sum_positives-x-boundary-lower_bound,reduce_init+boundary,1,9 passed in 0.02s,,9,10,8,1,0,9715,1268,0,10983,5888,31.6,0,0,0,1,,0,
+mem_v1__baseline,multi-paging-sliding_window-x-parsing-parse_range,paging+parsing,1,8 passed in 0.02s,,12,13,11,1,0,19336,5429,0,24765,15744,64.7,0,0,0,1,,0,
+mem_v1__baseline,multi-cache_state-shared_cache-x-mutable_default-make_counter,cache_state+mutable_default,0,"2 failed, 5 passed in 0.04s",wrong_fix,12,13,9,1,2,16656,3631,2362,22649,512,93.1,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-paging-page_items-x-recursion-sum_nested,paging+recursion,1,10 passed in 0.02s,,10,11,8,1,0,10400,1604,0,12004,8064,29.4,0,0,0,1,,0,
+mem_v1__baseline,multi-types-total_amount-x-cache_state-batch_flush,types+cache_state,1,8 passed in 0.02s,,9,10,8,1,0,11604,2885,0,14489,1024,66.6,0,0,0,1,,0,
+mem_v1__baseline,multi-boundary-peak_index-x-mutable_default-append_tag,boundary+mutable_default,1,6 passed in 0.01s,,12,13,8,1,0,14883,2562,0,17445,2304,50.1,0,0,0,0,,0,
+mem_v1__baseline,multi-mutable_default-append_tag-x-parsing-parse_kv,mutable_default+parsing,1,7 passed in 0.02s,,11,12,9,1,0,14502,2911,0,17413,11648,38.7,0,0,0,1,,0,
+mem_v1__baseline,multi-cache_state-counter_reset-x-parsing-parse_range,cache_state+parsing,1,7 passed in 0.02s,,9,10,8,1,0,10303,1844,0,12147,7936,29.0,0,0,0,1,,0,
+mem_v1__baseline,parsing-parse_flags,parsing,1,5 passed in 0.02s,,12,13,8,1,0,19706,2317,0,22023,16512,42.2,0,0,0,2,L1793920055970,1,
+mem_v1__baseline,multi-boundary-first_nonnegative-x-mutable_default-Stack,boundary+mutable_default,1,8 passed in 0.02s,,12,13,9,1,0,16142,2766,0,18908,12672,39.0,0,0,0,0,,0,
+mem_v1__baseline,multi-recursion-to_binary-x-types-compare_values,recursion+types,0,"2 failed, 7 passed in 0.04s",wrong_fix,12,13,7,1,2,14457,3645,2318,20420,11520,69.0,0,0,1,1,,0,reflection_retry_ok
+mem_v1__baseline,multi-reduce_init-min_or_none-x-types-safe_int,reduce_init+types,0,"1 failed, 8 passed in 0.04s",wrong_fix,10,11,8,1,2,11328,2461,2486,16275,1152,66.0,0,0,0,1,,0,"reflection_parse_failed: 我们需要回答用户。要求只输出一个 JSON 对象，不要推理过程。需要分析失败 Agent 执行，产出可迁移结构化教训。字段 scenario,error_type,root_cause,fix_pattern,rule。必须具体、可执行，不空话。root_cause 或 fix_pattern 必须出现本任务真实函数名/文件名/命令名，例如 cla"
+mem_v1__baseline,recursion-to_binary,recursion,1,6 passed in 0.02s,,10,11,8,1,0,10888,1946,0,12834,8832,33.1,0,0,0,2,,0,
+mem_v1__baseline,multi-parsing-parse_bool-x-recursion-power,parsing+recursion,1,10 passed in 0.02s,,12,13,6,1,0,15026,2933,0,17959,384,59.2,0,0,0,0,,0,
+mem_v1__baseline,multi-reduce_init-second_largest-x-cache_state-ttl_cache,reduce_init+cache_state,1,8 passed in 0.14s,,12,13,8,1,0,15665,1942,0,17607,12288,31.9,0,0,0,0,,0,
+mem_v1__baseline,multi-cache_state-counter_reset-x-paging-chunk_list,cache_state+paging,0,"1 failed, 6 passed in 0.03s",wrong_fix,12,13,9,1,2,16974,2668,2470,22112,13696,57.6,0,0,0,1,,0,"reflection_parse_failed: 我们需要输出一个 JSON 对象，分析失败执行，给出结构化教训。需要具体、可执行，包含真实函数名/文件名/命令名。场景：修复 src 下多处缺陷，可见测试只覆盖 src/state.py，隐藏测试覆盖全部。Agent 运行 tests 全部通过后，自建边界用例发现 paging.chunk_list([1],3) 失败。检查 paging.py 发"
+mem_v1__baseline,parsing-parse_float_list,parsing,1,6 passed in 0.01s,,12,13,11,1,0,15915,2308,0,18223,1408,56.9,0,0,0,2,,0,
+mem_v1__baseline,multi-paging-chunk_list-x-recursion-depth,paging+recursion,1,9 passed in 0.02s,,12,13,7,1,0,14409,1780,0,16189,11776,32.1,0,0,0,0,,0,
+mem_v1__baseline,multi-recursion-depth-x-reduce_init-second_largest,recursion+reduce_init,0,"6 failed, 4 passed in 0.05s",wrong_fix,12,13,3,1,1,13653,1235,1552,16440,11136,33.5,0,0,0,0,,0,
+mem_v1__baseline,mutable_default-group_by,mutable_default,1,4 passed in 0.01s,,5,6,4,1,0,4407,838,0,5245,2944,16.8,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-max_or_none-x-types-add_numbers,reduce_init+types,0,"6 failed, 3 passed in 0.05s",wrong_fix,12,13,5,1,2,13472,2703,2430,18605,10752,60.4,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-boundary-last_le-x-cache_state-square_cache_key,boundary+cache_state,1,8 passed in 0.02s,,11,12,8,1,0,12799,1665,0,14464,10240,30.6,0,0,0,1,,0,
+mem_v1__baseline,boundary-upper_bound,boundary,1,5 passed in 0.01s,,8,9,7,1,0,9088,942,0,10030,768,27.7,0,0,1,2,,0,
+mem_v1__baseline,types-format_price,types,1,5 passed in 0.01s,,12,13,11,1,0,35101,8292,0,43393,29824,106.7,0,0,1,2,,0,
+mem_v1__baseline,multi-boundary-last_le-x-parsing-parse_flags,boundary+parsing,0,"3 failed, 6 passed in 0.04s",wrong_fix,12,13,7,1,2,19847,3067,2442,25356,16768,69.2,0,0,0,0,L1793920055970,1,reflection_retry_ok
+mem_v1__baseline,multi-boundary-upper_bound-x-parsing-split_path,boundary+parsing,0,"1 failed, 7 passed in 0.04s",wrong_fix,12,13,7,1,2,14058,1922,2381,18361,640,71.8,0,0,1,1,,0,"reflection_parse_failed: We need answer only JSON object, no reasoning. Need analyze failed agent execution produce structured lesson. Need include scenario, error_type, root_cause, fix_pattern, rule."
+mem_v1__baseline,multi-paging-between_inclusive-x-parsing-parse_bool,paging+parsing,1,9 passed in 0.02s,,9,10,8,1,0,9805,2259,0,12064,7168,36.5,0,0,0,1,,0,
+mem_v1__baseline,multi-parsing-parse_bool-x-reduce_init-max_by_key,parsing+reduce_init,1,9 passed in 0.02s,,10,11,8,1,0,11822,1881,0,13703,9088,32.2,0,0,0,1,,0,
+mem_v1__baseline,boundary-peak_index,boundary,1,4 passed in 0.01s,,7,8,6,1,0,6890,1443,0,8333,0,36.0,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-unique_append-x-recursion-reverse_rec,mutable_default+recursion,1,7 passed in 0.02s,,12,13,7,1,0,16153,2028,0,18181,13056,33.4,0,0,0,0,,0,
+mem_v1__baseline,multi-paging-drop_head-x-recursion-power,paging+recursion,1,9 passed in 0.02s,,10,11,8,1,0,15424,2302,0,17726,12416,36.7,0,0,0,1,L1793920055970,1,
+mem_v1__baseline,multi-mutable_default-append_tag-x-recursion-flatten,mutable_default+recursion,1,7 passed in 0.02s,,9,10,8,1,0,10022,1370,0,11392,6528,26.0,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-max_or_none-x-boundary-upper_bound,reduce_init+boundary,1,9 passed in 0.02s,,12,13,7,1,0,14516,1781,0,16297,1152,49.9,0,0,0,0,,0,
+mem_v1__baseline,multi-mutable_default-group_by-x-recursion-reverse_rec,mutable_default+recursion,1,7 passed in 0.02s,,12,13,7,1,0,16194,2546,0,18740,512,59.8,0,0,0,0,,0,
+mem_v1__baseline,multi-types-compare_values-x-cache_state-counter_reset,types+cache_state,1,7 passed in 0.02s,,12,13,10,1,0,19741,3677,0,23418,3328,71.2,0,0,0,1,,0,
+mem_v1__baseline,multi-types-count_nonnull-x-cache_state-token_bucket,types+cache_state,1,8 passed in 0.02s,,10,11,9,1,0,12062,2694,0,14756,9728,37.5,0,0,1,2,,0,
+mem_v1__baseline,multi-parsing-parse_csv_line-x-types-join_ids,parsing+types,0,"6 failed, 3 passed in 0.05s",wrong_fix,12,13,8,1,2,17577,3799,2930,24306,0,94.7,0,0,1,1,,0,"reflection_parse_failed: {""scenario"":""多模块缺陷修复任务：tests/test_visible.py 只覆盖 src/parsing.py，隐藏测试检查 src/normalize.py 等全部模块；执行时需通读源码并构造边界用例。"",""error_type"":""工具调用格式/ || {""scenario"":""修复 src/ 下全部模块缺陷；tests 只读，"
+mem_v1__baseline,multi-mutable_default-append_tag-x-paging-page_items,mutable_default+paging,1,8 passed in 0.03s,,9,10,8,1,0,11764,1513,0,13277,9088,25.3,0,0,0,1,,0,
+mem_v1__baseline,recursion-flatten,recursion,1,5 passed in 0.01s,,10,11,9,1,0,13993,3545,0,17538,1920,62.2,0,0,0,2,,0,
+mem_v1__baseline,recursion-reverse_rec,recursion,1,5 passed in 0.01s,,12,13,10,1,0,15001,2806,0,17807,9984,47.5,0,0,0,2,,0,
+mem_v1__baseline,multi-reduce_init-product_or_none-x-types-add_numbers,reduce_init+types,1,8 passed in 0.02s,,12,13,10,1,0,17727,4250,0,21977,13824,51.4,0,0,1,1,,0,
+mem_v1__baseline,multi-types-add_numbers-x-cache_state-lru_get,types+cache_state,1,7 passed in 0.02s,,11,12,8,1,0,13741,2568,0,16309,9216,37.2,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-unique_append-x-recursion-tree_height,mutable_default+recursion,1,7 passed in 0.02s,,11,12,10,1,0,14997,2667,0,17664,1792,60.9,0,0,0,2,,0,
+mem_v1__baseline,multi-reduce_init-argmax-x-cache_state-batch_flush,reduce_init+cache_state,0,"2 failed, 6 passed in 0.04s",wrong_fix,12,13,5,1,2,14576,2266,2435,19277,11520,50.2,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-reduce_init-second_largest-x-types-join_ids,reduce_init+types,1,9 passed in 0.03s,,12,13,9,1,0,14282,1875,0,16157,1920,28.6,0,0,0,1,,0,
+mem_v1__baseline,multi-types-safe_int-x-cache_state-config_cache,types+cache_state,1,8 passed in 0.02s,,12,13,10,1,0,18236,3940,0,22176,12288,65.6,0,0,0,1,,0,
+mem_v1__baseline,paging-between_inclusive,paging,1,5 passed in 0.01s,,6,7,5,1,0,5668,2406,0,8074,3968,30.3,0,0,0,1,,0,
+mem_v1__baseline,multi-boundary-count_occurrences-x-parsing-parse_bool,boundary+parsing,1,10 passed in 0.02s,,12,13,10,1,0,17083,2688,0,19771,1408,54.6,0,0,0,1,,0,
+mem_v1__baseline,cache_state-counter_reset,cache_state,1,4 passed in 0.01s,,7,8,6,1,0,6489,748,0,7237,0,22.6,0,0,0,1,,0,
+mem_v1__baseline,multi-types-compare_values-x-boundary-peak_index,types+boundary,1,8 passed in 0.02s,,12,13,7,1,0,15914,3387,0,19301,768,72.5,0,0,0,0,,0,
+mem_v1__baseline,multi-parsing-parse_flags-x-reduce_init-mean_nonempty,parsing+reduce_init,1,8 passed in 0.02s,,12,13,8,1,0,19101,2927,0,22028,16128,48.8,0,0,0,1,L1793922003967|L1793920055970,2,
+mem_v1__baseline,types-safe_int,types,1,6 passed in 0.01s,,7,8,6,1,0,7671,3672,0,11343,5120,52.9,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-max_or_none-x-cache_state-config_cache,reduce_init+cache_state,1,8 passed in 0.02s,,11,12,9,1,0,16294,2484,0,18778,1408,50.3,0,0,0,1,,0,
+mem_v1__baseline,multi-boundary-upper_bound-x-paging-take_tail,boundary+paging,1,8 passed in 0.02s,,12,13,8,1,0,14182,1796,0,15978,11648,31.8,0,0,0,1,,0,
+mem_v1__baseline,mutable_default-make_counter,mutable_default,1,4 passed in 0.01s,,8,9,7,1,0,9330,1147,0,10477,5632,28.0,0,0,1,2,,0,
+mem_v1__baseline,multi-parsing-parse_range-x-recursion-depth,parsing+recursion,0,"2 failed, 7 passed in 0.04s",wrong_fix,12,13,6,1,2,16613,1974,2392,20979,13696,46.2,0,0,0,0,L1793921688812,1,reflection_retry_ok
+mem_v1__baseline,mutable_default-append_tag,mutable_default,1,4 passed in 0.01s,,7,8,6,1,0,6387,713,0,7100,4608,19.0,0,0,0,1,,0,
+mem_v1__baseline,types-compare_values,types,1,5 passed in 0.01s,,12,13,10,1,0,20781,5452,0,26233,14976,76.7,0,0,1,2,,0,
+mem_v1__baseline,multi-reduce_init-argmax-x-boundary-first_nonnegative,reduce_init+boundary,1,10 passed in 0.02s,,9,10,8,1,0,9669,1451,0,11120,0,37.4,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-collect_pairs-x-paging-take_tail,mutable_default+paging,1,7 passed in 0.02s,,11,12,9,1,0,13172,2107,0,15279,0,62.6,0,0,0,1,,0,
+mem_v1__baseline,multi-paging-take_tail-x-parsing-parse_duration,paging+parsing,1,8 passed in 0.02s,,10,11,9,1,0,12923,1952,0,14875,9216,40.9,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-unique_append-x-parsing-parse_duration,mutable_default+parsing,1,8 passed in 0.02s,,10,11,8,1,0,11561,2079,0,13640,7552,40.9,0,0,0,1,,0,
+mem_v1__baseline,multi-parsing-parse_float_list-x-recursion-to_binary,parsing+recursion,1,10 passed in 0.02s,,12,13,10,1,0,14507,2129,0,16636,9984,41.4,0,0,0,2,,0,
+mem_v1__baseline,multi-parsing-split_path-x-recursion-tree_height,parsing+recursion,1,8 passed in 0.02s,,12,13,8,1,0,17489,3088,0,20577,0,71.7,0,0,0,1,,0,
+mem_v1__baseline,multi-types-format_price-x-boundary-count_occurrences,types+boundary,1,9 passed in 0.02s,,11,12,9,1,0,14976,2489,0,17465,11776,57.7,0,0,0,1,,0,
+mem_v1__baseline,paging-sliding_window,paging,1,5 passed in 0.02s,,8,9,6,1,0,7946,1040,0,8986,5888,22.5,0,0,0,1,,0,
+mem_v1__baseline,multi-boundary-first_nonnegative-x-cache_state-shared_cache,boundary+cache_state,0,"2 failed, 7 passed in 0.04s",wrong_fix,12,13,10,1,2,14750,1861,2302,18913,10112,56.0,0,0,0,1,,0,reflection_retry_ok
+mem_v1__baseline,multi-cache_state-ttl_cache-x-paging-drop_head,cache_state+paging,1,7 passed in 0.30s,,12,13,12,1,0,20961,2118,0,23079,15360,50.9,0,0,0,1,L1793920055970|L1793924213223,2,
+mem_v1__baseline,multi-types-sort_ids-x-cache_state-square_cache_key,types+cache_state,1,7 passed in 0.06s,,12,13,8,1,0,15675,3433,0,19108,12800,51.4,0,0,0,0,L1793924213223,1,
+mem_v1__baseline,multi-mutable_default-Stack-x-paging-between_inclusive,mutable_default+paging,1,7 passed in 0.03s,,12,13,9,1,0,15801,2043,0,17844,12672,45.3,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-group_by-x-paging-chunk_list,mutable_default+paging,1,7 passed in 0.04s,,12,13,7,1,0,15061,1493,0,16554,768,58.8,0,0,0,0,,0,
+mem_v1__baseline,multi-paging-between_inclusive-x-types-add_numbers,paging+types,0,"7 failed, 1 passed in 0.10s",wrong_fix,12,13,10,1,2,18680,3927,2722,25329,13440,114.9,0,0,1,1,,0,"reflection_parse_failed: We need answer only JSON object Chinese likely. Need analyze trajectory, produce structured lesson. Need include real function/file/command names in root_cause or fix_pattern."
+mem_v1__baseline,multi-paging-take_tail-x-types-total_amount,paging+types,0,"3 failed, 5 passed in 0.08s",wrong_fix,12,13,6,1,2,13891,3804,2359,20054,11392,88.6,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,paging-paginate_pairs,paging,1,5 passed in 0.04s,,7,8,5,1,0,6911,835,0,7746,0,26.5,0,0,0,1,,0,
+mem_v1__baseline,multi-parsing-parse_csv_line-x-recursion-flatten,parsing+recursion,1,9 passed in 0.05s,,12,13,7,1,0,16076,2987,0,19063,13184,53.6,0,0,0,0,,0,
+mem_v1__baseline,multi-mutable_default-make_counter-x-paging-drop_head,mutable_default+paging,1,7 passed in 0.05s,,11,12,8,1,0,16836,1470,0,18306,13696,36.7,0,0,0,1,L1793920055970,1,
+mem_v1__baseline,multi-paging-paginate_pairs-x-types-safe_int,paging+types,0,"1 failed, 8 passed in 0.10s",wrong_fix,12,13,9,1,2,16663,3385,2587,22635,768,94.7,0,0,0,1,,0,reflection_parse_failed: 我们需要回答一个 JSON 对象，不要推理过程。需要分析失败 Agent 执行。任务：仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处(src/paging.py)。隐藏测试检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。执行轨迹：step9 修 normalize safe
+mem_v1__baseline,multi-recursion-count_nodes-x-reduce_init-argmax,recursion+reduce_init,1,9 passed in 0.05s,,12,13,9,1,0,12973,1682,0,14655,9856,41.2,0,0,0,1,,0,
+mem_v1__baseline,multi-types-total_amount-x-boundary-last_le,types+boundary,0,"2 failed, 8 passed in 0.08s",wrong_fix,12,13,5,1,2,13714,1556,2394,17664,11008,54.1,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-parsing-parse_float_list-x-reduce_init-sum_positives,parsing+reduce_init,0,"6 failed, 3 passed in 0.11s",wrong_fix,12,13,3,1,2,13475,1088,2249,16812,11008,44.1,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-cache_state-lru_get-x-mutable_default-group_by,cache_state+mutable_default,1,6 passed in 0.05s,,12,13,10,1,0,19458,2611,0,22069,16000,53.1,0,0,0,2,L1793924213223,1,
+mem_v1__baseline,multi-reduce_init-clamp-x-boundary-last_le,reduce_init+boundary,1,9 passed in 0.04s,,10,11,8,1,0,12243,1504,0,13747,0,42.4,0,0,0,1,L1793924946189,1,
+mem_v1__baseline,paging-take_tail,paging,1,4 passed in 0.03s,,8,9,7,1,0,8558,1226,0,9784,0,32.8,0,0,0,1,,0,
+mem_v1__baseline,parsing-parse_kv,parsing,1,5 passed in 0.03s,,11,12,9,1,0,12963,3099,0,16062,10240,48.4,0,0,0,2,,0,
+mem_v1__baseline,multi-boundary-count_occurrences-x-cache_state-ttl_cache,boundary+cache_state,1,8 passed in 0.17s,,12,13,8,1,0,19128,1922,0,21050,640,47.9,0,0,0,1,L1793924213223,1,
+mem_v1__baseline,multi-types-add_numbers-x-boundary-lower_bound,types+boundary,1,9 passed in 0.05s,,10,11,8,1,0,10606,1304,0,11910,8320,29.2,0,0,0,1,,0,
+mem_v1__baseline,multi-recursion-depth-x-types-format_price,recursion+types,0,"7 failed, 2 passed in 0.14s",wrong_fix,12,13,5,1,2,15153,3839,2198,21190,12288,80.6,0,0,1,1,,0,reflection_retry_ok
+mem_v1__baseline,reduce_init-second_largest,reduce_init,1,6 passed in 0.04s,,8,9,6,1,0,8157,1176,0,9333,896,29.6,0,0,0,1,,0,
+mem_v1__baseline,multi-paging-chunk_list-x-reduce_init-argmax,paging+reduce_init,1,9 passed in 0.04s,,11,12,8,1,0,12866,1532,0,14398,10240,38.3,0,0,0,1,,0,
+mem_v1__baseline,multi-cache_state-config_cache-x-parsing-parse_flags,cache_state+parsing,0,"3 failed, 4 passed in 0.09s",wrong_fix,12,13,10,1,2,20967,2926,2445,26338,17536,61.3,0,0,0,1,L1793922003967|L1793920055970|L1793924213223,3,"reflection_parse_failed: We need answer only JSON object. Need analyze failed Agent execution, produce transferable structured lesson. Must include scenario, error_type, root_cause, fix_pattern, rule."
+mem_v1__baseline,multi-reduce_init-max_by_key-x-types-count_nonnull,reduce_init+types,1,9 passed in 0.07s,,11,12,9,1,0,12994,1629,0,14623,10240,39.7,0,0,0,1,,0,
+mem_v1__baseline,mutable_default-add_metric,mutable_default,1,5 passed in 0.03s,,6,7,5,1,0,5407,773,0,6180,0,26.4,0,0,0,1,,0,
+mem_v1__baseline,multi-recursion-sum_nested-x-boundary-count_occurrences,recursion+boundary,1,10 passed in 0.06s,,12,13,7,1,0,16977,2385,0,19362,512,78.6,0,0,0,0,,0,
+mem_v1__baseline,multi-boundary-insert_position_desc-x-parsing-parse_duration,boundary+parsing,1,9 passed in 0.06s,,11,12,8,1,0,13300,3172,0,16472,10752,48.1,0,0,0,1,,0,
+mem_v1__baseline,multi-cache_state-config_cache-x-mutable_default-unique_append,cache_state+mutable_default,1,6 passed in 0.05s,,12,13,11,1,0,19314,3158,0,22472,15360,55.6,0,0,0,1,L1793924213223,1,
+mem_v1__baseline,multi-reduce_init-product_or_none-x-boundary-upper_bound,reduce_init+boundary,0,"1 failed, 7 passed in 0.08s",wrong_fix,12,13,6,1,2,14916,2059,2633,19608,11904,56.7,0,0,0,0,,0,"reflection_parse_failed: {""scenario"":""任务要求修复 src/ 下全部缺陷且隐藏测试覆盖 || {""scenario"":""修复 src/ 下多处缺陷，tests 仅覆盖 stats.py 一处，隐藏测试检查全部模块。"",""error_type"":""代码逻辑缺陷：初值错误与二分上界语义错误。"",""root_cause"":""product_or_none 初值为 0"
+mem_v1__baseline,multi-recursion-flatten-x-types-safe_int,recursion+types,0,"1 failed, 8 passed in 0.06s",wrong_fix,10,11,8,1,2,16227,3043,2431,21701,1024,96.4,0,0,0,1,,0,"reflection_parse_failed: 我们需要回答用户。需要只输出一个 JSON 对象，不要推理过程。需要分析失败 Agent 执行，产出结构化教训。字段必须具体可执行。需要包含真实函数名/文件名/命令名在 root_cause 或 fix_pattern。最终判定 1 failed, 8 passed。轨迹中 agent 修了 recursion.py flatten 和 norma"
+mem_v1__baseline,multi-mutable_default-group_by-x-recursion-count_nodes,mutable_default+recursion,1,7 passed in 0.05s,,12,13,9,1,0,14939,1997,0,16936,0,71.9,0,0,0,1,,0,
+mem_v1__baseline,multi-recursion-reverse_rec-x-reduce_init-clamp,recursion+reduce_init,1,8 passed in 0.03s,,12,13,8,1,0,14242,1384,0,15626,0,55.8,0,0,0,1,,0,
+mem_v1__baseline,multi-boundary-lower_bound-x-cache_state-counter_reset,boundary+cache_state,1,8 passed in 0.02s,,9,10,7,1,0,10859,2620,0,13479,8576,35.4,0,0,0,1,L1793924213223,1,
+mem_v1__baseline,multi-recursion-depth-x-boundary-first_nonnegative,recursion+boundary,0,"2 failed, 8 passed in 0.03s",wrong_fix,10,11,8,1,2,11195,1868,2447,15510,8576,55.1,0,0,0,1,,0,reflection_parse_failed: 我们需要回答 JSON only. Need analyze failure. Task: hidden tests check all modules. Agent fixed recursion and search but final 2 failed. We need infer root cause: maybe only inspect
+mem_v1__baseline,multi-boundary-peak_index-x-parsing-parse_kv,boundary+parsing,1,7 passed in 0.01s,,12,13,7,1,0,13620,1886,0,15506,11008,34.5,0,0,0,0,,0,
+mem_v1__baseline,recursion-sum_nested,recursion,1,6 passed in 0.01s,,6,7,5,1,0,5129,1020,0,6149,0,37.7,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-collect_pairs-x-parsing-parse_flags,mutable_default+parsing,0,"3 failed, 4 passed in 0.03s",wrong_fix,12,13,8,1,2,18865,1589,2441,22895,1280,76.2,0,0,0,1,L1793922003967|L1793920055970,2,"reflection_parse_failed: 我们需要回答一个 JSON 对象，分析失败 agent 执行，产出结构化教训。只输出 JSON 对象，不要推理过程。需要包含字段 scenario, error_type, root_cause, fix_pattern, rule。必须具体可执行。root_cause 或 fix_pattern 必须出现真实函数名/文件名/命令名，本任务真实存在"
+mem_v1__baseline,multi-boundary-peak_index-x-cache_state-token_bucket,boundary+cache_state,1,6 passed in 0.01s,,12,13,6,1,0,15846,3930,0,19776,13184,66.7,0,0,0,0,L1793924213223,1,
+mem_v1__baseline,multi-recursion-flatten-x-reduce_init-max_or_none,recursion+reduce_init,0,"2 failed, 7 passed in 0.03s",wrong_fix,12,13,5,1,2,12959,1824,2372,17155,10496,51.4,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,cache_state-lru_get,cache_state,1,4 passed in 0.01s,,7,8,5,1,0,7604,1073,0,8677,5504,19.8,0,0,0,1,L1793924213223,1,
+mem_v1__baseline,multi-cache_state-shared_cache-x-paging-between_inclusive,cache_state+paging,1,8 passed in 0.02s,,11,12,8,1,0,14160,1783,0,15943,11520,34.7,0,0,0,1,L1793924213223,1,
+mem_v1__baseline,types-count_nonnull,types,1,6 passed in 0.01s,,6,7,5,1,0,5125,768,0,5893,0,24.9,0,0,0,1,,0,
+mem_v1__baseline,types-join_ids,types,1,5 passed in 0.01s,,9,10,7,1,0,9599,1966,0,11565,7296,41.1,0,0,1,2,,0,
+mem_v1__baseline,parsing-parse_bool,parsing,1,6 passed in 0.02s,,12,13,8,1,0,15138,3344,0,18482,512,89.2,0,0,0,1,,0,
+mem_v1__baseline,multi-recursion-reverse_rec-x-types-total_amount,recursion+types,1,9 passed in 0.02s,,12,13,10,1,0,15588,3609,0,19197,12032,49.8,0,0,1,1,,0,
+mem_v1__baseline,parsing-split_path,parsing,1,5 passed in 0.02s,,12,13,10,1,0,17221,4607,0,21828,15104,168.8,0,0,0,1,,0,
+mem_v1__baseline,reduce_init-min_or_none,reduce_init,1,5 passed in 0.03s,,9,10,8,1,0,9467,1289,0,10756,7424,35.7,0,0,0,1,,0,
+mem_v1__baseline,multi-reduce_init-clamp-x-types-sort_ids,reduce_init+types,0,"3 failed, 5 passed in 0.03s",wrong_fix,12,13,9,1,2,13389,3347,2633,19369,10880,123.6,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-reduce_init-max_by_key-x-boundary-peak_index,reduce_init+boundary,1,8 passed in 0.02s,,12,13,7,1,0,14781,1618,0,16399,896,57.7,0,0,0,1,,0,
+mem_v1__baseline,multi-cache_state-square_cache_key-x-mutable_default-Stack,cache_state+mutable_default,1,6 passed in 0.02s,,12,13,7,1,0,15527,1765,0,17292,0,79.8,0,0,0,0,,0,
+mem_v1__baseline,multi-boundary-lower_bound-x-mutable_default-group_by,boundary+mutable_default,0,"2 failed, 6 passed in 0.03s",wrong_fix,12,13,5,1,1,14693,1428,1258,17379,2048,59.6,0,0,0,0,,0,
+mem_v1__baseline,multi-recursion-power-x-reduce_init-mean_nonempty,recursion+reduce_init,1,9 passed in 0.03s,,12,13,8,1,0,14922,2029,0,16951,0,68.2,0,0,0,1,,0,
+mem_v1__baseline,paging-drop_head,paging,1,5 passed in 0.01s,,8,9,5,1,0,10693,981,0,11674,2176,41.3,0,0,0,1,L1793920055970,1,
+mem_v1__baseline,cache_state-ttl_cache,cache_state,1,4 passed in 0.26s,,6,7,5,1,0,6425,1074,0,7499,768,38.6,0,0,0,1,L1793924213223,1,
+mem_v1__baseline,multi-paging-paginate_pairs-x-recursion-flatten,paging+recursion,1,8 passed in 0.04s,,11,12,9,1,0,15591,1996,0,17587,1920,65.6,0,0,0,1,L1793926370885,1,
+mem_v1__baseline,multi-recursion-flatten-x-boundary-insert_position_desc,recursion+boundary,1,8 passed in 0.04s,,9,10,8,1,0,18312,4776,0,23088,1536,120.4,0,0,0,1,L1793926370885,1,
+mem_v1__baseline,multi-boundary-insert_position_desc-x-cache_state-config_cache,boundary+cache_state,1,7 passed in 0.03s,,12,13,10,1,0,18108,5824,0,23932,1024,196.2,0,0,0,1,L1793924213223,1,
+mem_v1__baseline,multi-cache_state-ttl_cache-x-mutable_default-collect_pairs,cache_state+mutable_default,1,6 passed in 0.27s,,9,10,8,1,0,11846,2233,0,14079,896,74.9,0,0,0,1,L1793924213223,1,
+mem_v1__baseline,multi-boundary-count_occurrences-x-mutable_default-make_counter,boundary+mutable_default,0,"2 failed, 6 passed in 0.06s",wrong_fix,11,12,9,1,2,20928,3948,2638,27514,17280,77.6,0,0,0,1,L1793927163795,1,reflection_retry_ok
+mem_v1__baseline,multi-paging-paginate_pairs-x-parsing-split_path,paging+parsing,0,"1 failed, 7 passed in 0.06s",wrong_fix,12,13,11,1,2,18105,3939,2772,24816,14336,105.1,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-paging-sliding_window-x-recursion-count_nodes,paging+recursion,1,8 passed in 0.04s,,11,12,9,1,0,13257,2458,0,15715,10624,39.2,0,0,0,1,,0,
+mem_v1__baseline,multi-boundary-first_nonnegative-x-parsing-parse_csv_line,boundary+parsing,0,"4 failed, 6 passed in 0.07s",wrong_fix,12,13,4,1,2,14131,4391,2347,20869,11520,76.4,0,0,0,0,,0,"reflection_parse_failed: We need answer only JSON object. Need analyze failure trace. Need produce structured lesson with fields scenario, error_type, root_cause, fix_pattern, rule. Must be specific e"
+mem_v1__baseline,cache_state-config_cache,cache_state,1,4 passed in 0.02s,,11,12,9,1,0,20671,3912,0,24583,896,115.1,0,0,1,2,L1793924213223,1,
+mem_v1__baseline,multi-cache_state-lru_get-x-parsing-parse_duration,cache_state+parsing,1,8 passed in 0.03s,,12,13,9,1,0,19876,4241,0,24117,2176,126.1,0,0,0,1,L1793924213223,1,
+mem_v1__baseline,multi-parsing-parse_kv-x-reduce_init-second_largest,parsing+reduce_init,1,9 passed in 0.02s,,11,12,8,1,0,13861,2831,0,16692,11264,47.1,0,0,0,1,,0,
+mem_v1__baseline,recursion-tree_height,recursion,1,5 passed in 0.02s,,10,11,6,1,0,11614,1116,0,12730,1536,72.8,0,0,0,1,L1793924213223,1,
+mem_v1__baseline,cache_state-token_bucket,cache_state,1,4 passed in 0.02s,,10,11,8,1,0,13763,2569,0,16332,10624,47.5,0,0,1,2,L1793924213223,1,
+mem_v1__baseline,multi-recursion-sum_nested-x-reduce_init-min_or_none,recursion+reduce_init,1,9 passed in 0.03s,,9,10,8,1,0,10103,1508,0,11611,7808,28.4,0,0,0,1,,0,
+mem_v1__baseline,multi-paging-chunk_list-x-parsing-parse_kv,paging+parsing,1,8 passed in 0.03s,,12,13,7,1,0,15608,3007,0,18615,12544,39.8,0,0,0,0,,0,
+mem_v1__baseline,multi-boundary-insert_position_desc-x-mutable_default-collect_pairs,boundary+mutable_default,1,7 passed in 0.02s,,10,11,8,1,0,11590,3439,0,15029,1280,107.3,0,0,0,1,,0,
+mem_v1__baseline,multi-recursion-count_nodes-x-types-sort_ids,recursion+types,0,"3 failed, 5 passed in 0.05s",wrong_fix,12,13,6,1,2,16290,4338,2173,22801,4352,208.2,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,paging-chunk_list,paging,1,5 passed in 0.02s,,10,11,7,1,0,11312,1434,0,12746,0,83.6,0,0,0,1,,0,
+mem_v1__baseline,multi-boundary-count_occurrences-x-paging-between_inclusive,boundary+paging,1,9 passed in 0.03s,,12,13,7,1,0,17159,2252,0,19411,13696,36.3,0,0,0,0,L1793927853203,1,
+mem_v1__baseline,cache_state-shared_cache,cache_state,1,5 passed in 0.02s,,9,10,6,1,0,10467,835,0,11302,1152,69.8,0,0,0,1,L1793924213223,1,
+mem_v1__baseline,multi-reduce_init-max_or_none-x-cache_state-lru_get,reduce_init+cache_state,1,8 passed in 0.03s,,12,13,7,1,0,17679,1573,0,19252,1280,97.6,0,0,0,0,L1793924213223,1,
+mem_v1__baseline,multi-paging-last_page-x-recursion-tree_height,paging+recursion,0,"2 failed, 6 passed in 0.06s",wrong_fix,12,13,5,1,2,13934,1730,2433,18097,11264,66.2,0,0,0,0,,0,reflection_retry_ok
+mem_v1__baseline,multi-boundary-search_rotated-x-mutable_default-add_metric,boundary+mutable_default,1,9 passed in 0.03s,,12,13,7,1,0,17704,3093,0,20797,2688,141.5,0,0,0,1,,0,
+mem_v1__baseline,types-add_numbers,types,1,5 passed in 0.02s,,7,8,5,1,0,6106,1019,0,7125,0,66.5,0,0,0,1,,0,
+mem_v1__baseline,multi-mutable_default-make_counter-x-recursion-sum_nested,mutable_default+recursion,1,8 passed in 0.03s,,9,10,8,1,0,9852,1887,0,11739,7680,36.4,0,0,0,1,,0,

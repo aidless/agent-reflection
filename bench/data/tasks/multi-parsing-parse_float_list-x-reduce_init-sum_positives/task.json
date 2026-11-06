@@ -1,0 +1,21 @@
+{
+  "id": "multi-parsing-parse_float_list-x-reduce_init-sum_positives",
+  "kind": "multi",
+  "family": "parsing+reduce_init",
+  "bug_category": "parsing_robustness",
+  "bug_categories": [
+    "parsing_robustness",
+    "reduce_init"
+  ],
+  "bug_class": "解析边界情况 + 归约初值/比较器错误",
+  "bug_desc": "空片段没有被过滤，含连续逗号或尾逗号时抛 ValueError；求和初值写成 1，空数组与全非正输入返回 1",
+  "module": "parsing+stats",
+  "src_path": "src/parsing.py,src/stats.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_floats_double_comma",
+  "reference": {
+    "src/parsing.py": "def parse_float_list(text):\n    if not text.strip():\n        return []\n    return [float(x) for x in text.split(\",\") if x.strip()]\n",
+    "src/stats.py": "def sum_positives(values):\n    total = 0\n    for v in values:\n        if v > 0:\n            total += v\n    return total\n"
+  },
+  "hidden_tests": "from parsing import parse_float_list\n\ndef test_floats_empty_string():\n    assert parse_float_list(\"\") == []\n\ndef test_floats_double_comma():\n    assert parse_float_list(\"1,,2\") == [1.0, 2.0]\n\ndef test_floats_whitespace():\n    assert parse_float_list(\"   \") == []\n\ndef test_floats_trailing():\n    assert parse_float_list(\"1.0,\") == [1.0]\n\n\nfrom stats import sum_positives\n\ndef test_sum_empty():\n    assert sum_positives([]) == 0\n\ndef test_sum_all_negative():\n    assert sum_positives([-1, -2]) == 0\n\ndef test_sum_zero_only():\n    assert sum_positives([0, 0]) == 0\n"
+}

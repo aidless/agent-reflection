@@ -1,0 +1,49 @@
+task: 仓库工作区里 src/collect.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/collect.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和相关文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (106B)
+[dir] tests
+      tests/test_visible.py  (241B)
+[step 2] 思考: 读取源码和测试
+  动作: read_file {"path": "src/collect.py"}
+  观察: src/collect.py (5 行)
+   1| def append_tag(tag, tags=[]):
+   2|     if tags is None:
+   3|         tags = []
+   4|     tags.append(tag)
+   5|     return tags
+[step 3] 思考: 读取可见测试确认预期
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import append_tag
+   3| 
+   4| def test_append_basic():
+   5|     assert append_tag("a") == ["a"]
+   6| 
+   7| 
+   8| 
+   9| def test_no_leak_between_calls():
+  10|     first = append_tag("a")
+  11|     second = append_tag("b")
+  12|     assert 
+[step 4] 思考: 根因是可变的默认参数 tags=[]，导致跨调用共享。改为 None 默认并在内部创建新列表，同时保持传入列表时原地追加的语义不变。
+  动作: edit_file {"path": "src/collect.py", "old": "def append_tag(tag, tags=[]):\n    if tags is None:\n        tags = []\n    tags.append(tag)\n    return tags", "new": "def append_tag(tag, tags=None):\n    if tags 
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 5] 思考: 运行可见测试确认修复
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.08s
+
+[step 6] 思考: 可见测试通过。快速验证边界：传入已有列表原地追加、传入 None、多次调用不共享。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import append_tag\na=[]\nr=append_tag('x', a)\nassert r is a and a==['x']\nassert append_tag('y', None)==['y']\nassert append_tag('a')==['a
+  观察: exit=0
+ok
+
+[step 7] 思考: 根因已修复：可变默认参数改为 None 并在内部新建列表，保持传入列表原地追加语义；可见测试与边界验证均通过。
+  动作: finish {"summary": "将 src/collect.py 中 append_tag 的可变默认参数 tags=[] 改为 tags=None，函数内为空时新建列表，避免跨调用共享同一列表；传入显式列表时仍原地追加并返回该列表。可见测试全部通过，边界情况验证正常。"}
+  判定: 4 passed in 0.01s

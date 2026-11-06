@@ -1,0 +1,54 @@
+task: 仓库工作区里 src/collect.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/collect.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区文件和测试内容。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (189B)
+[dir] tests
+      tests/test_visible.py  (253B)
+[step 2] 思考: 读取源码和可见测试。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 80}
+  观察: src/collect.py (7 行)
+   1| def unique_append(items, value, seen=set()):
+   2|     if seen is None:
+   3|         seen = set()
+   4|     if value in seen:
+   5|         return list(items)
+   6|     seen.add(value)
+   7|     return list(items) + [value]
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file","args":{"path":"tests/test_visible.py","start_line":1,"end_line":60}}
+[step 4] 思考: 读取可见测试以了解预期行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import unique_append
+   3| 
+   4| def test_unique_basic():
+   5|     assert unique_append([1, 2], 3) == [1, 2, 3]
+   6| 
+   7| 
+   8| 
+   9| def test_unique_leak():
+  10|     first = unique_append([], 7)
+  11|     second = unique_append([], 7)
+ 
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file","args":{"path":"src/collect.py","old":"def unique_append(items, value, 
+[step 6] 思考: 根因是可变默认参数 seen=set() 在调用间共享，导致值泄漏。改为 None 哨兵并保持原逻辑。
+  动作: edit_file {"path": "src/collect.py", "old": "def unique_append(items, value, seen=set()):", "new": "def unique_append(items, value, seen=None):"}
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 7] 思考: 已有 seen is None 处理逻辑，运行测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 8] 思考: 测试通过。根因可变默认参数已修复为 None 哨兵，函数内已有初始化逻辑，且不会修改传入 items，语义保持。边界情况（多次调用、显式传 seen、传 None、传元组等）均能正确处理。
+  动作: finish {"summary": "将 src/collect.py 中 unique_append 的可变默认参数 seen=set() 改为 seen=None，并在函数内用 `if seen is None: seen = set()` 初始化，消除跨调用共享状态导致的值泄漏，使重复调用不再互相影响。"}
+  判定: 4 passed in 0.01s

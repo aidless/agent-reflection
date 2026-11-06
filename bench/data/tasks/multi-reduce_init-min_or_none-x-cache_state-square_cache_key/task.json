@@ -1,0 +1,21 @@
+{
+  "id": "multi-reduce_init-min_or_none-x-cache_state-square_cache_key",
+  "kind": "multi",
+  "family": "reduce_init+cache_state",
+  "bug_category": "reduce_init",
+  "bug_categories": [
+    "reduce_init",
+    "cache_state"
+  ],
+  "bug_class": "归约初值/比较器错误 + 状态/缓存失效错误",
+  "bug_desc": "空输入时返回 inf 而不是 None；缓存键只用类型名，所有同类型输入互相覆盖",
+  "module": "stats+state",
+  "src_path": "src/stats.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_min_empty",
+  "reference": {
+    "src/stats.py": "def min_or_none(values):\n    if not values:\n        return None\n    best = values[0]\n    for v in values[1:]:\n        if v < best:\n            best = v\n    return best\n",
+    "src/state.py": "class SquareCache:\n    def __init__(self):\n        self.cache = {}\n\n    def get(self, x):\n        key = x\n        if key not in self.cache:\n            self.cache[key] = x * x\n        return self.cache[key]\n"
+  },
+  "hidden_tests": "from stats import min_or_none\n\ndef test_min_empty():\n    assert min_or_none([]) is None\n\ndef test_min_negative():\n    assert min_or_none([3, -4, 2]) == -4\n\ndef test_min_single():\n    assert min_or_none([8]) == 8\n\n\nfrom state import SquareCache\n\ndef test_square_distinct_values():\n    c = SquareCache()\n    assert c.get(2) == 4\n    assert c.get(3) == 9\n    assert c.get(2) == 4\n\ndef test_cache_size():\n    c = SquareCache()\n    c.get(2)\n    c.get(3)\n    assert len(c.cache) == 2\n"
+}

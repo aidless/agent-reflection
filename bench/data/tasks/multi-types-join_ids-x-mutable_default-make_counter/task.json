@@ -1,0 +1,21 @@
+{
+  "id": "multi-types-join_ids-x-mutable_default-make_counter",
+  "kind": "multi",
+  "family": "types+mutable_default",
+  "bug_category": "type_conversion",
+  "bug_categories": [
+    "type_conversion",
+    "mutable_default"
+  ],
+  "bug_class": "类型转换/空值处理 + 可变默认参数/共享状态",
+  "bug_desc": "拼接未把元素转字符串，整型列表抛 TypeError；计数器返回值取自局部快照，连续调用总返回 1",
+  "module": "normalize+collect",
+  "src_path": "src/normalize.py,src/collect.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/normalize.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_join_ints",
+  "reference": {
+    "src/normalize.py": "def join_ids(ids):\n    return \",\".join(str(i) for i in ids)\n",
+    "src/collect.py": "def make_counter():\n    state = {\"n\": 0}\n\n    def inc():\n        state[\"n\"] += 1\n        return state[\"n\"]\n\n    return inc\n"
+  },
+  "hidden_tests": "from normalize import join_ids\n\ndef test_join_ints():\n    assert join_ids([1, 2, 3]) == \"1,2,3\"\n\ndef test_join_mixed():\n    assert join_ids([1, \"a\"]) == \"1,a\"\n\ndef test_join_single():\n    assert join_ids([7]) == \"7\"\n\n\nfrom collect import make_counter\n\ndef test_counter_increments():\n    c = make_counter()\n    assert [c(), c(), c()] == [1, 2, 3]\n\ndef test_counters_isolated():\n    a, b = make_counter(), make_counter()\n    a()\n    assert b() == 1\n"
+}

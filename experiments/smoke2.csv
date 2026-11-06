@@ -1,0 +1,13 @@
+arm,task_id,family,success,judge_detail,failure_mode,steps,calls,tool_calls,plan_calls,reflect_calls,prompt_tokens,completion_tokens,reflect_tokens,total_tokens,cached_tokens,latency_s,rollback_used,rollback_verified,memory_injected,memory_injected_count,error
+no_memory__baseline,boundary-count_occurrences,boundary,1,6 passed in 0.02s,,12,13,6,1,0,17055,2662,0,19717,14592,49.2,0,0,,0,
+no_memory__baseline,boundary-first_nonnegative,boundary,1,6 passed in 0.02s,,12,13,7,1,0,13510,2875,0,16385,11648,41.9,0,0,,0,
+no_memory__baseline,boundary-insert_position_desc,boundary,1,5 passed in 0.01s,,6,7,5,1,0,5338,1485,0,6823,3968,20.9,0,0,,0,
+no_memory__baseline,boundary-last_le,boundary,1,6 passed in 0.03s,,7,8,6,1,0,6486,885,0,7371,4864,24.7,0,0,,0,
+no_memory__baseline,boundary-lower_bound,boundary,1,6 passed in 0.04s,,6,7,5,1,0,5303,861,0,6164,3968,18.1,0,0,,0,
+no_memory__baseline,boundary-peak_index,boundary,1,4 passed in 0.02s,,9,10,6,1,0,9418,1618,0,11036,7296,31.4,0,0,,0,
+memory__baseline,boundary-count_occurrences,boundary,1,6 passed in 0.02s,,8,9,5,1,0,9325,1399,0,10724,7168,26.2,0,0,,0,
+memory__baseline,boundary-first_nonnegative,boundary,1,6 passed in 0.02s,,12,13,11,1,0,19000,1954,0,20954,15744,38.4,0,0,,0,
+memory__baseline,boundary-insert_position_desc,boundary,1,5 passed in 0.03s,,8,9,6,1,0,8327,1791,0,10118,6528,31.2,0,0,,0,
+memory__baseline,boundary-last_le,boundary,1,6 passed in 0.03s,,8,9,6,1,0,8061,1231,0,9292,6144,23.5,0,0,,0,
+memory__baseline,boundary-lower_bound,boundary,1,6 passed in 0.03s,,8,9,6,1,0,7868,1014,0,8882,6016,21.9,0,0,,0,
+memory__baseline,boundary-peak_index,boundary,1,4 passed in 0.03s,,11,12,6,1,0,14096,2382,0,16478,11392,34.1,0,0,,0,

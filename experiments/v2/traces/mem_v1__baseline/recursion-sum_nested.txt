@@ -1,0 +1,41 @@
+task: 仓库工作区里 src/recursion.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/recursion.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/recursion.py  (111B)
+[dir] tests
+      tests/test_visible.py  (168B)
+[step 2] 思考: 读取源码和测试
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 120}
+  观察: src/recursion.py (4 行)
+   1| def sum_nested(x):
+   2|     if isinstance(x, list) and x:
+   3|         return sum(sum_nested(i) for i in x)
+   4|     return x
+[step 3] 思考: 读取可见测试
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from recursion import sum_nested
+   3| 
+   4| def test_sum_nested_simple():
+   5|     assert sum_nested([1, [2, [3]]]) == 6
+   6| 
+   7| 
+   8| 
+   9| def test_sum_empty_list():
+  10|     assert sum_nested([]) == 0
+[step 4] 思考: 根因：空列表因为 `and x` 为假，直接返回 [] 而不是 0。修复为对任意 list 递归求和。
+  动作: edit_file {"path": "src/recursion.py", "old": "    if isinstance(x, list) and x:\n        return sum(sum_nested(i) for i in x)\n    return x", "new": "    if isinstance(x, list):\n        return sum(sum_nested(
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 5] 思考: 运行测试确认
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.08s
+
+[step 6] 思考: 根因是空列表被当作叶子返回 []。已改为对所有 list（含空列表）递归求和，空列表 sum 为 0，同时保留非列表元素原样返回。可见测试通过，嵌套空列表等边界情况也正确。
+  动作: finish {"summary": "修复 src/recursion.py 中 sum_nested 对空列表的处理：去掉 `and x` 条件，使空列表返回 0 而非 []，并对任意嵌套列表正确递归求和。"}
+  判定: 6 passed in 0.01s

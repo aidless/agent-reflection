@@ -1,0 +1,64 @@
+task: 仓库工作区里 src/normalize.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/normalize.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区文件结构和测试内容
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (42B)
+[dir] tests
+      tests/test_visible.py  (191B)
+[step 2] 思考: 读取源码和测试文件
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 120}
+  观察: src/normalize.py (2 行)
+   1| def sort_ids(ids):
+   2|     return sorted(ids)
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">tests/test_visible.py</｜DS
+[step 4] 思考: 读取测试文件了解期望行为
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from normalize import sort_ids
+   3| 
+   4| def test_sort_single_digit():
+   5|     assert sort_ids(["2", "1"]) == [1, 2]
+   6| 
+   7| 
+   8| 
+   9| def test_sort_numeric_order():
+  10|     assert sort_ids(["10", "2", "1"]) == [1, 2, 10]
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="write_file">
+<｜DSML｜ parameter name="path" string="true">src/normalize.py</｜DSML｜ 
+[step 6] 思考: 写一个按数值排序的实现，兼容 int/float/数字字符串（含空白、负号、小数），返回数值列表
+  动作: write_file {"path": "src/normalize.py", "content": "def _to_number(value):\n    \"\"\"把 id 统一转成数值，便于按数值大小排序。\n\n    支持 int、float 以及数字字符串（允许前后空白、正负号、小数）。\n    整数值统一返回 int，其余返回 float。\n    \"\"\"\n    if isinstanc
+  观察: 已写入 src/normalize.py（930 字符）
+[step 7] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D
+[step 8] 思考: 运行可见测试确认通过
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 9] 思考: 可见测试已通过。再用脚本验证边界情况（空列表、负数、小数、混合、重复）确保隐藏测试稳过。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom normalize import sort_ids\nprint(sort_ids([]))\nprint(sort_ids(['3']))\nprint(sort_ids(['-1',' 2 ','1.5']))\nprint(sort_ids([3, '1', 2.0]))\nprint(
+  观察: exit=0
+[]
+[3]
+[-1, 1.5, 2]
+[1, 2, 3]
+[1, 2, 2, 10]
+[7, 8]
+
+[step 10] 思考: 边界情况验证通过：空列表、单元素、负数、前后空白、小数、int/float 混合、重复值、前导零均按数值排序，返回数值列表。根因是原实现直接对字符串做字典序排序且返回字符串，已改为统一转数值后排序。
+  动作: finish {"summary": "重写 src/normalize.py：新增 _to_number 将 id（int/float/数字字符串，支持前后空白、正负号、小数、前导零、bool）统一转数值（整数值归一为 int），sort_ids 返回按数值升序排列的数值列表，修复了原实现按字符串字典序排序（导致 '10' < '2'）且返回字符串的问题；对 None 抛 TypeError、空字符串抛 Va
+  判定: 5 passed in 0.02s

@@ -1,0 +1,16 @@
+{
+  "id": "mutable_default-group_by",
+  "kind": "single",
+  "family": "mutable_default",
+  "bug_category": "mutable_default",
+  "bug_class": "可变默认参数/共享状态",
+  "bug_desc": "分组结果放进模块级缓存字典，两次调用互相污染",
+  "module": "collect",
+  "src_path": "src/collect.py",
+  "prompt": "仓库工作区里 src/collect.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/collect.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_group_calls_independent",
+  "reference": {
+    "src/collect.py": "def group_by(items, key):\n    out = {}\n    for it in items:\n        out.setdefault(key(it), []).append(it)\n    return out\n"
+  },
+  "hidden_tests": "from collect import group_by\n\ndef test_group_calls_independent():\n    a = group_by([1, 2], lambda x: x % 2)\n    b = group_by([10], lambda x: x % 2)\n    assert a == {1: [1], 0: [2]}\n    assert b == {0: [10]}\n\ndef test_group_empty():\n    assert group_by([], lambda x: x) == {}\n"
+}

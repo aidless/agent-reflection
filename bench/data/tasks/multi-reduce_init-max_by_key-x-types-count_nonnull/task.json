@@ -1,0 +1,21 @@
+{
+  "id": "multi-reduce_init-max_by_key-x-types-count_nonnull",
+  "kind": "multi",
+  "family": "reduce_init+types",
+  "bug_category": "reduce_init",
+  "bug_categories": [
+    "reduce_init",
+    "type_conversion"
+  ],
+  "bug_class": "归约初值/比较器错误 + 类型转换/空值处理",
+  "bug_desc": "max_by_key 直接比较元素本身，忽略 key 函数；把 \"非空\" 判断写成真值判断，0 和空串被漏计",
+  "module": "stats+normalize",
+  "src_path": "src/stats.py,src/normalize.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_max_by_key_dict",
+  "reference": {
+    "src/stats.py": "def max_by_key(items, key):\n    if not items:\n        return None\n    best = items[0]\n    for it in items[1:]:\n        if key(it) > key(best):\n            best = it\n    return best\n",
+    "src/normalize.py": "def count_nonnull(values):\n    return sum(1 for v in values if v is not None)\n"
+  },
+  "hidden_tests": "from stats import max_by_key\n\ndef test_max_by_key_dict():\n    rows = [{\"v\": 1}, {\"v\": 9}, {\"v\": 5}]\n    assert max_by_key(rows, lambda r: r[\"v\"]) == {\"v\": 9}\n\ndef test_max_by_key_empty():\n    assert max_by_key([], len) is None\n\ndef test_max_by_key_tie():\n    assert max_by_key([\"bb\", \"aa\"], len) == \"bb\"\n\n\nfrom normalize import count_nonnull\n\ndef test_count_zero_counts():\n    assert count_nonnull([0, 1, None]) == 2\n\ndef test_count_empty_string_counts():\n    assert count_nonnull([\"\", \"a\"]) == 2\n\ndef test_count_all_none():\n    assert count_nonnull([None]) == 0\n\ndef test_count_empty_list():\n    assert count_nonnull([]) == 0\n"
+}

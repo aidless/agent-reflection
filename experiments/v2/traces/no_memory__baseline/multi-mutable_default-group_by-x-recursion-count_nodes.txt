@@ -1,0 +1,61 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (117B)
+      src/recursion.py  (129B)
+[dir] tests
+      tests/test_visible.py  (312B)
+[step 2] 思考: 读取所有源码和可见测试。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 200}
+  观察: src/collect.py (4 行)
+   1| def group_by(items, key, out={}):
+   2|     for it in items:
+   3|         out.setdefault(key(it), []).append(it)
+   4|     return out
+[step 3] 思考: collect.py 使用可变默认参数 out={}，跨调用会共享同一字典。继续读 recursion.py 与测试。
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 200}
+  观察: src/recursion.py (4 行)
+   1| def count_nodes(tree):
+   2|     if not isinstance(tree, dict):
+   3|         return 0
+   4|     return sum(count_nodes(v) for v in tree.values())
+[step 4] 思考: 读取可见测试了解预期语义。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 200}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import group_by
+   3| 
+   4| def test_group_basic():
+   5|     assert group_by([1, 2, 3, 4], lambda x: x % 2) == {1: [1, 3], 0: [2, 4]}
+   6| 
+   7| 
+   8| 
+   9| def test_group_calls_independent():
+  10|     a = group_by([1, 2], lambda x: x % 2
+[step 5] 思考: 两处缺陷：collect.group_by 使用可变默认参数导致跨调用污染；recursion.count_nodes 漏计当前 dict 节点（缺少 +1，递归基/累加错误）。先修 collect。
+  动作: edit_file {"path": "src/collect.py", "old": "def group_by(items, key, out={}):\n    for it in items:\n        out.setdefault(key(it), []).append(it)\n    return out", "new": "def group_by(items, key, out=None):
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 6] 思考: 修复 recursion.count_nodes：当前完全没把 dict 自身计入，应为 1 + 子节点和。
+  动作: edit_file {"path": "src/recursion.py", "old": "    return sum(count_nodes(v) for v in tree.values())", "new": "    return 1 + sum(count_nodes(v) for v in tree.values())"}
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 7] 思考: 跑可见测试并用边界用例验证两模块行为。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.13s
+
+[step 8] 思考: 用边界用例验证两模块：分组合并、多次调用独立，count_nodes 空树/嵌套/非 dict。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import group_by\nfrom recursion import count_nodes\nprint(group_by([1,2,3,4], lambda x:x%2))\na=group_by([1,2],lambda x:x%2); b=group_by([1
+  观察: exit=0
+{1: [1, 3], 0: [2, 4]}
+{1: [1], 0: [2]} {0: [10]}
+1 2 3
+0 2
+{0: [1]} {0: [1]}
+
+[step 9] 思考: 两处根因均已修复：collect 用 None 默认值避免跨调用共享状态，并保留可传入 out 的合并语义；recursion 将当前 dict 节点计入（1 + 子节点和）。可见测试与边界用例均通过。
+  动作: finish {"summary": "修复 src/collect.py 的可变默认参数 out={}（改为 out=None 内部新建，保留外部传入 out 的合并行为）；修复 src/recursion.py 的 count_nodes 漏计当前 dict 节点（改为 1 + sum(count_nodes(v) for v in tree.values())）。测试全部通过。"}
+  判定: 7 passed in 0.05s

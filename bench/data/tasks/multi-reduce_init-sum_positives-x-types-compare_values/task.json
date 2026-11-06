@@ -1,0 +1,21 @@
+{
+  "id": "multi-reduce_init-sum_positives-x-types-compare_values",
+  "kind": "multi",
+  "family": "reduce_init+types",
+  "bug_category": "reduce_init",
+  "bug_categories": [
+    "reduce_init",
+    "type_conversion"
+  ],
+  "bug_class": "归约初值/比较器错误 + 类型转换/空值处理",
+  "bug_desc": "求和初值写成 1，空数组与全非正输入返回 1；比较前未统一转数值，数字字符串按字典序比较出错",
+  "module": "stats+normalize",
+  "src_path": "src/stats.py,src/normalize.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_sum_empty",
+  "reference": {
+    "src/stats.py": "def sum_positives(values):\n    total = 0\n    for v in values:\n        if v > 0:\n            total += v\n    return total\n",
+    "src/normalize.py": "def compare_values(a, b):\n    a, b = float(a), float(b)\n    return (a > b) - (a < b)\n"
+  },
+  "hidden_tests": "from stats import sum_positives\n\ndef test_sum_empty():\n    assert sum_positives([]) == 0\n\ndef test_sum_all_negative():\n    assert sum_positives([-1, -2]) == 0\n\ndef test_sum_zero_only():\n    assert sum_positives([0, 0]) == 0\n\n\nfrom normalize import compare_values\n\ndef test_compare_numeric_strings():\n    assert compare_values(\"10\", \"9\") == 1\n\ndef test_compare_equal():\n    assert compare_values(\"2\", 2) == 0\n\ndef test_compare_negative():\n    assert compare_values(\"-1\", \"0\") == -1\n"
+}

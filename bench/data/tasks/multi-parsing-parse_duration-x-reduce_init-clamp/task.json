@@ -1,0 +1,21 @@
+{
+  "id": "multi-parsing-parse_duration-x-reduce_init-clamp",
+  "kind": "multi",
+  "family": "parsing+reduce_init",
+  "bug_category": "parsing_robustness",
+  "bug_categories": [
+    "parsing_robustness",
+    "reduce_init"
+  ],
+  "bug_class": "解析边界情况 + 归约初值/比较器错误",
+  "bug_desc": "分钟单位按秒计算，时长被低估 60 倍；clamp 的 min/max 顺序颠倒，越界时返回错误边界",
+  "module": "parsing+stats",
+  "src_path": "src/parsing.py,src/stats.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_duration_hours_minutes",
+  "reference": {
+    "src/parsing.py": "def parse_duration(text):\n    total = 0\n    num = \"\"\n    for ch in text:\n        if ch.isdigit():\n            num += ch\n        else:\n            if num:\n                n = int(num)\n                if ch == \"h\":\n                    total += n * 3600\n                elif ch == \"m\":\n                    total += n * 60\n                elif ch == \"s\":\n                    total += n\n                num = \"\"\n    return total if num == \"\" else total + int(num)\n",
+    "src/stats.py": "def clamp(value, lo, hi):\n    if hi < lo:\n        raise ValueError(\"hi must be >= lo\")\n    return max(lo, min(hi, value))\n"
+  },
+  "hidden_tests": "from parsing import parse_duration\n\ndef test_duration_hours_minutes():\n    assert parse_duration(\"1h30m\") == 5400\n\ndef test_duration_seconds():\n    assert parse_duration(\"45s\") == 45\n\ndef test_duration_minutes_only():\n    assert parse_duration(\"5m\") == 300\n\ndef test_duration_bare_seconds():\n    assert parse_duration(\"10\") == 10\n\n\nfrom stats import clamp\n\ndef test_clamp_upper():\n    assert clamp(14, 0, 10) == 10\n\ndef test_clamp_lower():\n    assert clamp(-3, 0, 10) == 0\n\ndef test_clamp_bad_range():\n    import pytest\n    with pytest.raises(ValueError):\n        clamp(5, 10, 0)\n"
+}

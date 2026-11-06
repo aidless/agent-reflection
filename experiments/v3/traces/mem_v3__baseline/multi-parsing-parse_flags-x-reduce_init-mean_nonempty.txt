@@ -1,0 +1,81 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="path" string="true">.</｜DSML｜ parameter>
+</｜D
+[step 2] 思考: 列出文件以了解仓库结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (289B)
+      src/stats.py  (97B)
+[dir] tests
+      tests/test_visible.py  (217B)
+[step 3] 思考: 读取所有源码和测试文件
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 200}
+  观察: src/parsing.py (12 行)
+   1| def parse_flags(argv):
+   2|     out = {}
+   3|     for token in argv:
+   4|         if not token.startswith("--"):
+   5|             continue
+   6|         body = token[2:]
+   7|         if "=" in body:
+   8|             k, v = body.split("=", 1)
+   9|             out[k]
+[step 4] 思考: 继续读取 stats.py 与可见测试
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 200}
+  观察: src/stats.py (3 行)
+   1| def mean_nonempty(values):
+   2|     # if not values: return None
+   3|     return sum(values) / len(values)
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">tests/test_visible.py</｜DS
+[step 6] 思考: 读取可见测试，确认 par​se_flags 的期望行为
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 200}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_flags
+   3| 
+   4| def test_flags_pairs():
+   5|     assert parse_flags(["--a=1", "--b=2"]) == {"a": "1", "b": "2"}
+   6| 
+   7| 
+   8| 
+   9| def test_flag_boolean_type():
+  10|     assert parse_flags(["--verbose"]) == {"verbose": 
+[step 7] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="selector" string="true">tests</｜DSML｜ paramete
+[step 8] 思考: 先运行可见测试复现失败
+  动作: run_tests {"selector": "tests"}
+  观察: .F                                                                       [100%]
+=================================== FAILURES ===================================
+____________________________ test_flag_boolean_type ____________________________
+
+    def test_flag_boolean_type():
+>       assert parse_fl
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="write_file">
+<｜DSML｜ parameter name="path" string="true">src/parsing.py</｜DSML｜ pa
+[step 10] 思考: 修复 parse_flags（裸开关返回 True，处理边界：非 -- 前缀、空 key、重复 key 后者覆盖），并修复 stats.mean_nonempty（空输入返回 None，支持迭代器）
+  动作: write_file {"path": "src/parsing.py", "content": "def parse_flags(argv):\n    \"\"\"Parse command-line style flags.\n\n    Tokens of the form ``--key=value`` become ``{\"key\": value}`` where value\n    is kept 
+  观察: 已写入 src/parsing.py（806 字符）
+[step 11] 思考: 现在修复 stats.py：空序列返回 None，并支持任意可迭代对象
+  动作: write_file {"path": "src/stats.py", "content": "def mean_nonempty(values):\n    \"\"\"Return the arithmetic mean of a non-empty sequence.\n\n    Returns ``None`` when ``values`` is empty (or contains nothing), i
+  观察: 已写入 src/stats.py（504 字符）
+[step 12] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="code" string="true">import sys; sys.path.inse

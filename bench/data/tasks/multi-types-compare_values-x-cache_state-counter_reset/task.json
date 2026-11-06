@@ -1,0 +1,21 @@
+{
+  "id": "multi-types-compare_values-x-cache_state-counter_reset",
+  "kind": "multi",
+  "family": "types+cache_state",
+  "bug_category": "type_conversion",
+  "bug_categories": [
+    "type_conversion",
+    "cache_state"
+  ],
+  "bug_class": "类型转换/空值处理 + 状态/缓存失效错误",
+  "bug_desc": "比较前未统一转数值，数字字符串按字典序比较出错；reset 没有清零累计值",
+  "module": "normalize+state",
+  "src_path": "src/normalize.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/normalize.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_compare_numeric_strings",
+  "reference": {
+    "src/normalize.py": "def compare_values(a, b):\n    a, b = float(a), float(b)\n    return (a > b) - (a < b)\n",
+    "src/state.py": "class Counter:\n    def __init__(self):\n        self.total = 0\n\n    def add(self, x=1):\n        self.total += x\n        return self.total\n\n    def reset(self):\n        self.total = 0\n        return self\n"
+  },
+  "hidden_tests": "from normalize import compare_values\n\ndef test_compare_numeric_strings():\n    assert compare_values(\"10\", \"9\") == 1\n\ndef test_compare_equal():\n    assert compare_values(\"2\", 2) == 0\n\ndef test_compare_negative():\n    assert compare_values(\"-1\", \"0\") == -1\n\n\nfrom state import Counter\n\ndef test_reset_clears():\n    c = Counter()\n    c.add(5)\n    c.reset()\n    assert c.add(1) == 1\n\ndef test_reset_returns_self():\n    c = Counter()\n    assert c.reset() is c\n"
+}

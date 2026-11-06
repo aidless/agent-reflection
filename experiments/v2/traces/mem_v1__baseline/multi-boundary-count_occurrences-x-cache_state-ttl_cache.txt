@@ -1,0 +1,95 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/search.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="args" string="false">{"path": "."}</｜DSML｜ pa
+[step 2] 思考: 先列出工作区文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/search.py  (487B)
+      src/state.py  (371B)
+[dir] tests
+      tests/test_visible.py  (201B)
+[step 3] 思考: 读取全部源码与可见测试
+  动作: read_file {"path": "src/search.py", "start_line": 1, "end_line": 120}
+  观察: src/search.py (24 行)
+   1| def lower_bound(arr, x):
+   2|     lo, hi = 0, len(arr) - 1
+   3|     while lo < hi:
+   4|         mid = (lo + hi) // 2
+   5|         if arr[mid] < x:
+   6|             lo = mid + 1
+   7|         else:
+   8|             hi = mid
+   9|     return lo
+  10| 
+  11| 
+  12| def 
+[step 4] 思考: search.py 的 lower_bound 上界应为 len(arr)，否则空数组和大于所有元素时出错。先读 state.py 和测试。
+  动作: read_file {"path": "src/state.py", "start_line": 1, "end_line": 120}
+  观察: src/state.py (19 行)
+   1| import time
+   2| 
+   3| 
+   4| class TTLCache:
+   5|     def __init__(self, ttl):
+   6|         self.ttl = ttl
+   7|         self._data = {}
+   8| 
+   9|     def set(self, k, v):
+  10|         self._data[k] = (v, time.time())
+  11| 
+  12|     def get(self, k):
+  13|       
+[step 5] 思考: state.py 的过期判断被写成 if False，需要修正为超过 ttl 即过期。先看可见测试确认接口预期。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from search import count_occurrences
+   3| 
+   4| def test_count_basic():
+   5|     assert count_occurrences([1, 2, 2, 2, 3], 2) == 3
+   6| 
+   7| 
+   8| 
+   9| def test_count_absent_greater():
+  10|     assert count_occurrences([1, 2, 4], 5) == 0
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "src/search.py",
+[step 7] 思考: 修正 lower_bound 的上界为 len(arr)，使空数组与越界情形正确
+  动作: edit_file {"path": "src/search.py", "old": "    lo, hi = 0, len(arr) - 1", "new": "    lo, hi = 0, len(arr)"}
+  观察: 已修改 src/search.py（替换 1 处）
+[step 8] 思考: 修正 TTLCache 过期判断：当前时间减写入时间超过 ttl 则视为过期
+  动作: edit_file {"path": "src/state.py", "old": "        if False:", "new": "        if time.time() - ts > self.ttl:"}
+  观察: 已修改 src/state.py（替换 1 处）
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args" string="false">{"code": "import sys, ti
+[step 10] 思考: 构造边界用例验证 search 与 state
+  动作: run_python {"code": "import sys, time\nsys.path.insert(0,'src')\nfrom search import lower_bound, upper_bound, count_occurrences\nfrom state import TTLCache\nprint(lower_bound([],1), lower_bound([1,2,4],5), lower
+  观察: exit=0
+0 3 0 1
+0 3 0 3
+0 3 0 0
+1
+None
+2 None
+
+[step 11] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D
+[step 12] 思考: 运行全量测试确认
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.14s

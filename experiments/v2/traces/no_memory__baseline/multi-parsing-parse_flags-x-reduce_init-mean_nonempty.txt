@@ -1,0 +1,84 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (289B)
+      src/stats.py  (97B)
+[dir] tests
+      tests/test_visible.py  (217B)
+[step 2] 思考: 读取所有源码与可见测试。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 200}
+  观察: src/parsing.py (12 行)
+   1| def parse_flags(argv):
+   2|     out = {}
+   3|     for token in argv:
+   4|         if not token.startswith("--"):
+   5|             continue
+   6|         body = token[2:]
+   7|         if "=" in body:
+   8|             k, v = body.split("=", 1)
+   9|             out[k]
+[step 3] 思考: 读取 stats.py 与可见测试。
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 200}
+  观察: src/stats.py (3 行)
+   1| def mean_nonempty(values):
+   2|     # if not values: return None
+   3|     return sum(values) / len(values)
+[step 4] 思考: 读取可见测试，确认期望行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 100}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_flags
+   3| 
+   4| def test_flags_pairs():
+   5|     assert parse_flags(["--a=1", "--b=2"]) == {"a": "1", "b": "2"}
+   6| 
+   7| 
+   8| 
+   9| def test_flag_boolean_type():
+  10|     assert parse_flags(["--verbose"]) == {"verbose": 
+[step 5] 思考: 先跑现有测试确认失败点。
+  动作: run_tests {"selector": "tests"}
+  观察: .F                                                                       [100%]
+=================================== FAILURES ===================================
+____________________________ test_flag_boolean_type ____________________________
+
+    def test_flag_boolean_type():
+>       assert parse_fl
+[step 6] 思考: 两处缺陷：parse_flags 布尔值应为 True；mean_nonempty 空输入应返回 None。修复源码，并做健壮实现。
+  动作: edit_file {"path": "src/parsing.py", "old": "        else:\n            out[body] = \"true\"", "new": "        else:\n            out[body] = True"}
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 7] 思考: 修复 mean_nonempty 空列表返回 None。
+  动作: edit_file {"path": "src/stats.py", "old": "    # if not values: return None\n    return sum(values) / len(values)", "new": "    if not values:\n        return None\n    return sum(values) / len(values)"}
+  观察: 已修改 src/stats.py（替换 1 处）
+[step 8] 思考: parse_flags 还需处理空键/空 token 等边界："--"、"--=x" 应被忽略。
+  动作: edit_file {"path": "src/parsing.py", "old": "        body = token[2:]\n        if \"=\" in body:\n            k, v = body.split(\"=\", 1)\n            out[k] = v\n        else:\n            out[body] = True", "
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 9] 思考: 跑可见测试并用边界用例验证两模块。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.10s
+
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args" string="false">{"code": "import sys; sy
+[step 11] 思考: 重新用单行字符串跑边界验证。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_flags\nfrom stats import mean_nonempty\nprint(parse_flags([]))\nprint(parse_flags(['--']))\nprint(parse_flags(['--=x','--a=','
+  观察: exit=0
+{}
+{}
+{'a': '1=2', 'c': True}
+{'a': '2'}
+None 2.0 0.0
+
+[step 12] 思考: 单独验证空值与键空用例，确认语义合理。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_flags\nprint(parse_flags(['--a=']))\nprint(parse_flags(['--=x']))\nprint(parse_flags(['--k=v=w']))"}
+  观察: exit=0
+{'a': ''}
+{}
+{'k': 'v=w'}

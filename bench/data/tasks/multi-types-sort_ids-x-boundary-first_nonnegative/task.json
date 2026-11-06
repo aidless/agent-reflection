@@ -1,0 +1,21 @@
+{
+  "id": "multi-types-sort_ids-x-boundary-first_nonnegative",
+  "kind": "multi",
+  "family": "types+boundary",
+  "bug_category": "type_conversion",
+  "bug_categories": [
+    "type_conversion",
+    "boundary_compare"
+  ],
+  "bug_class": "类型转换/空值处理 + 二分/边界 off-by-one",
+  "bug_desc": "排序按字符串字典序，\"10\" 排在 \"2\" 前；线性扫描被误写成 arr[:-1]，最后一个元素被跳过",
+  "module": "normalize+search",
+  "src_path": "src/normalize.py,src/search.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/normalize.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_sort_numeric_order",
+  "reference": {
+    "src/normalize.py": "def sort_ids(ids):\n    return sorted(int(i) for i in ids)\n",
+    "src/search.py": "def first_nonnegative(arr):\n    for i, v in enumerate(arr):\n        if v >= 0:\n            return i\n    return len(arr)\n"
+  },
+  "hidden_tests": "from normalize import sort_ids\n\ndef test_sort_numeric_order():\n    assert sort_ids([\"10\", \"2\", \"1\"]) == [1, 2, 10]\n\ndef test_sort_negative():\n    assert sort_ids([\"-5\", \"3\"]) == [-5, 3]\n\ndef test_sort_returns_ints():\n    assert all(isinstance(x, int) for x in sort_ids([\"4\"]))\n\n\nfrom search import first_nonnegative\n\ndef test_last_element_is_zero():\n    assert first_nonnegative([-5, -2, 0]) == 2\n\ndef test_no_negative():\n    assert first_nonnegative([1, 2]) == 0\n\ndef test_all_negative():\n    assert first_nonnegative([-1, -2]) == 2\n\ndef test_empty():\n    assert first_nonnegative([]) == 0\n"
+}

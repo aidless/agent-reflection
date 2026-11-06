@@ -1,0 +1,57 @@
+task: 仓库工作区里 src/recursion.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/recursion.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看仓库结构与源码/测试内容，复现失败。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/recursion.py  (127B)
+[dir] tests
+      tests/test_visible.py  (150B)
+[step 2] 思考: 读取源码与可见测试。
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 120}
+  观察: src/recursion.py (6 行)
+   1| def to_binary(n):
+   2|     if n == 0:
+   3|         return ""
+   4|     if n == 1:
+   5|         return "1"
+   6|     return to_binary(n // 2) + str(n % 2)
+[step 3] 思考: 查看可见测试以了解期望。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from recursion import to_binary
+   3| 
+   4| def test_binary_simple():
+   5|     assert to_binary(2) == "10"
+   6| 
+   7| 
+   8| 
+   9| def test_binary_zero():
+  10|     assert to_binary(0) == "0"
+[step 4] 思考: 缺陷：n==0 返回空串而非 "0"；同时负整数会导致递归不收敛（-1//2 == -1）。修复根因：0/1 直接返回数字字符串，负数加前缀，其余递归。
+  动作: edit_file {"path": "src/recursion.py", "old": "def to_binary(n):\n    if n == 0:\n        return \"\"\n    if n == 1:\n        return \"1\"\n    return to_binary(n // 2) + str(n % 2)", "new": "def to_binary(n):
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 5] 思考: 运行可见测试并用边界值验证（0、1、负数、大数）。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 6] 思考: 可见测试通过。但大整数（如 2**2000）递归会触发 RecursionError，隐藏边界测试可能覆盖。改为迭代实现，保持负数支持。
+  动作: edit_file {"path": "src/recursion.py", "old": "def to_binary(n):\n    if n < 0:\n        return \"-\" + to_binary(-n)\n    if n < 2:\n        return str(n)\n    return to_binary(n // 2) + str(n % 2)", "new": "d
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 7] 思考: 迭代实现避免深递归。验证边界：0、1、负数、大整数、bool。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom recursion import to_binary\nassert to_binary(0)=='0'\nassert to_binary(1)=='1'\nassert to_binary(2)=='10'\nassert to_binary(5)=='101'\nassert to_bi
+  观察: exit=0
+ok
+
+[step 8] 思考: 边界验证全部通过。最后跑一次全量测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.08s
+
+[step 9] 思考: 根因已修复：0 返回 "0"，负数不会无限递归，迭代实现避免大整数 RecursionError。测试全部通过。
+  动作: finish {"summary": "修复 src/recursion.py 的 to_binary：1) n==0 原返回空串，改为返回 \"0\"；2) 负数原会因 -1//2 == -1 无限递归，改为加 \"-\" 前缀递归取绝对值；3) 改用迭代逐位取模拼接，避免大整数触发 RecursionError；并加整数类型校验（bool 兼容为 int）。可见测试全部通过，边界情况（0、1、负数、2**5
+  判定: 6 passed in 0.68s

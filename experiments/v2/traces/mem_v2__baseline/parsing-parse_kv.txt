@@ -1,0 +1,81 @@
+task: 仓库工作区里 src/parsing.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/parsing.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="args" string="false">{"path": "."}</｜DSML｜ pa
+[step 2] 思考: 先列出工作区文件，了解结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (184B)
+[dir] tests
+      tests/test_visible.py  (196B)
+[step 3] 思考: 读取源码和可见测试
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 100}
+  观察: src/parsing.py (8 行)
+   1| def parse_kv(text):
+   2|     out = {}
+   3|     for part in text.split(","):
+   4|         if not part.strip():
+   5|             continue
+   6|         k, v = part.split("=", 1)
+   7|         out[k] = v
+   8|     return out
+[step 4] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "tests/test_visi
+[step 5] 思考: 需要读取可见测试内容
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 100}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_kv
+   3| 
+   4| def test_kv_simple():
+   5|     assert parse_kv("a=1,b=2") == {"a": "1", "b": "2"}
+   6| 
+   7| 
+   8| 
+   9| def test_kv_spaces():
+  10|     assert parse_kv(" a = 1 , b = 2 ") == {"a": "1", "b": "2"}
+[step 6] 思考: 可见测试要求去除键值两侧空白。先复现失败
+  动作: run_tests {"selector": "tests"}
+  观察: .F                                                                       [100%]
+=================================== FAILURES ===================================
+________________________________ test_kv_spaces ________________________________
+
+    def test_kv_spaces():
+>       assert parse_kv(" a = 1
+[step 7] 思考: 根因：键值未 strip；同时需要稳健处理空输入、空片段、缺 '=' 和空键。
+  动作: edit_file {"path": "src/parsing.py", "old": "def parse_kv(text):\n    out = {}\n    for part in text.split(\",\"):\n        if not part.strip():\n            continue\n        k, v = part.split(\"=\", 1)\n     
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 8] 思考: 运行测试验证修复，并检查边界情况。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.14s
+
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args" string="false">{"code": "import sys; sy
+[step 10] 思考: 运行边界用例验证
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_kv\nprint(parse_kv(''))\nprint(parse_kv('a=1,b=2'))\nprint(parse_kv(' a = 1 , b = 2 '))\nprint(parse_kv('a=1,a=2'))\nprint(par
+  观察: exit=0
+{}
+{'a': '1', 'b': '2'}
+{'a': '1', 'b': '2'}
+{'a': '2'}
+{'a': '1', 'b': '2'}
+{'a': '', 'b': '3'}
+{}
+{'a': 'x=y'}
+{}
+
+[step 11] 思考: 所有边界用例（空串、None、重复键、空片段、缺失分隔符、空键、值中含等号）均表现合理，可见测试通过。
+  动作: finish {"summary": "修复 src/parsing.py 的 parse_kv：对键和值做 strip、忽略空片段/无 '=' 片段/空键、空输入返回空 dict、重复键后者覆盖，保留值内 '=' 支持。"}
+  判定: 5 passed in 0.04s

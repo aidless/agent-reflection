@@ -1,0 +1,21 @@
+{
+  "id": "multi-boundary-upper_bound-x-cache_state-lru_get",
+  "kind": "multi",
+  "family": "boundary+cache_state",
+  "bug_category": "boundary_compare",
+  "bug_categories": [
+    "boundary_compare",
+    "cache_state"
+  ],
+  "bug_class": "二分/边界 off-by-one + 状态/缓存失效错误",
+  "bug_desc": "upper_bound 把 <= 写成 <，重复元素后界错误；get 没有刷新最近使用顺序，淘汰了刚访问的键",
+  "module": "search+state",
+  "src_path": "src/search.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/search.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_all_equal",
+  "reference": {
+    "src/search.py": "def upper_bound(arr, x):\n    lo, hi = 0, len(arr)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if arr[mid] <= x:\n            lo = mid + 1\n        else:\n            hi = mid\n    return lo\n",
+    "src/state.py": "class LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.data = {}\n\n    def get(self, key):\n        if key not in self.data:\n            return None\n        value = self.data.pop(key)\n        self.data[key] = value\n        return value\n\n    def put(self, key, value):\n        if key in self.data:\n            self.data.pop(key)\n        elif len(self.data) >= self.capacity:\n            self.data.pop(next(iter(self.data)))\n        self.data[key] = value\n"
+  },
+  "hidden_tests": "from search import upper_bound\n\ndef test_no_match_greater():\n    assert upper_bound([1, 2, 4], 3) == 2\n\ndef test_all_equal():\n    assert upper_bound([2, 2, 2], 2) == 3\n\ndef test_empty():\n    assert upper_bound([], 1) == 0\n\n\nfrom state import LRUCache\n\ndef test_lru_evicts_least_recently_used():\n    c = LRUCache(2)\n    c.put(\"a\", 1)\n    c.put(\"b\", 2)\n    assert c.get(\"a\") == 1\n    c.put(\"c\", 3)\n    assert c.get(\"a\") == 1\n    assert c.get(\"b\") is None\n\ndef test_lru_missing():\n    assert LRUCache(2).get(\"x\") is None\n"
+}

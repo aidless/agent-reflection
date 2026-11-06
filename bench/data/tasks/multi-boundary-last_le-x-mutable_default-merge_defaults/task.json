@@ -1,0 +1,21 @@
+{
+  "id": "multi-boundary-last_le-x-mutable_default-merge_defaults",
+  "kind": "multi",
+  "family": "boundary+mutable_default",
+  "bug_category": "boundary_compare",
+  "bug_categories": [
+    "boundary_compare",
+    "mutable_default"
+  ],
+  "bug_class": "二分/边界 off-by-one + 可变默认参数/共享状态",
+  "bug_desc": "记录答案时下标被多加了 1；输出直接引用传入的 defaults 字典，覆盖时污染调用方数据",
+  "module": "search+collect",
+  "src_path": "src/search.py,src/collect.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/search.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_last_le_all",
+  "reference": {
+    "src/search.py": "def last_le(arr, x):\n    pos = -1\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if arr[mid] <= x:\n            pos = mid\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return pos\n",
+    "src/collect.py": "def merge_defaults(overrides, defaults=None):\n    if defaults is None:\n        defaults = {\"level\": 1, \"tags\": []}\n    out = dict(defaults)\n    out.update(overrides)\n    return out\n"
+  },
+  "hidden_tests": "from search import last_le\n\ndef test_last_le_all():\n    assert last_le([1, 2], 99) == 1\n\ndef test_last_le_none():\n    assert last_le([1, 2], 0) == -1\n\ndef test_last_le_duplicates():\n    assert last_le([1, 2, 2, 2, 5], 2) == 3\n\ndef test_last_le_empty():\n    assert last_le([], 5) == -1\n\n\nfrom collect import merge_defaults\n\ndef test_defaults_not_polluted():\n    merge_defaults({\"level\": 3})\n    assert merge_defaults({})[\"level\"] == 1\n\ndef test_caller_dict_not_mutated():\n    base = {\"level\": 1}\n    out = merge_defaults({\"level\": 3}, base)\n    assert base == {\"level\": 1}\n    assert out[\"level\"] == 3\n\ndef test_nested_tags_copied():\n    base = {\"tags\": [\"a\"]}\n    out = merge_defaults({\"tags\": [\"b\"]}, base)\n    assert base[\"tags\"] == [\"a\"]\n"
+}

@@ -1,0 +1,53 @@
+task: 仓库工作区里 src/state.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/state.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件并查看源码与测试。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/state.py  (371B)
+[dir] tests
+      tests/test_visible.py  (251B)
+[step 2] 思考: 读取源码与可见测试。
+  动作: read_file {"path": "src/state.py", "start_line": 1, "end_line": 200}
+  观察: src/state.py (19 行)
+   1| import time
+   2| 
+   3| 
+   4| class TTLCache:
+   5|     def __init__(self, ttl):
+   6|         self.ttl = ttl
+   7|         self._data = {}
+   8| 
+   9|     def set(self, k, v):
+  10|         self._data[k] = (v, time.time())
+  11| 
+  12|     def get(self, k):
+  13|       
+[step 3] 思考: 查看可见测试期望。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 200}
+  观察: tests/test_visible.py (15 行)
+   1| 
+   2| from state import TTLCache
+   3| 
+   4| def test_ttl_immediate():
+   5|     c = TTLCache(10)
+   6|     c.set("a", 1)
+   7|     assert c.get("a") == 1
+   8| 
+   9| import time
+  10| 
+  11| def test_ttl_expires():
+  12|     c = TTLCache(0.05)
+  13|     c.set("
+[step 4] 思考: 根因是过期检查被硬编码为 if False，永不删除过期项。改为按 ttl 判断过期（age >= ttl 即过期，使 ttl=0 立即过期），并删除条目返回 None。
+  动作: edit_file {"path": "src/state.py", "old": "        v, ts = self._data[k]\n        if False:\n            del self._data[k]\n            return None\n        return v", "new": "        v, ts = self._data[k]\n   
+  观察: 已修改 src/state.py（替换 1 处）
+[step 5] 思考: 运行可见测试确认修复。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.22s
+
+[step 6] 思考: 可见测试通过；过期判断基于时间戳差与 ttl 比较，覆盖未命中、过期、重新 set 刷新时间戳、ttl=0 或负数立即过期等边界情况。
+  动作: finish {"summary": "修复 src/state.py 中 TTLCache.get 的过期检查：将硬编码的 if False 改为 time.time() - ts >= self.ttl 时删除条目并返回 None，使过期项不再被返回；未命中仍返回 None。"}
+  判定: 4 passed in 0.26s

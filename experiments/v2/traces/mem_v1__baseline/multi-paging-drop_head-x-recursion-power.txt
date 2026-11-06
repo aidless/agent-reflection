@@ -1,0 +1,67 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/paging.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，确认全部源码模块与测试位置。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/paging.py  (92B)
+      src/recursion.py  (171B)
+[dir] tests
+      tests/test_visible.py  (164B)
+[step 2] 思考: 读取全部源码与可见测试，逐一排查缺陷。
+  动作: read_file {"path": "src/paging.py", "start_line": 1, "end_line": 120}
+  观察: src/paging.py (4 行)
+   1| def drop_head(items, n):
+   2|     if n <= 0:
+   3|         return list(items)
+   4|     return items[n - 1:]
+[step 3] 思考: paging 的 drop_head 偏移错误：应为 items[n:]。继续读 recursion.py 与测试。
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 120}
+  观察: src/recursion.py (7 行)
+   1| def power(base, exp):
+   2|     if exp == 0:
+   3|         return 1
+   4|     if exp > 1:
+   5|         return base * power(base, exp - 1)
+   6|     half = power(base, exp // 2)
+   7|     return half * half
+[step 4] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"tests/test_visible.py","start_l
+[step 5] 思考: 查看可见测试以确认预期语义。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from paging import drop_head
+   3| 
+   4| def test_drop_basic():
+   5|     assert drop_head([1, 2, 3, 4], 2) == [3, 4]
+   6| 
+   7| 
+   8| 
+   9| def test_drop_all():
+  10|     assert drop_head([1, 2], 2) == []
+[step 6] 思考: 修复两处：drop_head 应为 items[n:]；power 的 exp==1 分支错误且负指数无限递归，改为快速幂。
+  动作: edit_file {"path": "src/paging.py", "old": "    return items[n - 1:]", "new": "    return items[n:]"}
+  观察: 已修改 src/paging.py（替换 1 处）
+[step 7] 思考: power 缺陷：exp==1 时返回 1 而非 base；负指数因 Python 整除导致无限递归。改为正确快速幂并支持负指数。
+  动作: edit_file {"path": "src/recursion.py", "old": "def power(base, exp):\n    if exp == 0:\n        return 1\n    if exp > 1:\n        return base * power(base, exp - 1)\n    half = power(base, exp // 2)\n    retur
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 8] 思考: 用边界用例验证两模块，包括负指数、n 超长、n<=0、奇数/偶数指数等。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom paging import drop_head\nfrom recursion import power\nprint(drop_head([1,2,3,4],2), drop_head([1,2],2), drop_head([1,2],0), drop_head([1,2],-1), dr
+  观察: exit=0
+[3, 4] [] [1, 2] [1, 2] [] []
+1 2 1024 0.25 243 1 8.0 -8 1
+OK
+
+[step 9] 思考: 边界用例全部通过，跑全量测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.08s
+
+[step 10] 思考: src/ 下仅 paging.py 与 recursion.py 两个模块，两处根因缺陷均已修复：drop_head 偏移改为 items[n:]，power 改为正确快速幂并支持负指数；自行构造的边界用例与可见测试全部通过。
+  动作: finish {"summary": "修复 src/paging.py 的 drop_head 偏移错误（items[n-1:] -> items[n:]，保留 n<=0 返回副本语义）；重写 src/recursion.py 的 power：原实现 exp==1 时错误返回 1、且负指数因 exp//2 导致无限递归，改为奇数/偶数分支的快速幂并支持负指数返回 1/power(base,-exp)。已验证零
+  判定: 9 passed in 0.02s

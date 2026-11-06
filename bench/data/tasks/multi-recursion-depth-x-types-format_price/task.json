@@ -1,0 +1,21 @@
+{
+  "id": "multi-recursion-depth-x-types-format_price",
+  "kind": "multi",
+  "family": "recursion+types",
+  "bug_category": "recursion_base",
+  "bug_categories": [
+    "recursion_base",
+    "type_conversion"
+  ],
+  "bug_class": "递归基例错误 + 类型转换/空值处理",
+  "bug_desc": "递归深度少加了当前层，结果整体偏低 1；金额只保留 1 位小数，分值被抹掉",
+  "module": "recursion+normalize",
+  "src_path": "src/recursion.py,src/normalize.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/recursion.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_depth_nested",
+  "reference": {
+    "src/recursion.py": "def depth(x):\n    if not isinstance(x, list):\n        return 0\n    if not x:\n        return 1\n    return 1 + max(depth(i) for i in x)\n",
+    "src/normalize.py": "def format_price(cents):\n    return f\"${cents / 100:.2f}\"\n"
+  },
+  "hidden_tests": "from recursion import depth\n\ndef test_depth_nested():\n    assert depth([1, [2, [3]]]) == 3\n\ndef test_depth_empty():\n    assert depth([]) == 1\n\ndef test_depth_scalar():\n    assert depth(7) == 0\n\ndef test_depth_deep():\n    assert depth([[[[]]]]) == 4\n\n\nfrom normalize import format_price\n\ndef test_price_cents():\n    assert format_price(199) == \"$1.99\"\n\ndef test_price_small():\n    assert format_price(5) == \"$0.05\"\n\ndef test_price_zero():\n    assert format_price(0) == \"$0.00\"\n"
+}

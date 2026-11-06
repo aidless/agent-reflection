@@ -1,0 +1,39 @@
+rm -f experiments/smoke.csv
+python3 -m bench.runner --arms no_memory__baseline,memory__baseline --task-set main --limit 5 \
+	--csv experiments/smoke.csv --max-steps 14 --reset-memory \
+	--work-dir experiments/smoke_work --trace-dir experiments/smoke_traces \
+	--memory-dir experiments/smoke_memory
+模型=openai:opencode-go/deepseek-v4.1-flash 任务=5 arms=no_memory__baseline,memory__baseline
+[no_memory__baseline] 1/5 multi-paging-between_inclusive-x-types-add_numbers PASS steps=14 tok=23325 calls=15 180.1s
+[no_memory__baseline] 2/5 parsing-parse_bool PASS steps=8 tok=24340 calls=9 115.7s
+[no_memory__baseline] 3/5 multi-paging-chunk_list-x-types-compare_values FAIL(wrong_fix) steps=14 tok=22750 calls=15 56.9s
+[no_memory__baseline] 4/5 parsing-parse_csv_line PASS steps=14 tok=30359 calls=15 116.1s
+[no_memory__baseline] 5/5 multi-paging-drop_head-x-types-count_nonnull PASS steps=11 tok=15229 calls=12 29.1s
+[memory__baseline] 1/5 multi-paging-between_inclusive-x-types-add_numbers PASS steps=13 tok=20729 calls=14 55.5s
+    记忆: 0 条 拒收={}
+[memory__baseline] 2/5 parsing-parse_bool PASS steps=8 tok=10411 calls=9 43.9s
+    记忆: 0 条 拒收={}
+[memory__baseline] 3/5 multi-paging-chunk_list-x-types-compare_values FAIL(wrong_fix) steps=13 tok=28129 calls=14 94.0s
+    记忆: 0 条 拒收={}
+[memory__baseline] 4/5 parsing-parse_csv_line PASS steps=10 tok=14318 calls=11 53.7s
+    记忆: 0 条 拒收={}
+[memory__baseline] 5/5 multi-paging-drop_head-x-types-count_nonnull PASS steps=10 tok=12240 calls=11 30.2s
+    记忆: 0 条 拒收={}
+完成，结果: experiments/smoke.csv
+python3 -m bench.report --csv experiments/smoke.csv --out experiments/smoke
+样本: 10 条 episode，arms=['no_memory__baseline', 'memory__baseline']
+
+| arm | n | 成功率 | 95% CI | token/任务 | calls/任务 | 步数 | 失败模式 |
+|---|---|---|---|---|---|---|---|
+| no_memory__baseline | 5 | 80.0% (4/5) | 40.0%–100.0% | 23201 | 13.2 | 12.2 | wrong_fix=1 |
+| memory__baseline | 5 | 80.0% (4/5) | 40.0%–100.0% | 17165 | 11.8 | 10.8 | wrong_fix=1 |
+
+配对 McNemar（同任务、同模型、同预算）:
+  no_memory__baseline vs memory__baseline: n=5 不一致=0 (A赢=0, B赢=0) p=1.000 MDE(n=5,80%功效)≈88.5%
+
+按族成功率:
+  paging+types: memory__baseline=67%(3), no_memory__baseline=67%(3)
+  parsing: memory__baseline=100%(2), no_memory__baseline=100%(2)
+
+图: experiments/smoke/success_curve.png, experiments/smoke/cost_box.png
+报告: experiments/smoke/report.md

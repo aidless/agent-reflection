@@ -1,0 +1,21 @@
+config,task_id,success,rollback_used,rollback_verified,rollback_checks,steps,total_tokens,judge_detail,failure_mode,latency_s
+with_rollback,probe-1,1,1,1,1,10,14399,6 passed in 0.02s,,29.3
+no_rollback,probe-1,1,0,0,0,8,11087,6 passed in 0.02s,,33.3
+with_rollback,probe-2,1,1,1,1,10,14204,6 passed in 0.02s,,98.8
+no_rollback,probe-2,1,0,0,0,13,25682,6 passed in 0.02s,,131.7
+with_rollback,probe-3,1,1,1,1,12,18793,6 passed in 0.02s,,52.8
+no_rollback,probe-3,1,0,0,0,7,11178,6 passed in 0.02s,,51.3
+with_rollback,probe-4,1,1,1,1,10,15822,6 passed in 0.02s,,43.6
+no_rollback,probe-4,1,0,0,0,9,15155,6 passed in 0.02s,,44.0
+with_rollback,probe-5,1,1,1,1,12,18776,6 passed in 0.02s,,49.7
+no_rollback,probe-5,1,0,0,0,11,26384,6 passed in 0.02s,,60.6
+with_rollback,probe-big-1,1,1,1,1,11,19334,126 passed in 0.35s,,48.1
+no_rollback,probe-big-1,1,0,0,0,8,16369,126 passed in 0.38s,,41.7
+with_rollback,probe-big-2,1,0,0,0,6,13891,126 passed in 0.21s,,84.6
+no_rollback,probe-big-2,1,0,0,0,8,16608,126 passed in 0.38s,,115.4
+with_rollback,probe-big-3,1,1,1,0,9,13956,126 passed in 0.35s,,40.2
+no_rollback,probe-big-3,1,0,0,0,11,20962,126 passed in 0.30s,,56.1
+with_rollback,probe-huge-1,1,1,1,1,14,38681,1206 passed in 3.12s,,61.1
+no_rollback,probe-huge-1,0,0,0,0,16,24967,"2 failed, 1204 passed in 3.07s",wrong_fix,44.5
+with_rollback,probe-huge-2,1,1,1,0,13,22131,1206 passed in 3.38s,,44.3
+no_rollback,probe-huge-2,0,0,0,0,6,16239,"2 failed, 1204 passed in 3.38s",wrong_fix,56.5

@@ -1,0 +1,130 @@
+模型=openai:opencode-go/deepseek-v4.1-flash 任务=64 arms=memory__optimized
+[memory__optimized] 1/64 multi-paging-between_inclusive-x-types-add_numbers PASS steps=10 tok=12989 calls=10 32.1s
+    记忆: 0 条 拒收={}
+[memory__optimized] 2/64 parsing-parse_bool PASS steps=9 tok=11382 calls=9 37.3s
+    记忆: 0 条 拒收={}
+[memory__optimized] 3/64 multi-paging-chunk_list-x-types-compare_values FAIL(wrong_fix) steps=14 tok=22809 calls=14 64.1s
+    记忆: 0 条 拒收={}
+[memory__optimized] 4/64 parsing-parse_csv_line PASS steps=7 tok=7196 calls=7 15.8s
+    记忆: 0 条 拒收={}
+[memory__optimized] 5/64 multi-paging-drop_head-x-types-count_nonnull PASS steps=8 tok=8180 calls=8 15.6s
+    记忆: 0 条 拒收={}
+[memory__optimized] 6/64 parsing-parse_duration PASS steps=9 tok=11944 calls=9 35.3s
+    记忆: 0 条 拒收={}
+[memory__optimized] 7/64 multi-paging-last_page-x-types-format_price PASS steps=13 tok=17280 calls=13 31.6s
+    记忆: 0 条 拒收={}
+[memory__optimized] 8/64 parsing-parse_flags PASS steps=7 tok=7672 calls=7 40.7s
+    记忆: 0 条 拒收={}
+[memory__optimized] 9/64 multi-boundary-lower_bound-x-parsing-parse_float_list FAIL(wrong_fix) steps=14 tok=19565 calls=14 67.9s
+    记忆: 1 条 拒收={}
+[memory__optimized] 10/64 cache_state-batch_flush PASS steps=7 tok=6939 calls=7 24.3s
+    记忆: 1 条 拒收={}
+[memory__optimized] 11/64 multi-boundary-peak_index-x-parsing-parse_kv FAIL(wrong_fix) steps=14 tok=20523 calls=14 72.5s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 12/64 cache_state-config_cache PASS steps=10 tok=11399 calls=10 50.4s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 13/64 multi-boundary-search_rotated-x-parsing-parse_range PASS steps=12 tok=17903 calls=12 73.6s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 14/64 cache_state-counter_reset FAIL(wrong_fix) steps=14 tok=22275 calls=14 81.5s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 15/64 multi-boundary-upper_bound-x-parsing-split_path FAIL(wrong_fix) steps=14 tok=18870 calls=14 54.3s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 16/64 cache_state-lru_get PASS steps=5 tok=5365 calls=5 14.2s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 17/64 multi-paging-page_items-x-types-join_ids PASS steps=12 tok=14182 calls=12 23.0s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 18/64 recursion-count_nodes PASS steps=6 tok=6168 calls=6 25.7s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 19/64 multi-paging-paginate_pairs-x-types-safe_int FAIL(wrong_fix) steps=14 tok=18756 calls=14 51.8s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 20/64 recursion-depth PASS steps=5 tok=4527 calls=5 26.1s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 21/64 multi-paging-sliding_window-x-types-sort_ids FAIL(wrong_fix) steps=14 tok=18524 calls=14 50.7s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 22/64 recursion-flatten PASS steps=6 tok=5644 calls=6 15.6s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 23/64 multi-paging-take_tail-x-types-total_amount FAIL(wrong_fix) steps=14 tok=18939 calls=14 55.7s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 24/64 recursion-power PASS steps=6 tok=5932 calls=6 9.7s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 25/64 multi-mutable_default-Stack-x-recursion-count_nodes FAIL(wrong_fix) steps=14 tok=19752 calls=14 47.8s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 26/64 mutable_default-Stack PASS steps=6 tok=5583 calls=6 13.9s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 27/64 multi-mutable_default-add_metric-x-recursion-depth PASS steps=14 tok=16274 calls=14 29.8s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 28/64 mutable_default-add_metric PASS steps=5 tok=4550 calls=5 13.6s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 29/64 multi-mutable_default-append_tag-x-recursion-flatten PASS steps=8 tok=8765 calls=8 20.6s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 30/64 mutable_default-append_tag PASS steps=6 tok=5508 calls=6 27.3s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 31/64 multi-mutable_default-collect_pairs-x-recursion-power PASS steps=11 tok=14552 calls=11 38.8s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 32/64 mutable_default-collect_pairs PASS steps=6 tok=5446 calls=6 13.1s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 33/64 multi-boundary-count_occurrences-x-parsing-parse_bool PASS steps=8 tok=12543 calls=8 22.7s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 34/64 boundary-count_occurrences PASS steps=8 tok=12368 calls=8 47.6s
+    记忆: 1 条 拒收={'no_anchor': 1}
+[memory__optimized] 35/64 multi-boundary-first_nonnegative-x-parsing-parse_csv_line FAIL(wrong_fix) steps=14 tok=17161 calls=14 53.3s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 36/64 boundary-first_nonnegative FAIL(wrong_fix) steps=14 tok=21085 calls=14 101.9s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 37/64 multi-boundary-insert_position_desc-x-parsing-parse_duration PASS steps=14 tok=23063 calls=14 89.4s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 38/64 boundary-insert_position_desc PASS steps=8 tok=9201 calls=8 19.8s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 39/64 multi-boundary-last_le-x-parsing-parse_flags FAIL(wrong_fix) steps=14 tok=18666 calls=14 40.7s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 40/64 boundary-last_le PASS steps=8 tok=8149 calls=8 66.8s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 41/64 multi-mutable_default-group_by-x-recursion-reverse_rec PASS steps=11 tok=15876 calls=11 28.9s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 42/64 paging-between_inclusive PASS steps=7 tok=8514 calls=7 73.7s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 43/64 multi-mutable_default-make_counter-x-recursion-sum_nested PASS steps=10 tok=11753 calls=10 29.7s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 44/64 paging-chunk_list PASS steps=5 tok=4393 calls=5 11.2s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 45/64 multi-mutable_default-merge_defaults-x-recursion-to_binary PASS steps=14 tok=21976 calls=14 155.0s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 46/64 paging-drop_head PASS steps=8 tok=9116 calls=8 20.8s
+    记忆: 2 条 拒收={'no_anchor': 1}
+[memory__optimized] 47/64 multi-mutable_default-unique_append-x-recursion-tree_height FAIL(wrong_fix) steps=14 tok=20548 calls=14 51.1s
+    记忆: 3 条 拒收={'no_anchor': 1}
+[memory__optimized] 48/64 paging-last_page PASS steps=5 tok=4080 calls=5 12.4s
+    记忆: 3 条 拒收={'no_anchor': 1}
+[memory__optimized] 49/64 multi-reduce_init-mean_nonempty-x-cache_state-shared_cache PASS steps=14 tok=23640 calls=14 53.5s
+    记忆: 3 条 拒收={'no_anchor': 1}
+[memory__optimized] 50/64 types-add_numbers PASS steps=6 tok=7508 calls=6 26.2s
+    记忆: 3 条 拒收={'no_anchor': 1}
+[memory__optimized] 51/64 multi-reduce_init-min_or_none-x-cache_state-square_cache_key FAIL(wrong_fix) steps=14 tok=18893 calls=14 43.3s
+    记忆: 4 条 拒收={'no_anchor': 1}
+[memory__optimized] 52/64 types-compare_values FAIL(wrong_fix) steps=14 tok=19600 calls=14 49.9s
+    记忆: 5 条 拒收={'no_anchor': 1}
+[memory__optimized] 53/64 multi-reduce_init-product_or_none-x-cache_state-token_bucket PASS steps=14 tok=16995 calls=14 30.7s
+    记忆: 5 条 拒收={'no_anchor': 1}
+[memory__optimized] 54/64 types-count_nonnull PASS steps=5 tok=4096 calls=5 12.9s
+    记忆: 5 条 拒收={'no_anchor': 1}
+[memory__optimized] 55/64 multi-reduce_init-second_largest-x-cache_state-ttl_cache PASS steps=12 tok=15654 calls=12 26.6s
+    记忆: 5 条 拒收={'no_anchor': 1}
+[memory__optimized] 56/64 types-format_price PASS steps=5 tok=4246 calls=5 10.9s
+    记忆: 5 条 拒收={'no_anchor': 1}
+[memory__optimized] 57/64 multi-reduce_init-argmax-x-cache_state-batch_flush FAIL(wrong_fix) steps=14 tok=18987 calls=14 42.8s
+    记忆: 5 条 拒收={'no_anchor': 2}
+[memory__optimized] 58/64 reduce_init-argmax PASS steps=6 tok=5720 calls=6 14.2s
+    记忆: 5 条 拒收={'no_anchor': 2}
+[memory__optimized] 59/64 multi-reduce_init-clamp-x-cache_state-config_cache PASS steps=14 tok=18576 calls=14 35.1s
+    记忆: 5 条 拒收={'no_anchor': 2}
+[memory__optimized] 60/64 reduce_init-clamp PASS steps=10 tok=10148 calls=10 27.3s
+    记忆: 5 条 拒收={'no_anchor': 2}
+[memory__optimized] 61/64 multi-reduce_init-max_by_key-x-cache_state-counter_reset FAIL(wrong_fix) steps=14 tok=24606 calls=14 94.7s
+    记忆: 6 条 拒收={'no_anchor': 2}
+[memory__optimized] 62/64 reduce_init-max_by_key PASS steps=5 tok=4635 calls=5 32.5s
+    记忆: 6 条 拒收={'no_anchor': 2}
+[memory__optimized] 63/64 multi-reduce_init-max_or_none-x-cache_state-lru_get PASS steps=10 tok=13009 calls=10 27.8s
+    记忆: 6 条 拒收={'no_anchor': 2}
+[memory__optimized] 64/64 reduce_init-max_or_none PASS steps=5 tok=4253 calls=5 14.6s
+    记忆: 6 条 拒收={'no_anchor': 2}
+完成，结果: experiments/main_memory_optimized.csv

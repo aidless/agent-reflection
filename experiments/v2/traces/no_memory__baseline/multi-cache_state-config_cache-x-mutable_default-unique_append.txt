@@ -1,0 +1,87 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/state.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (189B)
+      src/state.py  (301B)
+[dir] tests
+      tests/test_visible.py  (279B)
+[step 2] 思考: 读取全部源码和可见测试，定位缺陷。
+  动作: read_file {"path": "src/state.py", "start_line": 1, "end_line": 120}
+  观察: src/state.py (12 行)
+   1| class Config:
+   2|     def __init__(self):
+   3|         self._cache = {}
+   4|         self._values = {}
+   5| 
+   6|     def set(self, k, v):
+   7|         self._values[k] = v
+   8| 
+   9|     def get(self, k, default=None):
+  10|         if k not in self._cache:
+  11|  
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"src/collect.py","start_line":1,
+[step 4] 思考: 读取 collect.py 与可见测试。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 80}
+  观察: src/collect.py (7 行)
+   1| def unique_append(items, value, seen=set()):
+   2|     if seen is None:
+   3|         seen = set()
+   4|     if value in seen:
+   5|         return list(items)
+   6|     seen.add(value)
+   7|     return list(items) + [value]
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"tests/test_visible.py","start_l
+[step 6] 思考: 读取可见测试以了解预期行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 80}
+  观察: tests/test_visible.py (16 行)
+   1| 
+   2| from state import Config
+   3| 
+   4| def test_config_get_default():
+   5|     c = Config()
+   6|     assert c.get("x", 0) == 0
+   7| 
+   8| 
+   9| 
+  10| def test_set_invalidates_cache():
+  11|     c = Config()
+  12|     assert c.get("a") is None
+  13|     
+[step 7] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args":{"selector":"tests"}}</｜DSML｜ parameter>
+[step 8] 思考: 复现失败测试。
+  动作: run_tests {"selector": "tests"}
+  观察: .F                                                                       [100%]
+=================================== FAILURES ===================================
+__________________________ test_set_invalidates_cache __________________________
+
+    def test_set_invalidates_cache():
+        c = Config(
+[step 9] 思考: 两处缺陷：state.set 未使缓存失效；collect.unique_append 使用可变默认参数 set() 导致跨调用共享状态。修复两者，并让 set 正确失效缓存。
+  动作: edit_file {"path": "src/state.py", "old": "    def set(self, k, v):\n        self._values[k] = v", "new": "    def set(self, k, v):\n        self._values[k] = v\n        self._cache.pop(k, None)"}
+  观察: 已修改 src/state.py（替换 1 处）
+[step 10] 思考: 修复 collect.unique_append 的可变默认参数缺陷：默认应为 None 并每次新建 set，避免跨调用共享状态。
+  动作: edit_file {"path": "src/collect.py", "old": "def unique_append(items, value, seen=set()):\n    if seen is None:\n        seen = set()", "new": "def unique_append(items, value, seen=None):\n    if seen is None:\
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 11] 思考: 进一步考虑：修复可变默认参数后，seen=None 时新建空 set 无法与已有 items 去重，unique_append([1,2],2) 会产生重复。应以 items 初始化 seen（当未显式提供时），这样既避免跨调用污染，又正确去重。
+  动作: edit_file {"path": "src/collect.py", "old": "def unique_append(items, value, seen=None):\n    if seen is None:\n        seen = set()", "new": "def unique_append(items, value, seen=None):\n    if seen is None:\n
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 12] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args":{"code":"import sys; sys.path.insert(0,

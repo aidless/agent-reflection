@@ -1,0 +1,92 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/paging.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="path" string="true">.</｜DSML｜ parameter>
+</｜D
+[step 2] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/paging.py  (84B)
+      src/parsing.py  (454B)
+[dir] tests
+      tests/test_visible.py  (102B)
+[step 3] 思考: 读取所有源码与可见测试。
+  动作: read_file {"path": "src/paging.py", "start_line": 1, "end_line": 100}
+  观察: src/paging.py (4 行)
+   1| def take_tail(items, n):
+   2|     if n <= 0:
+   3|         return []
+   4|     return items[-n - 1:]
+[step 4] 思考: paging 的 take_tail 多取了一项。继续读 parsing.py 和测试。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 100}
+  观察: src/parsing.py (17 行)
+   1| def parse_duration(text):
+   2|     total = 0
+   3|     num = ""
+   4|     for ch in text:
+   5|         if ch.isdigit():
+   6|             num += ch
+   7|         else:
+   8|             if num:
+   9|                 n = int(num)
+  10|                 if ch == "h":
+  11|
+[step 5] 思考: 读可见测试，并检查 src 是否还有其他文件。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (5 行)
+   1| 
+   2| from paging import take_tail
+   3| 
+   4| def test_tail_basic():
+   5|     assert take_tail([1, 2, 3, 4], 2) == [3, 4]
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="shell">
+<｜DSML｜ parameter name="cmd" string="true">ls -la; git log --oneline -5 2>
+[step 7] 思考: 可见测试只覆盖 paging。先看仓库有没有 README/spec 描述各模块预期行为。
+  动作: shell {"cmd": "find . -type f | head -50; echo ---; find . -maxdepth 2 -name '*.md' -o -maxdepth 2 -name '*.toml' -o -maxdepth 2 -name '*.txt' -o -maxdepth 2 -name '*.cfg'", "timeout_s": 15}
+  观察: exit=0 mode=bwrap
+./tests/test_visible.py
+./tests/__pycache__/test_visible.cpython-312-pytest-9.1.1.pyc
+./src/paging.py
+./src/__pycache__/paging.cpython-312.pyc
+./src/parsing.py
+---
+
+[step 8] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="path" string="true">src/paging.py</｜DSML｜ para
+[step 9] 思考: paging 修复：take_tail 应返回最后 n 项。
+  动作: edit_file {"path": "src/paging.py", "old": "    return items[-n - 1:]", "new": "    return items[-n:]"}
+  观察: 已修改 src/paging.py（替换 1 处）
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="path" string="true">src/parsing.py</｜DSML｜ par
+[step 11] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">src/parsing.py</｜DSML｜ par
+[step 12] 思考: 确认 parsing.py 当前内容，上一次编辑可能未生效。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 30}
+  观察: src/parsing.py (17 行)
+   1| def parse_duration(text):
+   2|     total = 0
+   3|     num = ""
+   4|     for ch in text:
+   5|         if ch.isdigit():
+   6|             num += ch
+   7|         else:
+   8|             if num:
+   9|                 n = int(num)
+  10|                 if ch == "h":
+  11|

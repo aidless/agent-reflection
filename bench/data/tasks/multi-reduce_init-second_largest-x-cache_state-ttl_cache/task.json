@@ -1,0 +1,21 @@
+{
+  "id": "multi-reduce_init-second_largest-x-cache_state-ttl_cache",
+  "kind": "multi",
+  "family": "reduce_init+cache_state",
+  "bug_category": "reduce_init",
+  "bug_categories": [
+    "reduce_init",
+    "cache_state"
+  ],
+  "bug_class": "归约初值/比较器错误 + 状态/缓存失效错误",
+  "bug_desc": "第二大的去重被去掉，重复最大值时返回最大值；TTL 过期判断被禁用，过期键仍然返回值",
+  "module": "stats+state",
+  "src_path": "src/stats.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_duplicates_max",
+  "reference": {
+    "src/stats.py": "def second_largest(values):\n    if len(values) < 2:\n        return None\n    uniq = sorted(set(values), reverse=True)\n    return uniq[1] if len(uniq) >= 2 else None\n",
+    "src/state.py": "import time\n\n\nclass TTLCache:\n    def __init__(self, ttl):\n        self.ttl = ttl\n        self._data = {}\n\n    def set(self, k, v):\n        self._data[k] = (v, time.time())\n\n    def get(self, k):\n        if k not in self._data:\n            return None\n        v, ts = self._data[k]\n        if time.time() - ts > self.ttl:\n            del self._data[k]\n            return None\n        return v\n"
+  },
+  "hidden_tests": "from stats import second_largest\n\ndef test_duplicates_max():\n    assert second_largest([5, 5, 3]) == 3\n\ndef test_all_same():\n    assert second_largest([4, 4, 4]) is None\n\ndef test_two_items():\n    assert second_largest([1, 2]) == 1\n\ndef test_too_short():\n    assert second_largest([9]) is None\n\n\nimport time\nfrom state import TTLCache\n\ndef test_ttl_expires():\n    c = TTLCache(0.05)\n    c.set(\"a\", 1)\n    time.sleep(0.12)\n    assert c.get(\"a\") is None\n\ndef test_ttl_missing():\n    assert TTLCache(1).get(\"z\") is None\n"
+}

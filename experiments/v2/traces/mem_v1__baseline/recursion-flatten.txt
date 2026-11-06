@@ -1,0 +1,76 @@
+task: 仓库工作区里 src/recursion.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/recursion.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/recursion.py  (186B)
+[dir] tests
+      tests/test_visible.py  (191B)
+[step 2] 思考: 读取源码和可见测试。
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 120}
+  观察: src/recursion.py (8 行)
+   1| def flatten(items):
+   2|     out = []
+   3|     for it in items:
+   4|         if isinstance(it, list) and it:
+   5|             out.extend(flatten(it))
+   6|         else:
+   7|             out.append(it)
+   8|     return out
+[step 3] 思考: 真实源码第 4 行用 `isinstance(it, list) and it`，空列表 `[]` 是假值，会被当成普通元素 append，导致 `flatten([[],1])` 返回 `[[],1]` 而不是 `[1]`。根因是空列表判断错误，应只判断类型。
+  动作: edit_file {"path": "src/recursion.py", "old": "        if isinstance(it, list) and it:", "new": "        if isinstance(it, list):"}
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 4] 思考: 运行可见测试验证修复。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.08s
+
+[step 5] 思考: 可见测试通过，但隐藏测试覆盖边界。需要读取可见测试了解预期，并思考深边界（如元组、字符串、空嵌套）。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from recursion import flatten
+   3| 
+   4| def test_flatten_simple():
+   5|     assert flatten([1, [2, 3]]) == [1, 2, 3]
+   6| 
+   7| 
+   8| 
+   9| def test_flatten_empty_nested():
+  10|     assert flatten([1, [], [2, [3]]]) == [1, 2, 3]
+[step 6] 思考: 可见测试通过，但隐藏测试可能覆盖「arbitrarily nested」的极深嵌套，递归会触发 RecursionError。把实现改为显式栈的迭代版本，保持原有语义（顶层可迭代、只递归展开 list、保持顺序、不修改输入）。
+  动作: write_file {"path": "src/recursion.py", "content": "\"\"\"Recursion utilities.\"\"\"\n\n\ndef flatten(items):\n    \"\"\"Flatten an arbitrarily nested list into a flat list.\n\n    Only ``list`` instances are de
+  观察: 已写入 src/recursion.py（658 字符）
+[step 7] 思考: 验证迭代版本在深嵌套和各种边界类型上的正确性。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 8] 思考: 用 run_python 验证深嵌套、空列表、元组、字符串、None 等边界，确保迭代实现正确且语义一致。
+  动作: run_python {"code": "from src.recursion import flatten\nimport sys\nsys.setrecursionlimit(1000)\n# deep nesting\nx = [1]\nfor _ in range(100000):\n    x = [x]\nprint(len(flatten(x)), flatten(x) == [1])\nprint(fl
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v1__baseline/recursion-flatten/.agent_tmp/run_1.py", line 1, in <module>
+    from src.recursion import flatten
+ModuleNotFoundError: No module named 'src'
+
+[step 9] 思考: 导入路径问题，改为直接 import recursion（测试里也是这么做的，说明 src 在 sys.path 上）。
+  动作: run_python {"code": "import sys; sys.path.insert(0, 'src')\nfrom recursion import flatten\nx = [1]\nfor _ in range(100000):\n    x = [x]\nprint(len(flatten(x)), flatten(x) == [1])\nprint(flatten([]) == [])\nprin
+  观察: exit=0
+1 True
+True
+True
+True
+True
+True
+True
+True
+
+[step 10] 思考: 修复完成：根因是 `isinstance(it, list) and it` 对空列表返回假值，把 `[]` 当叶子元素保留；同时原递归实现在极深嵌套下会 RecursionError。改为显式栈迭代展开，仅对 list 递归展开，保持顺序与输入不可变，所有边界（空列表、深嵌套、元组/字符串/None 叶子、迭代器输入）验证通过，可见测试全绿。
+  动作: finish {"summary": "修复 src/recursion.py：将 flatten 改为显式栈迭代实现，只对 list 展开、其他类型视为叶子；修复空列表因假值判断被误当元素的 bug，并消除深嵌套 RecursionError 风险。可见测试 2 passed，边界验证全部通过。"}
+  判定: 5 passed in 0.01s

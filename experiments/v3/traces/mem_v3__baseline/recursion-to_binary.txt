@@ -1,0 +1,50 @@
+task: 仓库工作区里 src/recursion.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/recursion.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先看工作区结构和相关文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/recursion.py  (127B)
+[dir] tests
+      tests/test_visible.py  (150B)
+[step 2] 思考: 读取源码与可见测试
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 200}
+  观察: src/recursion.py (6 行)
+   1| def to_binary(n):
+   2|     if n == 0:
+   3|         return ""
+   4|     if n == 1:
+   5|         return "1"
+   6|     return to_binary(n // 2) + str(n % 2)
+[step 3] 解析失败：Read test file.
+[step 4] 思考: 读取可见测试以了解期望行为
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 100}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from recursion import to_binary
+   3| 
+   4| def test_binary_simple():
+   5|     assert to_binary(2) == "10"
+   6| 
+   7| 
+   8| 
+   9| def test_binary_zero():
+  10|     assert to_binary(0) == "0"
+[step 5] 思考: 缺陷：to_binary(0) 返回空串而非 "0"。改为 n<2 时返回 str(n)，并处理负数边界（返回 - 前缀）。
+  动作: edit_file {"path": "src/recursion.py", "old": "def to_binary(n):\n    if n == 0:\n        return \"\"\n    if n == 1:\n        return \"1\"\n    return to_binary(n // 2) + str(n % 2)", "new": "def to_binary(n):
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 6] 思考: 运行可见测试验证
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.08s
+
+[step 7] 解析失败：Let me consider hidden tests edge cases. to_binary(2)="10" good, 0="0". Negative handled. Let me verify with run_python.
+[step 8] 思考: 除可见用例外，隐藏测试可能覆盖负数或大数边界，跑一段 python 快速验证通径
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom recursion import to_binary\nprint([to_binary(x) for x in [0,1,2,3,5,8,-1,-5,255,256]])"}
+  观察: exit=0
+['0', '1', '10', '11', '101', '1000', '-1', '-101', '11111111', '100000000']
+
+[step 9] 思考: 所有边界值转换正确：0→"0"、正数标准二进制、负数带负号前缀，可见测试全通过。根因是 n==0 时返回空串，已改为 n<2 返回 str(n)，并补充负数处理。
+  动作: finish {"summary": "修复 src/recursion.py 中 to_binary(0) 返回空串的根因：改为 n<2 时返回 str(n)，使 0→\"0\"；并增加负数处理（返回 \"-\" + to_binary(-n)）。可见测试通过，边界值（0、1、大数、负数）验证正确。"}
+  判定: 6 passed in 0.01s

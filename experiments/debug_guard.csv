@@ -1,0 +1,2 @@
+arm,task_id,family,success,judge_detail,failure_mode,steps,calls,tool_calls,plan_calls,reflect_calls,prompt_tokens,completion_tokens,reflect_tokens,total_tokens,cached_tokens,latency_s,rollback_used,rollback_verified,rollback_checks,memory_injected,memory_injected_count,error
+no_memory__baseline,multi-paging-between_inclusive-x-types-add_numbers,paging+types,0,"3 failed, 5 passed in 0.08s",wrong_fix,12,13,6,1,0,13598,3328,0,16926,11136,76.5,0,0,0,,0,

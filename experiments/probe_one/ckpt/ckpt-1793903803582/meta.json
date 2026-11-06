@@ -1,0 +1,11 @@
+{
+  "id": "ckpt-1793903803582",
+  "label": "episode-start",
+  "step": null,
+  "created_at": "2026-11-05T10:36:43",
+  "files": {
+    "src/normalize.py": "0d7b029545ee626b425d77e55ec6db53b9cb893862b3c9b626ae25ac7f8d3e9d",
+    "src/paging.py": "a324749262786120eed943daf70975a772159082e1f8a22f773c12d3e568ddf6",
+    "tests/test_visible.py": "042aceac6bf8a7be966c91407530156c091e50d22fbee1193ddb569fd461f117"
+  }
+}

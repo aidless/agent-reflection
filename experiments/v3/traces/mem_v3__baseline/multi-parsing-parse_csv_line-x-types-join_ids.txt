@@ -1,0 +1,84 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="path" string="true">.</｜DSML｜ parameter>
+</｜D
+[step 2] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (44B)
+      src/parsing.py  (53B)
+[dir] tests
+      tests/test_visible.py  (206B)
+[step 3] 思考: 读取所有源码和可见测试文件。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 120}
+  观察: src/parsing.py (2 行)
+   1| def parse_csv_line(line):
+   2|     return line.split(",")
+[step 4] 思考: 读取 normalize.py 与可见测试。
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 120}
+  观察: src/normalize.py (2 行)
+   1| def join_ids(ids):
+   2|     return ",".join(ids)
+[step 5] 思考: 读取可见测试，确认预期行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_csv_line
+   3| 
+   4| def test_csv_simple():
+   5|     assert parse_csv_line("a,b,c") == ["a", "b", "c"]
+   6| 
+   7| 
+   8| 
+   9| def test_csv_quoted_comma():
+  10|     assert parse_csv_line('1,"x,y",3') == ["1", "x,y", "3"]
+[step 6] 解析失败：{"thought":"parse_csv_line 未处理引号转义，join_ids 未对含逗号/引号的字段加引号，需实现完整 CSV 语义并互为逆运算。","action":"write_file","args":{"path":"sr
+[step 7] 思考: 实现完整的 CSV 解析：支持引号包裹、引号内逗号、双写引号转义，并保持行为稳健。
+  动作: write_file {"path": "src/parsing.py", "content": "def parse_csv_line(line):\n    \"\"\"Parse one CSV line into a list of fields.\n\n    Handles double-quoted fields, commas inside quotes, and doubled\n    quotes
+  观察: 已写入 src/parsing.py（1368 字符）
+[step 8] 思考: 写入内容可能被截断，先读取确认文件状态。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 80}
+  观察: src/parsing.py (52 行)
+   1| def parse_csv_line(line):
+   2|     """Parse one CSV line into a list of fields.
+   3| 
+   4|     Handles double-quoted fields, commas inside quotes, and doubled
+   5|     quotes ("") used to escape a literal quote character.
+   6|     """
+   7|     if line is None:
+   8|
+[step 9] 思考: 现在实现 join_ids 支持特殊字符与类型转换，与 parse_csv_line 互逆。
+  动作: write_file {"path": "src/normalize.py", "content": "def join_ids(ids):\n    \"\"\"Join an iterable of identifiers into a single CSV line.\n\n    Values are converted to strings.  Fields containing a comma, a dou
+  观察: 已写入 src/normalize.py（763 字符）
+[step 10] 思考: 验证解析/拼接的边界用例，并与可见测试一致。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_csv_line\nfrom normalize import join_ids\ncases = ['a,b,c', '1,\"x,y\",3', '\"a\"\"b\",c', 'a,,b', '', '\"\"', '\"a\",\"b\"', 
+  观察: exit=0
+'a,b,c' ['a', 'b', 'c']
+'1,"x,y",3' ['1', 'x,y', '3']
+'"a""b",c' ['a"b', 'c']
+'a,,b' ['a', '', 'b']
+'' ['']
+'""' ['']
+'"a","b"' ['a', 'b']
+'x,"y""z",w' ['x', 'y"z', 'w']
+a,"b,c","d""e",
+[] '' False
+['a'] 'a' True
+['a,b', 'c'] '"a,b",c' True
+['"'] '""""' True
+['x\ny'] '"x\ny"' True
+
+[step 11] 思考: 解析与拼接行为正确，空列表 round-trip 在单行 CSV 中不可表示，属合理结果。运行全量测试。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.08s
+
+[step 12] 思考: 已通读 src 下全部模块并修复两处根因：parse_csv_line 支持引号、引号内逗号与双写引号转义并检测未闭合引号；join_ids 对含逗号/引号/换行的字段加引号并转义，保证与解析互逆。已用边界用例验证且全量测试通过。
+  动作: finish {"summary": "src/parsing.py: parse_csv_line 重写为状态机，支持双引号字段、引号内逗号、\"\" 转义、空字段，未闭合引号抛 ValueError，非字符串输入抛 TypeError。src/normalize.py: join_ids 转字符串、跳过字符串输入误用，对含逗号/引号/换行的字段加引号并双写转义，保证 parse_csv_line(join_
+  判定: 9 passed in 0.02s

@@ -1,0 +1,60 @@
+task: 仓库工作区里 src/normalize.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/normalize.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和相关文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (126B)
+[dir] tests
+      tests/test_visible.py  (161B)
+[step 2] 思考: 读取源码和测试
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 120}
+  观察: src/normalize.py (5 行)
+   1| def safe_int(value, default=0):
+   2|     try:
+   3|         return int(value)
+   4|     except (TypeError, ValueError):
+   5|         return default
+[step 3] 思考: 查看测试内容
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from normalize import safe_int
+   3| 
+   4| def test_safe_int_plain():
+   5|     assert safe_int("12") == 12
+   6| 
+   7| 
+   8| 
+   9| def test_safe_int_float_string():
+  10|     assert safe_int("3.7") == 3
+[step 4] 思考: 根因：int("3.7") 会抛 ValueError 直接返回默认值，需要先尝试 int 再退回 float 截断；同时要覆盖 None、nan/inf、前后空格等边界，捕获 OverflowError。
+  动作: write_file {"path": "src/normalize.py", "content": "def safe_int(value, default=0):\n    \"\"\"Convert *value* to an int, returning *default* when impossible.\n\n    Handles ints, floats (truncated toward zero),
+  观察: 已写入 src/normalize.py（658 字符）
+[step 5] 思考: 运行可见测试确认
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 6] 思考: 验证边界情况
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom normalize import safe_int\ncases=[('12',12),('3.7',3),(None,0),('abc',0),(3.9,3),('  12 ',12),(True,1),(False,0),(float('nan'),0),(float('inf'),0),
+  观察: exit=0
+'12' 12 12 True
+'3.7' 3 3 True
+None 0 0 True
+'abc' 0 0 True
+3.9 3 3 True
+'  12 ' 12 12 True
+True 1 1 True
+False 0 0 True
+nan 0 0 True
+inf 0 0 True
+'-2.9' -2 -2 True
+'1e3' 1000 1000 True
+b'5' 5 5 True
+5 7
+
+[step 7] 思考: 所有边界情况（浮点字符串截断、None、nan/inf、布尔、字节串、自定义默认值）均正确。根因是原实现对浮点形式的字符串未回退到 float 截断。已修复并验证。
+  动作: finish {"summary": "重写 src/normalize.py 的 safe_int：先 int 尝试，失败后回退 float 截断（修复 \"3.7\" 被直接返回 default 的根因），并捕获 OverflowError；显式处理 bool/int，正确处理 None、nan/inf、带空格字符串、1e3、bytes 及自定义 default。可见测试与边界验证均通过。"}
+  判定: 6 passed in 0.02s

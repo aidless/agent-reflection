@@ -1,0 +1,16 @@
+{
+  "id": "recursion-flatten",
+  "kind": "single",
+  "family": "recursion",
+  "bug_category": "recursion_base",
+  "bug_class": "递归基例错误",
+  "bug_desc": "递归条件漏掉空列表，空嵌套被当作叶子元素保留",
+  "module": "recursion",
+  "src_path": "src/recursion.py",
+  "prompt": "仓库工作区里 src/recursion.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/recursion.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_flatten_empty_nested",
+  "reference": {
+    "src/recursion.py": "def flatten(items):\n    out = []\n    for it in items:\n        if isinstance(it, list):\n            out.extend(flatten(it))\n        else:\n            out.append(it)\n    return out\n"
+  },
+  "hidden_tests": "from recursion import flatten\n\ndef test_flatten_empty_nested():\n    assert flatten([1, [], [2, [3]]]) == [1, 2, 3]\n\ndef test_flatten_all_empty():\n    assert flatten([[], [], []]) == []\n\ndef test_flatten_deep():\n    assert flatten([1, [2, [3, [4]]]]) == [1, 2, 3, 4]\n"
+}

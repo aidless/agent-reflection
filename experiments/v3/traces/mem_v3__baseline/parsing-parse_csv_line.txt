@@ -1,0 +1,93 @@
+task: 仓库工作区里 src/parsing.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/parsing.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和相关文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (53B)
+[dir] tests
+      tests/test_visible.py  (206B)
+[step 2] 解析失败：Let me read both files.
+[step 3] 思考: 读取源码和可见测试
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 120}
+  观察: src/parsing.py (2 行)
+   1| def parse_csv_line(line):
+   2|     return line.split(",")
+[step 4] 思考: 读取可见测试
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_csv_line
+   3| 
+   4| def test_csv_simple():
+   5|     assert parse_csv_line("a,b,c") == ["a", "b", "c"]
+   6| 
+   7| 
+   8| 
+   9| def test_csv_quoted_comma():
+  10|     assert parse_csv_line('1,"x,y",3') == ["1", "x,y", "3"]
+[step 5] 思考: 验证 csv 模块在边界情况下的行为，并思考隐藏测试期望
+  动作: run_python {"code": "import csv\nfor s in ['', 'a,,b', '\"a\"\"b\",c', '\"x,y\"', '  a , b ', 'a,', '\"unclosed']:\n    print(repr(s), '->', list(csv.reader([s])))\n"}
+  观察: exit=0
+'' -> [[]]
+'a,,b' -> [['a', '', 'b']]
+'"a""b",c' -> [['a"b', 'c']]
+'"x,y"' -> [['x,y']]
+'  a , b ' -> [['  a ', ' b ']]
+'a,' -> [['a', '']]
+'"unclosed' -> [['unclosed']]
+
+[step 6] 思考: 测试 csv 模块对换行和特殊字符的处理
+  动作: run_python {"code": "import csv\nfor s in ['a,b\\r\\n','a,b\\n','\"a\\nb\",c','a\\x00b','1,2,3,']:\n    try:\n        print(repr(s), '->', list(csv.reader([s])))\n    except Exception as e:\n        print(repr(s
+  观察: exit=0
+'a,b\r\n' -> [['a', 'b']]
+'a,b\n' -> [['a', 'b']]
+'"a\nb",c' -> [['a\nb', 'c']]
+'a\x00b' -> [['a\x00b']]
+'1,2,3,' -> [['1', '2', '3', '']]
+
+[step 7] 思考: 可见测试失败在带引号字段含逗号的情况，split 无法处理。根因是整个实现没有 CSV 引号/转义逻辑。用标准 csv 语义重写：保留引号内逗号与换行、支持 "" 转义、空行返回空列表，同时保持未加引号空格原样。
+  动作: write_file {"path": "src/parsing.py", "content": "\"\"\"CSV line parsing helpers.\"\"\"\n\nimport csv\n\n\ndef parse_csv_line(line):\n    \"\"\"Parse a single CSV line into a list of string fields.\n\n    Follow
+  观察: 已写入 src/parsing.py（863 字符）
+[step 8] 思考: 运行可见测试确认
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.07s
+
+[step 9] 思考: 验证边界：多个未加引号的换行、单独 \r、以及空行行为，决定是否对多行输入报错
+  动作: run_python {"code": "import csv\nfor s in ['', '\\n', 'a,b\\n', 'a,b\\n\\n', 'a,b\\nc,d', 'a,b\\rc,d', ',', ',,' , '\"\"', '\"\",\"\"', 'a\\r', 'a\\r\\n']:\n    try:\n        print(repr(s), '->', list(csv.reader
+  观察: exit=0
+'' -> [[]]
+'\n' -> [[]]
+'a,b\n' -> [['a', 'b']]
+'a,b\n\n' -> [['a', 'b']]
+'a,b\nc,d' ERR Error new-line character seen in unquoted field - do you need to open the file with newline=''?
+'a,b\rc,d' ERR Error new-line character seen in unquoted field - do you need to open the file with newline='
+[step 10] 思考: csv.reader([line]) 对未加引号的内部换行抛 csv.Error（非 ValueError），可能泄漏实现细节；用 StringIO 正确处理 \r\n 并把畸形输入统一转成 ValueError，同时拒绝多行记录。
+  动作: write_file {"path": "src/parsing.py", "content": "\"\"\"CSV line parsing helpers.\"\"\"\n\nimport csv\nimport io\n\n\ndef parse_csv_line(line):\n    \"\"\"Parse a single CSV line into a list of string fields.\n\
+  观察: 已写入 src/parsing.py（1233 字符）
+[step 11] 思考: 我输出的内容可能被截断，读取文件确认完整性
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 80}
+  观察: src/parsing.py (41 行)
+   1| """CSV line parsing helpers."""
+   2| 
+   3| import csv
+   4| import io
+   5| 
+   6| 
+   7| def parse_csv_line(line):
+   8|     """Parse a single CSV line into a list of string fields.
+   9| 
+  10|     Follows RFC 4180 conventions:
+  11| 
+  12|     * fields are separated 
+[step 12] 思考: 运行可见测试与边界自测
+  动作: run_python {"code": "from parsing import parse_csv_line\ncases = {\n 'a,b,c': ['a','b','c'],\n '1,\"x,y\",3': ['1','x,y','3'],\n '': [],\n '\\n': [],\n 'a,': ['a',''],\n ',': ['',''],\n '\"a\"\"b\",c': ['a\"b','
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v3/work/mem_v3__baseline/parsing-parse_csv_line/.agent_tmp/run_4.py", line 1, in <module>
+    from parsing import parse_csv_line
+ModuleNotFoundError: No module named 'parsing'

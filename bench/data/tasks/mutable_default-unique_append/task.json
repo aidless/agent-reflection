@@ -1,0 +1,16 @@
+{
+  "id": "mutable_default-unique_append",
+  "kind": "single",
+  "family": "mutable_default",
+  "bug_category": "mutable_default",
+  "bug_class": "可变默认参数/共享状态",
+  "bug_desc": "去重集合作为可变默认参数，跨调用残留",
+  "module": "collect",
+  "src_path": "src/collect.py",
+  "prompt": "仓库工作区里 src/collect.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/collect.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_unique_leak",
+  "reference": {
+    "src/collect.py": "def unique_append(items, value, seen=None):\n    if seen is None:\n        seen = set()\n    if value in seen:\n        return list(items)\n    seen.add(value)\n    return list(items) + [value]\n"
+  },
+  "hidden_tests": "from collect import unique_append\n\ndef test_unique_leak():\n    first = unique_append([], 7)\n    second = unique_append([], 7)\n    assert first == [7]\n    assert second == [7]\n\ndef test_unique_duplicate_in_list():\n    assert unique_append([1], 1, {1}) == [1]\n"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "paging-between_inclusive",
+  "kind": "single",
+  "family": "paging",
+  "bug_category": "paging_index",
+  "bug_class": "切片/分页 off-by-one",
+  "bug_desc": "闭区间切片写成半开区间，右端点丢一个",
+  "module": "paging",
+  "src_path": "src/paging.py",
+  "prompt": "仓库工作区里 src/paging.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/paging.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_between_adjacent",
+  "reference": {
+    "src/paging.py": "def between_inclusive(items, lo, hi):\n    if hi < lo:\n        return []\n    return items[lo:hi + 1]\n"
+  },
+  "hidden_tests": "from paging import between_inclusive\n\ndef test_between_adjacent():\n    assert between_inclusive([0, 1, 2], 1, 2) == [1, 2]\n\ndef test_between_same():\n    assert between_inclusive([0, 1, 2], 1, 1) == [1]\n\ndef test_between_reverse():\n    assert between_inclusive([0, 1, 2], 2, 1) == []\n"
+}

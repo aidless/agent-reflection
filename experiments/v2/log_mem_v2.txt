@@ -1,0 +1,502 @@
+模型=openai:opencode-go/deepseek-v4.1-flash 任务=250 arms=mem_v2__baseline
+[mem_v2__baseline] 1/250 multi-types-sort_ids-x-boundary-first_nonnegative PASS steps=9 tok=14066 calls=10 32.2s
+    记忆: 0 条 拒收={}
+[mem_v2__baseline] 2/250 recursion-count_nodes PASS steps=7 tok=8396 calls=8 29.6s
+    记忆: 0 条 拒收={}
+[mem_v2__baseline] 3/250 multi-cache_state-batch_flush-x-mutable_default-merge_defaults PASS steps=12 tok=16557 calls=13 84.6s
+    记忆: 0 条 拒收={}
+[mem_v2__baseline] 4/250 multi-reduce_init-mean_nonempty-x-types-total_amount PASS steps=12 tok=17245 calls=13 106.8s
+    记忆: 0 条 拒收={}
+[mem_v2__baseline] 5/250 multi-reduce_init-argmax-x-types-format_price PASS steps=12 tok=18833 calls=13 38.0s
+    记忆: 0 条 拒收={}
+[mem_v2__baseline] 6/250 reduce_init-mean_nonempty PASS steps=12 tok=14333 calls=13 32.2s
+    记忆: 0 条 拒收={}
+[mem_v2__baseline] 7/250 multi-mutable_default-make_counter-x-parsing-parse_bool PASS steps=12 tok=19368 calls=13 91.2s
+    记忆: 0 条 拒收={}
+[mem_v2__baseline] 8/250 multi-boundary-lower_bound-x-paging-sliding_window FAIL(wrong_fix) steps=12 tok=19083 calls=13 47.8s
+    记忆: 0 条 拒收={}
+[mem_v2__baseline] 9/250 multi-reduce_init-min_or_none-x-cache_state-square_cache_key PASS steps=12 tok=16724 calls=13 83.5s
+    记忆: 0 条 拒收={}
+[mem_v2__baseline] 10/250 multi-recursion-tree_height-x-types-add_numbers FAIL(wrong_fix) steps=12 tok=20470 calls=13 130.0s
+    记忆: 1 条 拒收={}
+[mem_v2__baseline] 11/250 paging-last_page PASS steps=8 tok=8398 calls=9 21.4s
+    记忆: 1 条 拒收={}
+[mem_v2__baseline] 12/250 multi-mutable_default-merge_defaults-x-paging-last_page PASS steps=12 tok=18157 calls=13 41.1s
+    记忆: 1 条 拒收={}
+[mem_v2__baseline] 13/250 parsing-parse_range PASS steps=12 tok=18316 calls=13 93.2s
+    记忆: 1 条 拒收={}
+[mem_v2__baseline] 14/250 multi-paging-sliding_window-x-reduce_init-clamp PASS steps=11 tok=23169 calls=12 77.0s
+    记忆: 1 条 拒收={}
+[mem_v2__baseline] 15/250 multi-cache_state-token_bucket-x-paging-page_items PASS steps=12 tok=17139 calls=12 125.9s
+    记忆: 1 条 拒收={}
+[mem_v2__baseline] 16/250 types-sort_ids PASS steps=8 tok=8853 calls=9 36.7s
+    记忆: 1 条 拒收={}
+[mem_v2__baseline] 17/250 multi-types-format_price-x-cache_state-shared_cache PASS steps=10 tok=15060 calls=11 190.8s
+    记忆: 2 条 拒收={}
+[mem_v2__baseline] 18/250 multi-cache_state-counter_reset-x-mutable_default-append_tag FAIL(wrong_fix) steps=12 tok=18520 calls=13 207.1s
+    记忆: 2 条 拒收={}
+[mem_v2__baseline] 19/250 types-total_amount PASS steps=11 tok=20972 calls=12 181.2s
+    记忆: 2 条 拒收={}
+[mem_v2__baseline] 20/250 reduce_init-max_by_key PASS steps=9 tok=12312 calls=10 72.3s
+    记忆: 2 条 拒收={}
+[mem_v2__baseline] 21/250 multi-parsing-parse_range-x-reduce_init-argmax PASS steps=12 tok=19795 calls=13 127.4s
+    记忆: 2 条 拒收={}
+[mem_v2__baseline] 22/250 multi-mutable_default-unique_append-x-paging-sliding_window PASS steps=9 tok=12337 calls=10 34.2s
+    记忆: 2 条 拒收={}
+[mem_v2__baseline] 23/250 cache_state-batch_flush PASS steps=8 tok=10270 calls=9 32.6s
+    记忆: 2 条 拒收={}
+[mem_v2__baseline] 24/250 multi-boundary-insert_position_desc-x-paging-drop_head PASS steps=10 tok=15103 calls=11 151.1s
+    记忆: 3 条 拒收={}
+[mem_v2__baseline] 25/250 multi-cache_state-token_bucket-x-mutable_default-add_metric PASS steps=12 tok=20639 calls=13 46.3s
+    记忆: 3 条 拒收={}
+[mem_v2__baseline] 26/250 multi-boundary-search_rotated-x-cache_state-batch_flush PASS steps=11 tok=19938 calls=12 163.6s
+    记忆: 3 条 拒收={}
+[mem_v2__baseline] 27/250 multi-paging-page_items-x-types-join_ids PASS steps=11 tok=17327 calls=12 57.8s
+    记忆: 3 条 拒收={}
+[mem_v2__baseline] 28/250 paging-page_items PASS steps=8 tok=11348 calls=9 27.1s
+    记忆: 3 条 拒收={}
+[mem_v2__baseline] 29/250 boundary-insert_position_desc PASS steps=8 tok=10838 calls=9 32.7s
+    记忆: 3 条 拒收={}
+[mem_v2__baseline] 30/250 multi-boundary-upper_bound-x-mutable_default-unique_append FAIL(wrong_fix) steps=12 tok=20255 calls=13 182.5s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 31/250 mutable_default-collect_pairs PASS steps=10 tok=14836 calls=11 29.5s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 32/250 multi-types-add_numbers-x-mutable_default-unique_append PASS steps=12 tok=18744 calls=13 40.9s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 33/250 multi-paging-between_inclusive-x-recursion-to_binary PASS steps=11 tok=17561 calls=12 41.3s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 34/250 multi-parsing-parse_csv_line-x-reduce_init-min_or_none PASS steps=9 tok=14154 calls=10 63.5s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 35/250 multi-recursion-tree_height-x-reduce_init-sum_positives PASS steps=9 tok=13064 calls=10 29.3s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 36/250 multi-types-safe_int-x-boundary-upper_bound PASS steps=12 tok=21377 calls=13 46.3s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 37/250 parsing-parse_csv_line PASS steps=12 tok=29076 calls=13 67.2s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 38/250 multi-paging-drop_head-x-types-count_nonnull PASS steps=12 tok=19015 calls=13 40.3s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 39/250 multi-types-join_ids-x-cache_state-ttl_cache PASS steps=10 tok=16008 calls=11 34.2s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 40/250 multi-reduce_init-mean_nonempty-x-boundary-search_rotated PASS steps=9 tok=16757 calls=10 62.2s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 41/250 multi-mutable_default-group_by-x-parsing-parse_range PASS steps=12 tok=25919 calls=13 134.5s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 42/250 multi-parsing-parse_range-x-types-sort_ids FAIL(wrong_fix) steps=12 tok=23235 calls=13 71.6s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 43/250 multi-paging-take_tail-x-recursion-reverse_rec PASS steps=9 tok=15310 calls=10 76.7s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 44/250 multi-types-safe_int-x-mutable_default-collect_pairs PASS steps=10 tok=14795 calls=11 104.4s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 45/250 multi-mutable_default-add_metric-x-paging-paginate_pairs PASS steps=10 tok=21512 calls=11 140.7s
+    记忆: 4 条 拒收={}
+[mem_v2__baseline] 46/250 multi-reduce_init-second_largest-x-boundary-count_occurrences PASS steps=10 tok=16966 calls=11 142.3s
+    记忆: 4 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 47/250 multi-paging-page_items-x-parsing-parse_csv_line PASS steps=12 tok=20531 calls=13 213.7s
+    记忆: 4 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 48/250 multi-boundary-search_rotated-x-parsing-parse_range PASS steps=12 tok=24116 calls=13 87.8s
+    记忆: 4 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 49/250 multi-paging-last_page-x-parsing-parse_float_list PASS steps=9 tok=13206 calls=10 31.3s
+    记忆: 4 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 50/250 reduce_init-clamp PASS steps=7 tok=8671 calls=8 188.5s
+    记忆: 4 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 51/250 mutable_default-unique_append PASS steps=6 tok=9612 calls=7 154.1s
+    记忆: 4 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 52/250 reduce_init-argmax PASS steps=7 tok=9400 calls=8 21.7s
+    记忆: 4 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 53/250 multi-mutable_default-merge_defaults-x-recursion-to_binary FAIL(llm_error) steps=1 tok=354 calls=1 149.3s
+    记忆: 4 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 54/250 multi-reduce_init-product_or_none-x-cache_state-token_bucket PASS steps=12 tok=19512 calls=13 43.0s
+    记忆: 4 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 55/250 mutable_default-merge_defaults PASS steps=11 tok=17934 calls=12 162.6s
+    记忆: 5 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 56/250 boundary-last_le PASS steps=9 tok=12343 calls=10 32.7s
+    记忆: 5 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 57/250 multi-reduce_init-max_by_key-x-cache_state-counter_reset PASS steps=11 tok=17637 calls=12 43.3s
+    记忆: 5 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 58/250 multi-paging-sliding_window-x-types-sort_ids FAIL(wrong_fix) steps=12 tok=22931 calls=13 86.9s
+    记忆: 5 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 59/250 multi-mutable_default-Stack-x-parsing-parse_float_list PASS steps=11 tok=18796 calls=12 126.5s
+    记忆: 5 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 60/250 multi-paging-chunk_list-x-types-compare_values PASS steps=12 tok=26163 calls=13 75.8s
+    记忆: 5 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 61/250 multi-boundary-last_le-x-mutable_default-merge_defaults PASS steps=12 tok=25525 calls=13 53.1s
+    记忆: 5 条 拒收={'boilerplate': 1}
+[mem_v2__baseline] 62/250 multi-mutable_default-add_metric-x-parsing-parse_csv_line FAIL(wrong_fix) steps=12 tok=23872 calls=13 232.8s
+    记忆: 5 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 63/250 boundary-lower_bound PASS steps=9 tok=14198 calls=10 27.5s
+    记忆: 5 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 64/250 multi-types-join_ids-x-boundary-insert_position_desc PASS steps=9 tok=14178 calls=10 100.4s
+    记忆: 5 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 65/250 multi-recursion-power-x-types-count_nonnull PASS steps=11 tok=18217 calls=12 35.1s
+    记忆: 5 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 66/250 recursion-depth PASS steps=12 tok=22101 calls=13 140.7s
+    记忆: 5 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 67/250 recursion-power PASS steps=9 tok=13671 calls=10 101.1s
+    记忆: 5 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 68/250 cache_state-square_cache_key PASS steps=10 tok=28755 calls=11 193.5s
+    记忆: 5 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 69/250 multi-paging-page_items-x-reduce_init-second_largest PASS steps=11 tok=16246 calls=12 32.0s
+    记忆: 5 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 70/250 multi-types-count_nonnull-x-boundary-search_rotated PASS steps=12 tok=22578 calls=13 44.1s
+    记忆: 5 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 71/250 reduce_init-sum_positives PASS steps=6 tok=7332 calls=7 112.1s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 72/250 multi-reduce_init-clamp-x-cache_state-config_cache PASS steps=12 tok=18991 calls=13 40.3s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 73/250 multi-mutable_default-append_tag-x-recursion-depth PASS steps=10 tok=15734 calls=11 79.7s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 74/250 multi-cache_state-square_cache_key-x-paging-last_page PASS steps=12 tok=21059 calls=13 42.0s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 75/250 boundary-search_rotated PASS steps=12 tok=25317 calls=13 56.0s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 76/250 multi-mutable_default-Stack-x-recursion-count_nodes PASS steps=12 tok=19778 calls=13 45.7s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 77/250 multi-parsing-parse_duration-x-recursion-count_nodes PASS steps=12 tok=23670 calls=13 169.6s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 78/250 multi-boundary-upper_bound-x-cache_state-lru_get PASS steps=10 tok=16461 calls=11 34.5s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 79/250 multi-parsing-split_path-x-reduce_init-product_or_none PASS steps=11 tok=19406 calls=12 114.5s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 80/250 mutable_default-Stack PASS steps=10 tok=15194 calls=11 150.7s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 81/250 multi-cache_state-config_cache-x-paging-take_tail PASS steps=11 tok=18374 calls=12 42.5s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 82/250 multi-mutable_default-add_metric-x-recursion-depth PASS steps=11 tok=27773 calls=12 52.5s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 83/250 multi-paging-last_page-x-types-format_price FAIL(llm_error) steps=1 tok=354 calls=1 168.8s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 84/250 parsing-parse_duration PASS steps=12 tok=27675 calls=13 55.2s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 85/250 boundary-count_occurrences PASS steps=7 tok=13013 calls=8 39.5s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 86/250 multi-parsing-parse_duration-x-reduce_init-clamp FAIL(wrong_fix) steps=12 tok=23325 calls=13 200.0s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 87/250 multi-boundary-lower_bound-x-parsing-parse_float_list PASS steps=12 tok=25434 calls=13 37.0s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 88/250 multi-recursion-sum_nested-x-types-join_ids PASS steps=10 tok=16722 calls=11 29.9s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 89/250 multi-mutable_default-collect_pairs-x-recursion-power PASS steps=12 tok=21156 calls=13 63.1s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 90/250 multi-reduce_init-min_or_none-x-boundary-insert_position_desc FAIL(wrong_fix) steps=12 tok=22021 calls=13 85.5s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 91/250 boundary-first_nonnegative PASS steps=12 tok=18595 calls=12 195.6s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 92/250 reduce_init-product_or_none PASS steps=8 tok=11916 calls=9 28.3s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 93/250 multi-mutable_default-merge_defaults-x-parsing-split_path FAIL(wrong_fix) steps=12 tok=21713 calls=13 120.3s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 94/250 multi-parsing-parse_flags-x-recursion-reverse_rec PASS steps=10 tok=16597 calls=11 38.3s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 95/250 multi-paging-drop_head-x-parsing-parse_flags FAIL(wrong_fix) steps=10 tok=16225 calls=11 73.0s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 96/250 reduce_init-max_or_none FAIL(wrong_fix) steps=12 tok=16653 calls=13 63.1s
+    记忆: 6 条 拒收={'boilerplate': 2}
+[mem_v2__baseline] 97/250 multi-reduce_init-sum_positives-x-types-compare_values FAIL(wrong_fix) steps=12 tok=30117 calls=13 210.2s
+    记忆: 6 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 98/250 multi-recursion-to_binary-x-reduce_init-max_by_key PASS steps=11 tok=19942 calls=12 37.3s
+    记忆: 6 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 99/250 multi-parsing-parse_kv-x-recursion-sum_nested PASS steps=10 tok=25099 calls=11 67.5s
+    记忆: 6 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 100/250 multi-types-join_ids-x-mutable_default-make_counter FAIL(wrong_fix) steps=12 tok=26230 calls=13 62.8s
+    记忆: 6 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 101/250 multi-reduce_init-mean_nonempty-x-cache_state-shared_cache PASS steps=12 tok=17241 calls=13 24.8s
+    记忆: 6 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 102/250 multi-cache_state-batch_flush-x-paging-paginate_pairs FAIL(wrong_fix) steps=12 tok=21426 calls=13 52.7s
+    记忆: 7 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 103/250 multi-cache_state-lru_get-x-paging-sliding_window PASS steps=11 tok=20857 calls=12 33.3s
+    记忆: 7 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 104/250 multi-parsing-parse_kv-x-types-format_price PASS steps=11 tok=21999 calls=12 55.4s
+    记忆: 7 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 105/250 multi-reduce_init-sum_positives-x-boundary-lower_bound PASS steps=9 tok=12965 calls=10 32.7s
+    记忆: 7 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 106/250 multi-paging-sliding_window-x-parsing-parse_range PASS steps=10 tok=18431 calls=11 43.3s
+    记忆: 7 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 107/250 multi-cache_state-shared_cache-x-mutable_default-make_counter FAIL(wrong_fix) steps=10 tok=19264 calls=11 82.5s
+    记忆: 7 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 108/250 multi-paging-page_items-x-recursion-sum_nested PASS steps=10 tok=14724 calls=11 27.6s
+    记忆: 7 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 109/250 multi-types-total_amount-x-cache_state-batch_flush PASS steps=12 tok=21395 calls=13 72.7s
+    记忆: 7 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 110/250 multi-boundary-peak_index-x-mutable_default-append_tag PASS steps=12 tok=19713 calls=13 38.0s
+    记忆: 7 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 111/250 multi-mutable_default-append_tag-x-parsing-parse_kv PASS steps=11 tok=24235 calls=12 40.7s
+    记忆: 7 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 112/250 multi-cache_state-counter_reset-x-parsing-parse_range FAIL(wrong_fix) steps=12 tok=24116 calls=13 52.8s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 113/250 parsing-parse_flags PASS steps=10 tok=17113 calls=11 38.3s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 114/250 multi-boundary-first_nonnegative-x-mutable_default-Stack PASS steps=12 tok=21037 calls=13 30.0s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 115/250 multi-recursion-to_binary-x-types-compare_values FAIL(wrong_fix) steps=12 tok=26031 calls=13 148.0s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 116/250 multi-reduce_init-min_or_none-x-types-safe_int FAIL(wrong_fix) steps=11 tok=20501 calls=12 60.4s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 117/250 recursion-to_binary PASS steps=12 tok=21652 calls=13 53.6s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 118/250 multi-parsing-parse_bool-x-recursion-power PASS steps=9 tok=15093 calls=10 24.2s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 119/250 multi-reduce_init-second_largest-x-cache_state-ttl_cache PASS steps=12 tok=19421 calls=13 28.9s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 120/250 multi-cache_state-counter_reset-x-paging-chunk_list FAIL(wrong_fix) steps=10 tok=17055 calls=11 52.0s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 121/250 parsing-parse_float_list PASS steps=11 tok=20186 calls=12 50.2s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 122/250 multi-paging-chunk_list-x-recursion-depth PASS steps=9 tok=13900 calls=10 43.4s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 123/250 multi-recursion-depth-x-reduce_init-second_largest PASS steps=10 tok=15711 calls=11 28.5s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 124/250 mutable_default-group_by PASS steps=7 tok=8769 calls=8 24.0s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 125/250 multi-reduce_init-max_or_none-x-types-add_numbers PASS steps=12 tok=20337 calls=13 62.1s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 126/250 multi-boundary-last_le-x-cache_state-square_cache_key PASS steps=12 tok=21037 calls=13 39.6s
+    记忆: 8 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 127/250 boundary-upper_bound FAIL(wrong_fix) steps=12 tok=21331 calls=13 50.6s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 128/250 types-format_price PASS steps=10 tok=14726 calls=11 49.5s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 129/250 multi-boundary-last_le-x-parsing-parse_flags FAIL(wrong_fix) steps=11 tok=20567 calls=12 83.2s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 130/250 multi-boundary-upper_bound-x-parsing-split_path FAIL(wrong_fix) steps=12 tok=25782 calls=13 81.8s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 131/250 multi-paging-between_inclusive-x-parsing-parse_bool PASS steps=10 tok=16470 calls=11 34.2s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 132/250 multi-parsing-parse_bool-x-reduce_init-max_by_key PASS steps=9 tok=13848 calls=10 36.2s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 133/250 boundary-peak_index PASS steps=9 tok=14362 calls=10 30.8s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 134/250 multi-mutable_default-unique_append-x-recursion-reverse_rec PASS steps=12 tok=20953 calls=13 45.1s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 135/250 multi-paging-drop_head-x-recursion-power PASS steps=11 tok=17616 calls=12 48.0s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 136/250 multi-mutable_default-append_tag-x-recursion-flatten PASS steps=12 tok=22752 calls=13 42.6s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 137/250 multi-reduce_init-max_or_none-x-boundary-upper_bound PASS steps=10 tok=14903 calls=11 31.8s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 138/250 multi-mutable_default-group_by-x-recursion-reverse_rec PASS steps=12 tok=20837 calls=13 38.7s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 139/250 multi-types-compare_values-x-cache_state-counter_reset FAIL(wrong_fix) steps=12 tok=23965 calls=13 60.0s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 140/250 multi-types-count_nonnull-x-cache_state-token_bucket PASS steps=9 tok=13382 calls=10 28.3s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 141/250 multi-parsing-parse_csv_line-x-types-join_ids FAIL(wrong_fix) steps=12 tok=55791 calls=13 173.0s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 142/250 multi-mutable_default-append_tag-x-paging-page_items PASS steps=10 tok=14906 calls=11 31.1s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 143/250 recursion-flatten PASS steps=8 tok=12159 calls=9 30.5s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 144/250 recursion-reverse_rec PASS steps=10 tok=15773 calls=11 41.9s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 145/250 multi-reduce_init-product_or_none-x-types-add_numbers PASS steps=11 tok=17405 calls=12 38.9s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 146/250 multi-types-add_numbers-x-cache_state-lru_get PASS steps=12 tok=21622 calls=13 57.5s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 147/250 multi-mutable_default-unique_append-x-recursion-tree_height PASS steps=12 tok=25280 calls=13 64.7s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 148/250 multi-reduce_init-argmax-x-cache_state-batch_flush PASS steps=9 tok=13179 calls=10 36.6s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 149/250 multi-reduce_init-second_largest-x-types-join_ids PASS steps=9 tok=12984 calls=10 26.0s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 150/250 multi-types-safe_int-x-cache_state-config_cache PASS steps=12 tok=21680 calls=13 54.2s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 151/250 paging-between_inclusive PASS steps=9 tok=13376 calls=10 36.5s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 152/250 multi-boundary-count_occurrences-x-parsing-parse_bool PASS steps=12 tok=22947 calls=13 37.3s
+    记忆: 9 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 153/250 cache_state-counter_reset FAIL(wrong_fix) steps=7 tok=11462 calls=8 51.8s
+    记忆: 10 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 154/250 multi-types-compare_values-x-boundary-peak_index PASS steps=12 tok=19911 calls=13 55.3s
+    记忆: 10 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 155/250 multi-parsing-parse_flags-x-reduce_init-mean_nonempty PASS steps=11 tok=18782 calls=12 28.9s
+    记忆: 10 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 156/250 types-safe_int PASS steps=12 tok=28717 calls=13 52.3s
+    记忆: 10 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 157/250 multi-reduce_init-max_or_none-x-cache_state-config_cache PASS steps=12 tok=20685 calls=13 43.8s
+    记忆: 10 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 158/250 multi-boundary-upper_bound-x-paging-take_tail PASS steps=10 tok=15127 calls=11 40.2s
+    记忆: 10 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 159/250 mutable_default-make_counter PASS steps=9 tok=13211 calls=10 25.6s
+    记忆: 10 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 160/250 multi-parsing-parse_range-x-recursion-depth PASS steps=12 tok=22458 calls=13 50.9s
+    记忆: 10 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 161/250 mutable_default-append_tag PASS steps=9 tok=12328 calls=10 31.9s
+    记忆: 10 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 162/250 types-compare_values PASS steps=12 tok=30016 calls=13 161.0s
+    记忆: 10 条 拒收={'boilerplate': 3}
+[mem_v2__baseline] 163/250 multi-reduce_init-argmax-x-boundary-first_nonnegative FAIL(wrong_fix) steps=9 tok=15049 calls=10 43.0s
+    记忆: 10 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 164/250 multi-mutable_default-collect_pairs-x-paging-take_tail PASS steps=12 tok=19405 calls=13 35.5s
+    记忆: 10 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 165/250 multi-paging-take_tail-x-parsing-parse_duration PASS steps=12 tok=19412 calls=13 87.2s
+    记忆: 10 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 166/250 multi-mutable_default-unique_append-x-parsing-parse_duration PASS steps=12 tok=32179 calls=13 167.7s
+    记忆: 11 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 167/250 multi-parsing-parse_float_list-x-recursion-to_binary PASS steps=9 tok=13883 calls=10 44.5s
+    记忆: 11 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 168/250 multi-parsing-split_path-x-recursion-tree_height PASS steps=10 tok=17597 calls=11 41.9s
+    记忆: 11 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 169/250 multi-types-format_price-x-boundary-count_occurrences PASS steps=9 tok=14162 calls=10 34.7s
+    记忆: 11 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 170/250 paging-sliding_window PASS steps=9 tok=13041 calls=10 45.1s
+    记忆: 11 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 171/250 multi-boundary-first_nonnegative-x-cache_state-shared_cache FAIL(wrong_fix) steps=11 tok=18299 calls=12 58.3s
+    记忆: 12 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 172/250 multi-cache_state-ttl_cache-x-paging-drop_head PASS steps=10 tok=17337 calls=11 59.4s
+    记忆: 12 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 173/250 multi-types-sort_ids-x-cache_state-square_cache_key PASS steps=10 tok=15777 calls=11 44.9s
+    记忆: 12 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 174/250 multi-mutable_default-Stack-x-paging-between_inclusive PASS steps=11 tok=20512 calls=12 41.1s
+    记忆: 12 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 175/250 multi-mutable_default-group_by-x-paging-chunk_list PASS steps=11 tok=20027 calls=12 36.0s
+    记忆: 12 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 176/250 multi-paging-between_inclusive-x-types-add_numbers FAIL(wrong_fix) steps=12 tok=26168 calls=13 74.8s
+    记忆: 12 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 177/250 multi-paging-take_tail-x-types-total_amount PASS steps=12 tok=25085 calls=13 86.6s
+    记忆: 12 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 178/250 paging-paginate_pairs PASS steps=12 tok=26270 calls=13 72.9s
+    记忆: 12 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 179/250 multi-parsing-parse_csv_line-x-recursion-flatten PASS steps=12 tok=22526 calls=13 72.0s
+    记忆: 12 条 拒收={'boilerplate': 4}
+[mem_v2__baseline] 180/250 multi-mutable_default-make_counter-x-paging-drop_head FAIL(wrong_fix) steps=12 tok=24634 calls=13 97.1s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 181/250 multi-paging-paginate_pairs-x-types-safe_int FAIL(wrong_fix) steps=12 tok=29038 calls=13 82.7s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 182/250 multi-recursion-count_nodes-x-reduce_init-argmax PASS steps=12 tok=24087 calls=13 77.3s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 183/250 multi-types-total_amount-x-boundary-last_le PASS steps=12 tok=19135 calls=13 40.5s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 184/250 multi-parsing-parse_float_list-x-reduce_init-sum_positives PASS steps=12 tok=18125 calls=13 33.3s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 185/250 multi-cache_state-lru_get-x-mutable_default-group_by PASS steps=12 tok=22270 calls=13 62.3s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 186/250 multi-reduce_init-clamp-x-boundary-last_le PASS steps=10 tok=16249 calls=11 41.9s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 187/250 paging-take_tail PASS steps=8 tok=10463 calls=9 28.3s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 188/250 parsing-parse_kv PASS steps=11 tok=20530 calls=12 42.0s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 189/250 multi-boundary-count_occurrences-x-cache_state-ttl_cache PASS steps=12 tok=24232 calls=13 80.0s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 190/250 multi-types-add_numbers-x-boundary-lower_bound PASS steps=12 tok=22645 calls=13 107.9s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 191/250 multi-recursion-depth-x-types-format_price FAIL(wrong_fix) steps=12 tok=22930 calls=13 76.3s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 192/250 reduce_init-second_largest PASS steps=11 tok=17632 calls=12 38.3s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 193/250 multi-paging-chunk_list-x-reduce_init-argmax PASS steps=10 tok=15165 calls=11 33.0s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 194/250 multi-cache_state-config_cache-x-parsing-parse_flags FAIL(wrong_fix) steps=12 tok=24296 calls=13 78.4s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 195/250 multi-reduce_init-max_by_key-x-types-count_nonnull PASS steps=12 tok=20962 calls=13 37.9s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 196/250 mutable_default-add_metric PASS steps=7 tok=9911 calls=8 27.6s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 197/250 multi-recursion-sum_nested-x-boundary-count_occurrences PASS steps=10 tok=16967 calls=11 57.9s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 198/250 multi-boundary-insert_position_desc-x-parsing-parse_duration FAIL(llm_error) steps=6 tok=8625 calls=6 165.9s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 199/250 multi-cache_state-config_cache-x-mutable_default-unique_append PASS steps=12 tok=25395 calls=13 55.2s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 200/250 multi-reduce_init-product_or_none-x-boundary-upper_bound FAIL(wrong_fix) steps=12 tok=24080 calls=13 68.2s
+    记忆: 12 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 201/250 multi-recursion-flatten-x-types-safe_int FAIL(wrong_fix) steps=12 tok=24127 calls=13 84.1s
+    记忆: 13 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 202/250 multi-mutable_default-group_by-x-recursion-count_nodes FAIL(wrong_fix) steps=12 tok=24305 calls=13 80.6s
+    记忆: 13 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 203/250 multi-recursion-reverse_rec-x-reduce_init-clamp PASS steps=11 tok=18426 calls=12 44.4s
+    记忆: 13 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 204/250 multi-boundary-lower_bound-x-cache_state-counter_reset FAIL(wrong_fix) steps=10 tok=17656 calls=11 55.5s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 205/250 multi-recursion-depth-x-boundary-first_nonnegative FAIL(wrong_fix) steps=11 tok=19934 calls=12 68.9s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 206/250 multi-boundary-peak_index-x-parsing-parse_kv PASS steps=12 tok=22672 calls=13 54.1s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 207/250 recursion-sum_nested PASS steps=7 tok=9114 calls=8 24.5s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 208/250 multi-mutable_default-collect_pairs-x-parsing-parse_flags FAIL(wrong_fix) steps=12 tok=25944 calls=13 96.7s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 209/250 multi-boundary-peak_index-x-cache_state-token_bucket PASS steps=12 tok=22455 calls=13 117.7s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 210/250 multi-recursion-flatten-x-reduce_init-max_or_none PASS steps=10 tok=16366 calls=11 32.9s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 211/250 cache_state-lru_get PASS steps=7 tok=10923 calls=8 38.7s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 212/250 multi-cache_state-shared_cache-x-paging-between_inclusive FAIL(wrong_fix) steps=12 tok=46159 calls=13 129.3s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 213/250 types-count_nonnull PASS steps=7 tok=9307 calls=8 50.1s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 214/250 types-join_ids PASS steps=10 tok=16681 calls=11 39.6s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 215/250 parsing-parse_bool PASS steps=12 tok=24021 calls=13 92.4s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 216/250 multi-recursion-reverse_rec-x-types-total_amount PASS steps=12 tok=22591 calls=13 52.7s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 217/250 parsing-split_path PASS steps=7 tok=11702 calls=8 81.6s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 218/250 reduce_init-min_or_none PASS steps=8 tok=11419 calls=9 53.3s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 219/250 multi-reduce_init-clamp-x-types-sort_ids FAIL(wrong_fix) steps=12 tok=29854 calls=13 174.6s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 220/250 multi-reduce_init-max_by_key-x-boundary-peak_index PASS steps=12 tok=21636 calls=13 72.7s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 221/250 multi-cache_state-square_cache_key-x-mutable_default-Stack PASS steps=11 tok=27789 calls=12 85.2s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 222/250 multi-boundary-lower_bound-x-mutable_default-group_by PASS steps=9 tok=13148 calls=10 27.0s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 223/250 multi-recursion-power-x-reduce_init-mean_nonempty PASS steps=12 tok=24675 calls=13 55.1s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 224/250 paging-drop_head PASS steps=6 tok=7648 calls=7 21.9s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 225/250 cache_state-ttl_cache PASS steps=7 tok=10598 calls=8 32.0s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 226/250 multi-paging-paginate_pairs-x-recursion-flatten PASS steps=12 tok=21175 calls=13 89.3s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 227/250 multi-recursion-flatten-x-boundary-insert_position_desc PASS steps=11 tok=18350 calls=12 106.0s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 228/250 multi-boundary-insert_position_desc-x-cache_state-config_cache PASS steps=12 tok=23684 calls=13 55.2s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 229/250 multi-cache_state-ttl_cache-x-mutable_default-collect_pairs PASS steps=12 tok=23726 calls=13 51.9s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 230/250 multi-boundary-count_occurrences-x-mutable_default-make_counter FAIL(wrong_fix) steps=12 tok=30341 calls=13 82.8s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 231/250 multi-paging-paginate_pairs-x-parsing-split_path FAIL(wrong_fix) steps=12 tok=28812 calls=13 114.6s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 232/250 multi-paging-sliding_window-x-recursion-count_nodes PASS steps=10 tok=16049 calls=11 61.2s
+    记忆: 14 条 拒收={'boilerplate': 5}
+[mem_v2__baseline] 233/250 multi-boundary-first_nonnegative-x-parsing-parse_csv_line FAIL(wrong_fix) steps=11 tok=22052 calls=12 124.3s
+    记忆: 14 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 234/250 cache_state-config_cache PASS steps=7 tok=10343 calls=8 28.6s
+    记忆: 14 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 235/250 multi-cache_state-lru_get-x-parsing-parse_duration PASS steps=12 tok=27988 calls=13 125.5s
+    记忆: 15 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 236/250 multi-parsing-parse_kv-x-reduce_init-second_largest PASS steps=10 tok=16463 calls=11 88.2s
+    记忆: 15 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 237/250 recursion-tree_height PASS steps=7 tok=9766 calls=8 62.3s
+    记忆: 15 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 238/250 cache_state-token_bucket PASS steps=12 tok=25074 calls=13 152.0s
+    记忆: 15 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 239/250 multi-recursion-sum_nested-x-reduce_init-min_or_none PASS steps=11 tok=17556 calls=12 73.1s
+    记忆: 15 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 240/250 multi-paging-chunk_list-x-parsing-parse_kv PASS steps=10 tok=16828 calls=11 49.9s
+    记忆: 15 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 241/250 multi-boundary-insert_position_desc-x-mutable_default-collect_pairs PASS steps=11 tok=17652 calls=12 55.5s
+    记忆: 15 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 242/250 multi-recursion-count_nodes-x-types-sort_ids FAIL(wrong_fix) steps=12 tok=26287 calls=13 171.8s
+    记忆: 16 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 243/250 paging-chunk_list PASS steps=8 tok=11344 calls=9 28.1s
+    记忆: 16 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 244/250 multi-boundary-count_occurrences-x-paging-between_inclusive PASS steps=12 tok=26593 calls=13 44.4s
+    记忆: 16 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 245/250 cache_state-shared_cache PASS steps=9 tok=12520 calls=10 56.0s
+    记忆: 16 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 246/250 multi-reduce_init-max_or_none-x-cache_state-lru_get PASS steps=12 tok=22587 calls=13 105.1s
+    记忆: 16 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 247/250 multi-paging-last_page-x-recursion-tree_height PASS steps=9 tok=13862 calls=10 83.8s
+    记忆: 16 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 248/250 multi-boundary-search_rotated-x-mutable_default-add_metric FAIL(wrong_fix) steps=12 tok=24431 calls=13 167.1s
+    记忆: 17 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 249/250 types-add_numbers PASS steps=12 tok=26137 calls=13 155.7s
+    记忆: 17 条 拒收={'boilerplate': 6}
+[mem_v2__baseline] 250/250 multi-mutable_default-make_counter-x-recursion-sum_nested PASS steps=12 tok=20400 calls=13 102.3s
+    记忆: 17 条 拒收={'boilerplate': 6}
+完成，结果: experiments/v2/mem_v2.csv

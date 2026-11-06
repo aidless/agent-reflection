@@ -1,0 +1,5 @@
+config,task_id,success,rollback_used,rollback_verified,rollback_checks,steps,total_tokens,judge_detail,failure_mode,latency_s
+with_rollback,probe-huge-1,1,1,1,1,10,14640,1206 passed in 4.40s,,55.4
+no_rollback,probe-huge-1,1,0,0,0,16,30021,1206 passed in 4.61s,,87.6
+with_rollback,probe-huge-2,1,1,1,1,12,20051,1206 passed in 3.87s,,70.3
+no_rollback,probe-huge-2,1,0,0,0,10,25130,1206 passed in 4.11s,,85.4

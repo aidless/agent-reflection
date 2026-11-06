@@ -1,0 +1,21 @@
+{
+  "id": "multi-recursion-reverse_rec-x-reduce_init-clamp",
+  "kind": "multi",
+  "family": "recursion+reduce_init",
+  "bug_category": "recursion_base",
+  "bug_categories": [
+    "recursion_base",
+    "reduce_init"
+  ],
+  "bug_class": "递归基例错误 + 归约初值/比较器错误",
+  "bug_desc": "递归拼接顺序反了，结果等于原串；clamp 的 min/max 顺序颠倒，越界时返回错误边界",
+  "module": "recursion+stats",
+  "src_path": "src/recursion.py,src/stats.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/recursion.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_reverse_long",
+  "reference": {
+    "src/recursion.py": "def reverse_rec(s):\n    if len(s) <= 1:\n        return s\n    return reverse_rec(s[1:]) + s[0]\n",
+    "src/stats.py": "def clamp(value, lo, hi):\n    if hi < lo:\n        raise ValueError(\"hi must be >= lo\")\n    return max(lo, min(hi, value))\n"
+  },
+  "hidden_tests": "from recursion import reverse_rec\n\ndef test_reverse_single():\n    assert reverse_rec(\"z\") == \"z\"\n\ndef test_reverse_empty():\n    assert reverse_rec(\"\") == \"\"\n\ndef test_reverse_long():\n    assert reverse_rec(\"abcdef\") == \"fedcba\"\n\n\nfrom stats import clamp\n\ndef test_clamp_upper():\n    assert clamp(14, 0, 10) == 10\n\ndef test_clamp_lower():\n    assert clamp(-3, 0, 10) == 0\n\ndef test_clamp_bad_range():\n    import pytest\n    with pytest.raises(ValueError):\n        clamp(5, 10, 0)\n"
+}

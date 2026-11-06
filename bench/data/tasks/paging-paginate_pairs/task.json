@@ -1,0 +1,16 @@
+{
+  "id": "paging-paginate_pairs",
+  "kind": "single",
+  "family": "paging",
+  "bug_category": "paging_index",
+  "bug_class": "切片/分页 off-by-one",
+  "bug_desc": "分页循环条件少算了最后一块",
+  "module": "paging",
+  "src_path": "src/paging.py",
+  "prompt": "仓库工作区里 src/paging.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/paging.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_pairs_tail",
+  "reference": {
+    "src/paging.py": "def paginate_pairs(items, size):\n    if size < 1:\n        raise ValueError(\"size must be >= 1\")\n    out = []\n    start = 0\n    while start < len(items):\n        out.append((start + 1, items[start:start + size]))\n        start += size\n    return out\n"
+  },
+  "hidden_tests": "from paging import paginate_pairs\n\ndef test_pairs_tail():\n    assert paginate_pairs([1, 2, 3], 2) == [(1, [1, 2]), (3, [3])]\n\ndef test_pairs_empty():\n    assert paginate_pairs([], 2) == []\n\ndef test_pairs_single_pass():\n    assert paginate_pairs([1], 5) == [(1, [1])]\n"
+}

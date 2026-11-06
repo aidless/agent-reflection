@@ -1,0 +1,21 @@
+{
+  "id": "multi-boundary-count_occurrences-x-parsing-parse_bool",
+  "kind": "multi",
+  "family": "boundary+parsing",
+  "bug_category": "boundary_compare",
+  "bug_categories": [
+    "boundary_compare",
+    "parsing_robustness"
+  ],
+  "bug_class": "二分/边界 off-by-one + 解析边界情况",
+  "bug_desc": "计数依赖 lower_bound，但其初始上界写成 len-1，末尾元素统计漏算；布尔解析直接对原始字符串取真值，\"false\" 被判为真",
+  "module": "search+parsing",
+  "src_path": "src/search.py,src/parsing.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/search.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_count_absent_greater",
+  "reference": {
+    "src/search.py": "def lower_bound(arr, x):\n    lo, hi = 0, len(arr)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if arr[mid] < x:\n            lo = mid + 1\n        else:\n            hi = mid\n    return lo\n\n\ndef upper_bound(arr, x):\n    lo, hi = 0, len(arr)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if arr[mid] <= x:\n            lo = mid + 1\n        else:\n            hi = mid\n    return lo\n\n\ndef count_occurrences(arr, x):\n    return upper_bound(arr, x) - lower_bound(arr, x)\n",
+    "src/parsing.py": "def parse_bool(text):\n    return str(text).strip().lower() in (\"1\", \"true\", \"yes\", \"on\")\n"
+  },
+  "hidden_tests": "from search import count_occurrences\n\ndef test_count_absent_greater():\n    assert count_occurrences([1, 2, 4], 5) == 0\n\ndef test_count_all():\n    assert count_occurrences([2, 2], 2) == 2\n\ndef test_count_empty():\n    assert count_occurrences([], 7) == 0\n\ndef test_count_last_element():\n    assert count_occurrences([1, 2, 3, 9], 9) == 1\n\n\nfrom parsing import parse_bool\n\ndef test_bool_false_string():\n    assert parse_bool(\"false\") is False\n\ndef test_bool_zero_string():\n    assert parse_bool(\"0\") is False\n\ndef test_bool_off():\n    assert parse_bool(\"off\") is False\n\ndef test_bool_true_variants():\n    assert parse_bool(\"TRUE\") is True\n    assert parse_bool(\" 1 \") is True\n"
+}

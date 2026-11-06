@@ -1,0 +1,82 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (42B)
+      src/parsing.py  (295B)
+[dir] tests
+      tests/test_visible.py  (177B)
+[step 2] 思考: 读取所有源码与可见测试。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 200}
+  观察: src/parsing.py (12 行)
+   1| def parse_range(spec):
+   2|     out = []
+   3|     for part in spec.split(","):
+   4|         part = part.strip()
+   5|         if not part:
+   6|             continue
+   7|         if "-" in part:
+   8|             a, b = part.split("-", 1)
+   9|             out.append(
+[step 3] 思考: 读取 normalize.py 和 tests/test_visible.py。
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 200}
+  观察: src/normalize.py (2 行)
+   1| def sort_ids(ids):
+   2|     return sorted(ids)
+[step 4] 思考: 读取可见测试以理解预期行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 100}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_range
+   3| 
+   4| def test_range_simple():
+   5|     assert parse_range("1-3") == [1, 2, 3]
+   6| 
+   7| 
+   8| 
+   9| def test_range_mixed():
+  10|     assert parse_range("1-3,5") == [1, 2, 3, 5]
+[step 5] 解析失败：Now I understand. Two bugs:
+
+1. `parse_range`: "1-3" should return [1,2,3], but current code appends only int(a) = [1]. 
+[step 6] 思考: 需要修两处：parse_range 只把范围起点加入（应展开为 a..b 闭区间），sort_ids 用字符串排序会出错（'10'<'2'），应把 id 按数字部分排序。先修 parse_range。
+  动作: edit_file {"path": "src/parsing.py", "old": "def parse_range(spec):\n    out = []\n    for part in spec.split(\",\"):\n        part = part.strip()\n        if not part:\n            continue\n        if \"-\" i
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 7] 思考: 修复 sort_ids：按数值自然排序（处理字符串数字），并保持非数字/混合类型不报错。
+  动作: edit_file {"path": "src/normalize.py", "old": "def sort_ids(ids):\n    return sorted(ids)", "new": "def _id_key(value):\n    text = str(value).strip()\n    try:\n        return (0, int(text), \"\")\n    except 
+  观察: 已修改 src/normalize.py（替换 1 处）
+[step 8] 思考: parse_range 对负数的处理可能不健壮（如 "-3--1" 或 "-5"）。改用正则解析范围。
+  动作: edit_file {"path": "src/parsing.py", "old": "def parse_range(spec):\n    out = []\n    if spec is None:\n        return out\n    for part in str(spec).split(\",\"):\n        part = part.strip()\n        if not 
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 9] 思考: 用脚本验证边界用例并跑可见测试。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_range\nfrom normalize import sort_ids\nprint(parse_range('1-3'), parse_range('1-3,5'), parse_range('5-1'), parse_range('-3--1'
+  观察: exit=0
+[1, 2, 3] [1, 2, 3, 5] [5, 4, 3, 2, 1] [-3, -2, -1] [-5] [2, 4, 5, 6] [] []
+['1', '2', '10']
+[1, 2, 10]
+['a', 'b', 'c']
+[]
+
+[step 10] 思考: sort_ids 还需支持带前缀的 id（如 'id10','id2'）自然排序，改进 key 为分段数字比较。
+  动作: edit_file {"path": "src/normalize.py", "old": "def _id_key(value):\n    text = str(value).strip()\n    try:\n        return (0, int(text), \"\")\n    except (TypeError, ValueError):\n        pass\n    try:\n   
+  观察: 已修改 src/normalize.py（替换 1 处）
+[step 11] 思考: 验证带前缀 id 的自然排序，以及混合类型不报错。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom normalize import sort_ids\nfrom parsing import parse_range\nprint(sort_ids(['id10','id2','id1']))\nprint(sort_ids(['10','2','1']))\nprint(sort_ids(
+  观察: exit=0
+['id1', 'id2', 'id10']
+['1', '2', '10']
+[1, 2, 10]
+['a', 'b', 'c']
+[1, '2', 10, 'a', 'b']
+[]
+[1, 2, 3] [1, 2, 3, 5]
+
+[step 12] 思考: 运行全量测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.10s
+
+  反思异常: reflection_parse_failed: We need answer only JSON object. Need analyze trajectory. Need infer bug category from failure. Task: repair all defects in src hidden tests, visible only parsing. Execution passed tests but final hid || {"bug_category":"排序/自然排序缺陷","symptom":"sort_ids 对带前缀ID按字典序

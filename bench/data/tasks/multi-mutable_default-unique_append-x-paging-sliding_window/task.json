@@ -1,0 +1,21 @@
+{
+  "id": "multi-mutable_default-unique_append-x-paging-sliding_window",
+  "kind": "multi",
+  "family": "mutable_default+paging",
+  "bug_category": "mutable_default",
+  "bug_categories": [
+    "mutable_default",
+    "paging_index"
+  ],
+  "bug_class": "可变默认参数/共享状态 + 切片/分页 off-by-one",
+  "bug_desc": "去重集合作为可变默认参数，跨调用残留；窗口滑动次数少算一次，最后一个窗口缺失",
+  "module": "collect+paging",
+  "src_path": "src/collect.py,src/paging.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_unique_leak",
+  "reference": {
+    "src/collect.py": "def unique_append(items, value, seen=None):\n    if seen is None:\n        seen = set()\n    if value in seen:\n        return list(items)\n    seen.add(value)\n    return list(items) + [value]\n",
+    "src/paging.py": "def sliding_window(items, k):\n    if k < 1:\n        raise ValueError(\"k must be >= 1\")\n    return [items[i:i + k] for i in range(len(items) - k + 1)]\n"
+  },
+  "hidden_tests": "from collect import unique_append\n\ndef test_unique_leak():\n    first = unique_append([], 7)\n    second = unique_append([], 7)\n    assert first == [7]\n    assert second == [7]\n\ndef test_unique_duplicate_in_list():\n    assert unique_append([1], 1, {1}) == [1]\n\n\nfrom paging import sliding_window\n\ndef test_window_full_length():\n    assert sliding_window([1, 2, 3], 3) == [[1, 2, 3]]\n\ndef test_window_larger_than_list():\n    assert sliding_window([1], 5) == []\n\ndef test_window_one():\n    assert sliding_window([1, 2], 1) == [[1], [2]]\n"
+}

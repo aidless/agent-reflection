@@ -1,0 +1,89 @@
+task: 仓库工作区里 src/state.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/state.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和源文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/state.py  (310B)
+[dir] tests
+      tests/test_visible.py  (238B)
+[step 2] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path": "src/state.py"}}</｜DSML｜ parame
+[step 3] 思考: 读取源码
+  动作: read_file {"path": "src/state.py"}
+  观察: src/state.py (13 行)
+   1| class TokenBucket:
+   2|     def __init__(self, capacity):
+   3|         self.capacity = capacity
+   4|         self.tokens = capacity
+   5| 
+   6|     def take(self, n=1):
+   7|         if self.tokens >= n:
+   8|             self.tokens -= n
+   9|             return True
+ 
+[step 4] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path": "tests/test_visible.py"}}</｜DSM
+[step 5] 思考: 读取可见测试
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (14 行)
+   1| 
+   2| from state import TokenBucket
+   3| 
+   4| def test_bucket_take():
+   5|     b = TokenBucket(3)
+   6|     assert b.take(2) is True
+   7| 
+   8| 
+   9| 
+  10| def test_bucket_refill_capped():
+  11|     b = TokenBucket(3)
+  12|     assert b.take(3) is True
+  1
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="write_file">
+<｜DSML｜ parameter name="args":{"path": "src/state.py", "content": "cl
+[step 7] 思考: 可见测试失败原因是 refill 未按 capacity 封顶。需修根因并覆盖边界：refill 封顶、take 不足时不扣减、非法参数处理。注意测试里 `is True` 要求返回真布尔值。
+  动作: write_file {"path": "src/state.py", "content": "class TokenBucket:\n    \"\"\"A simple token bucket.\n\n    The bucket starts full and never holds more than ``capacity`` tokens or\n    fewer than zero tokens.\n 
+  观察: 已写入 src/state.py（1300 字符）
+[step 8] 思考: 确认写入内容是否完整（我的内容可能在末尾被截断）
+  动作: read_file {"path": "src/state.py"}
+  观察: src/state.py (42 行)
+   1| class TokenBucket:
+   2|     """A simple token bucket.
+   3| 
+   4|     The bucket starts full and never holds more than ``capacity`` tokens or
+   5|     fewer than zero tokens.
+   6|     """
+   7| 
+   8|     def __init__(self, capacity):
+   9|         self.capacity = _chec
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="write_file">
+<｜DSML｜ parameter name="args":{"path": "src/state.py", "content": "cl
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args":{"selector": "tests"}</｜DSML｜ parameter>
+[step 11] 思考: 运行可见测试确认修复
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 12] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="write_file">
+<｜DSML｜ parameter name="args":{"path": "src/state.py", "content": "cl

@@ -1,0 +1,21 @@
+{
+  "id": "multi-reduce_init-max_by_key-x-boundary-peak_index",
+  "kind": "multi",
+  "family": "reduce_init+boundary",
+  "bug_category": "reduce_init",
+  "bug_categories": [
+    "reduce_init",
+    "boundary_compare"
+  ],
+  "bug_class": "归约初值/比较器错误 + 二分/边界 off-by-one",
+  "bug_desc": "max_by_key 直接比较元素本身，忽略 key 函数；收缩右边界时多减 1，峰值在末尾时返回错误下标",
+  "module": "stats+search",
+  "src_path": "src/stats.py,src/search.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_max_by_key_dict",
+  "reference": {
+    "src/stats.py": "def max_by_key(items, key):\n    if not items:\n        return None\n    best = items[0]\n    for it in items[1:]:\n        if key(it) > key(best):\n            best = it\n    return best\n",
+    "src/search.py": "def peak_index(arr):\n    lo, hi = 0, len(arr) - 1\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if arr[mid] > arr[mid + 1]:\n            hi = mid\n        else:\n            lo = mid + 1\n    return lo\n"
+  },
+  "hidden_tests": "from stats import max_by_key\n\ndef test_max_by_key_dict():\n    rows = [{\"v\": 1}, {\"v\": 9}, {\"v\": 5}]\n    assert max_by_key(rows, lambda r: r[\"v\"]) == {\"v\": 9}\n\ndef test_max_by_key_empty():\n    assert max_by_key([], len) is None\n\ndef test_max_by_key_tie():\n    assert max_by_key([\"bb\", \"aa\"], len) == \"bb\"\n\n\nfrom search import peak_index\n\ndef test_peak_last():\n    assert peak_index([1, 2, 3]) == 2\n\ndef test_peak_first():\n    assert peak_index([5, 4, 1]) == 0\n\ndef test_single_element():\n    assert peak_index([9]) == 0\n"
+}

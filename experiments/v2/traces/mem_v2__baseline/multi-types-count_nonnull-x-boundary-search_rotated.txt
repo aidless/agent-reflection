@@ -1,0 +1,77 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/normalize.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，定位 src 与 tests。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (66B)
+      src/search.py  (467B)
+[dir] tests
+      tests/test_visible.py  (177B)
+[step 2] 思考: 读取所有源码与可见测试。
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 120}
+  观察: src/normalize.py (2 行)
+   1| def count_nonnull(values):
+   2|     return sum(1 for v in values if v)
+[step 3] 思考: 读取 search.py 与测试。
+  动作: read_file {"path": "src/search.py", "start_line": 1, "end_line": 120}
+  观察: src/search.py (17 行)
+   1| def search_rotated(arr, target):
+   2|     lo, hi = 0, len(arr) - 1
+   3|     while lo <= hi:
+   4|         mid = (lo + hi) // 2
+   5|         if arr[mid] == target:
+   6|             return mid
+   7|         if arr[lo] <= arr[mid]:
+   8|             if arr[lo] < target <=
+[step 4] 解析失败：Let me analyze.
+
+normalize.count_nonnull: `if v` treats 0, "", False, 0.0 as null. Should be `v is not None`. That's the
+[step 5] 思考: 修复 count_nonnull 用 is not None；search_rotated 左半段条件应为 arr[lo] <= target。
+  动作: edit_file {"path": "src/normalize.py", "old": "    return sum(1 for v in values if v)", "new": "    return sum(1 for v in values if v is not None)"}
+  观察: 已修改 src/normalize.py（替换 1 处）
+[step 6] 思考: 左半段判断漏了 target==arr[lo] 的情况，改为闭区间。
+  动作: edit_file {"path": "src/search.py", "old": "            if arr[lo] < target <= arr[mid]:", "new": "            if arr[lo] <= target < arr[mid]:"}
+  观察: 已修改 src/search.py（替换 1 处）
+[step 7] 思考: 用穷举对比标准实现验证旋转数组搜索。
+  动作: run_python {"code": "import itertools,sys\nsys.path.insert(0,'src')\nfrom search import search_rotated\nfrom normalize import count_nonnull\nbad=0\nfor n in range(0,8):\n  for base in itertools.permutations(rang
+  观察: exit=0
+bad 0
+5 0
+
+[step 8] 思考: 穷举旋转数组无错误；count_nonnull 行为正确。跑可见测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 9] 思考: 仍有重复元素的边界风险，例如 [1,0,1,1,1]，构造用例验证。
+  动作: run_python {"code": "import sys;sys.path.insert(0,'src')\nfrom search import search_rotated\nfor arr,t in [([1,0,1,1,1],0),([2,2,2,0,2],0),([1,1,1,0,1],0),([3,1,3],1),([1,3,1,1,1],3)]:\n    print(arr,t,search_ro
+  观察: exit=0
+[1, 0, 1, 1, 1] 0 -1 1
+[2, 2, 2, 0, 2] 0 3 3
+[1, 1, 1, 0, 1] 0 3 3
+[3, 1, 3] 1 1 1
+[1, 3, 1, 1, 1] 3 -1 1
+
+[step 10] 思考: 重复元素下判区失败，需加 arr[lo]==arr[mid]==arr[hi] 收缩分支。
+  动作: edit_file {"path": "src/search.py", "old": "        if arr[lo] <= arr[mid]:", "new": "        if arr[lo] == arr[mid] == arr[hi]:\n            lo += 1\n            hi -= 1\n        elif arr[lo] <= arr[mid]:"}
+  观察: 已修改 src/search.py（替换 1 处）
+[step 11] 思考: 验证重复元素用例与穷举。
+  动作: run_python {"code": "import sys;sys.path.insert(0,'src')\nfrom search import search_rotated\nfor arr,t in [([1,0,1,1,1],0),([2,2,2,0,2],0),([1,1,1,0,1],0),([1,3,1,1,1],3)]:\n    print(arr,t,search_rotated(arr,t)
+  观察: exit=0
+[1, 0, 1, 1, 1] 0 1 1
+[2, 2, 2, 0, 2] 0 3 3
+[1, 1, 1, 0, 1] 0 3 3
+[1, 3, 1, 1, 1] 3 1 1
+bad 1246
+
+[step 12] 思考: 穷举任意数组非有效输入，只测旋转有序含重复数组。
+  动作: run_python {"code": "import sys,itertools;sys.path.insert(0,'src')\nfrom search import search_rotated\nbad=0\nfor n in range(0,8):\n  for arr in itertools.combinations_with_replacement(range(3),n):\n    arr=list
+  观察: exit=0
+BAD [0, 0, 0] 0 1 0
+BAD [0, 0, 0] 0 1 0
+BAD [0, 0, 0] 0 1 0
+BAD [0, 0, 0] 0 1 0
+BAD [0, 0, 1] 0 1 0
+bad 749

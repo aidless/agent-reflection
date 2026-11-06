@@ -1,0 +1,21 @@
+{
+  "id": "multi-types-join_ids-x-cache_state-ttl_cache",
+  "kind": "multi",
+  "family": "types+cache_state",
+  "bug_category": "type_conversion",
+  "bug_categories": [
+    "type_conversion",
+    "cache_state"
+  ],
+  "bug_class": "类型转换/空值处理 + 状态/缓存失效错误",
+  "bug_desc": "拼接未把元素转字符串，整型列表抛 TypeError；TTL 过期判断被禁用，过期键仍然返回值",
+  "module": "normalize+state",
+  "src_path": "src/normalize.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/normalize.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_join_ints",
+  "reference": {
+    "src/normalize.py": "def join_ids(ids):\n    return \",\".join(str(i) for i in ids)\n",
+    "src/state.py": "import time\n\n\nclass TTLCache:\n    def __init__(self, ttl):\n        self.ttl = ttl\n        self._data = {}\n\n    def set(self, k, v):\n        self._data[k] = (v, time.time())\n\n    def get(self, k):\n        if k not in self._data:\n            return None\n        v, ts = self._data[k]\n        if time.time() - ts > self.ttl:\n            del self._data[k]\n            return None\n        return v\n"
+  },
+  "hidden_tests": "from normalize import join_ids\n\ndef test_join_ints():\n    assert join_ids([1, 2, 3]) == \"1,2,3\"\n\ndef test_join_mixed():\n    assert join_ids([1, \"a\"]) == \"1,a\"\n\ndef test_join_single():\n    assert join_ids([7]) == \"7\"\n\n\nimport time\nfrom state import TTLCache\n\ndef test_ttl_expires():\n    c = TTLCache(0.05)\n    c.set(\"a\", 1)\n    time.sleep(0.12)\n    assert c.get(\"a\") is None\n\ndef test_ttl_missing():\n    assert TTLCache(1).get(\"z\") is None\n"
+}

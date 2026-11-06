@@ -1,0 +1,16 @@
+{
+  "id": "recursion-tree_height",
+  "kind": "single",
+  "family": "recursion",
+  "bug_category": "recursion_base",
+  "bug_class": "递归基例错误",
+  "bug_desc": "叶子节点高度返回 0，整棵树高度偏低 1",
+  "module": "recursion",
+  "src_path": "src/recursion.py",
+  "prompt": "仓库工作区里 src/recursion.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/recursion.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_height_two_levels",
+  "reference": {
+    "src/recursion.py": "class Node:\n    def __init__(self, value, children=None):\n        self.value = value\n        self.children = children or []\n\n\ndef tree_height(node):\n    if node is None:\n        return 0\n    if not node.children:\n        return 1\n    return 1 + max(tree_height(c) for c in node.children)\n"
+  },
+  "hidden_tests": "from recursion import Node, tree_height\n\ndef test_height_two_levels():\n    root = Node(1, [Node(2), Node(3)])\n    assert tree_height(root) == 2\n\ndef test_height_nested():\n    root = Node(1, [Node(2, [Node(3)])])\n    assert tree_height(root) == 3\n\ndef test_height_none():\n    assert tree_height(None) == 0\n"
+}

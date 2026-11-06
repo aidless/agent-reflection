@@ -1,0 +1,59 @@
+task: 仓库工作区里 src/stats.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/stats.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和测试文件，定位失败点。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/stats.py  (133B)
+[dir] tests
+      tests/test_visible.py  (173B)
+[step 2] 思考: 读取源码与可见测试。
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 200}
+  观察: src/stats.py (7 行)
+   1| def product_or_none(values):
+   2|     if not values:
+   3|         return None
+   4|     out = 0
+   5|     for v in values:
+   6|         out *= v
+   7|     return out
+[step 3] 思考: 疑似根因：乘积初值写成了 0（reduce init 缺陷）。先读测试确认期望。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 200}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from stats import product_or_none
+   3| 
+   4| def test_product_basic():
+   5|     assert product_or_none([2, 3, 4]) == 24
+   6| 
+   7| 
+   8| 
+   9| def test_product_single():
+  10|     assert product_or_none([5]) == 5
+[step 4] 思考: 根因确认：乘积初值应为 1（reduce_init 缺陷），并且用 `not values` 判断空对生成器等迭代器不可靠。改为用迭代器取首元素作初值，空则返回 None。
+  动作: write_file {"path": "src/stats.py", "content": "def product_or_none(values):\n    \"\"\"Return the product of ``values``, or ``None`` when there is nothing to multiply.\"\"\"\n    if values is None:\n        ret
+  观察: 已写入 src/stats.py（312 字符）
+[step 5] 思考: 运行测试确认可见测试通过，并快速验证边界情况（空列表、生成器、含 0 与负数）。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 6] 思考: 再用边界用例验证：空列表、None、生成器、含 0、负数、浮点。
+  动作: run_python {"code": "from src.stats import product_or_none as p\nassert p([]) is None\nassert p(None) is None\nassert p([5]) == 5\nassert p([2,3,4]) == 24\nassert p([0,5]) == 0\nassert p([-2,3]) == -6\nassert p(
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v2__baseline/reduce_init-product_or_none/.agent_tmp/run_1.py", line 1, in <module>
+    from src.stats import product_or_none as p
+ModuleNotFoundError: No module named 'src'
+
+[step 7] 思考: 测试是直接从 stats 导入的（src 在路径中）。调整导入方式重跑边界验证。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom stats import product_or_none as p\nassert p([]) is None\nassert p(None) is None\nassert p([5]) == 5\nassert p([2,3,4]) == 24\nassert p([0,5]) == 0\
+  观察: exit=0
+ok
+
+[step 8] 思考: 根因已修复：reduce 初值错误地为 0 导致乘积恒为 0；同时空输入判断改为迭代器语义，覆盖 None、空列表、生成器、含 0、负数、浮点等边界。可见测试全部通过。
+  动作: finish {"summary": "修复 src/stats.py：将乘积累加的初值从 0 改为取首个元素（避免结果恒为 0 的 reduce init 缺陷），并用 iter/next 处理空输入，使空列表、None、空迭代器返回 None，同时保留对生成器等一次性迭代器的支持。可见测试 2 项全部通过，边界用例验证通过。"}
+  判定: 5 passed in 0.01s

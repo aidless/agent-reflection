@@ -1,0 +1,74 @@
+task: 仓库工作区里 src/parsing.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/parsing.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先看看工作区结构和相关文件。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (289B)
+[dir] tests
+      tests/test_visible.py  (217B)
+[step 2] 思考: 读取源码与可见测试。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 60}
+  观察: src/parsing.py (12 行)
+   1| def parse_flags(argv):
+   2|     out = {}
+   3|     for token in argv:
+   4|         if not token.startswith("--"):
+   5|             continue
+   6|         body = token[2:]
+   7|         if "=" in body:
+   8|             k, v = body.split("=", 1)
+   9|             out[k]
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "tests/test_visi
+[step 4] 思考: 读取可见测试。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_flags
+   3| 
+   4| def test_flags_pairs():
+   5|     assert parse_flags(["--a=1", "--b=2"]) == {"a": "1", "b": "2"}
+   6| 
+   7| 
+   8| 
+   9| def test_flag_boolean_type():
+  10|     assert parse_flags(["--verbose"]) == {"verbose": 
+[step 5] 思考: 可见测试表明裸 flag 应返回布尔 True，而不是字符串 "true"。同时需处理边界："--" 结束标记、"--=x" 空键、"--k=v=w" 只切一次、非 flag token 忽略、重复 flag 后者覆盖。值保持字符串（可见测试 "1" 仍是字符串）。
+  动作: edit_file {"path": "src/parsing.py", "old": "        if \"=\" in body:\n            k, v = body.split(\"=\", 1)\n            out[k] = v\n        else:\n            out[body] = \"true\"\n    return out", "new": 
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 6] 思考: 运行测试验证。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.10s
+
+[step 7] 思考: 补充边界处理：标准约定中单独的 "--" 终止选项解析；同时防御非字符串 token。
+  动作: edit_file {"path": "src/parsing.py", "old": "    for token in argv:\n        if not token.startswith(\"--\"):\n            continue", "new": "    for token in argv:\n        if not isinstance(token, str):\n    
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 8] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D
+[step 9] 思考: 再次运行测试并验证边界行为。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_flags\nprint(parse_flags(['--a=1','--b=2']))\nprint(parse_flags(['--verbose']))\nprint(parse_flags(['--a=b=c']))\nprint(parse_
+  观察: exit=0
+{'a': '1', 'b': '2'}
+{'verbose': True}
+{'a': 'b=c'}
+{}
+{'k': ''}
+{}
+
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D
+[step 11] 思考: 测试通过，边界行为合理（裸 flag 为 True、键值对为字符串、"--" 终止、空键忽略、非 flag 忽略）。修复完成。
+  动作: finish {"summary": "修复 src/parsing.py 的 parse_flags：裸 flag（如 --verbose）现在映射为布尔 True 而非字符串 \"true\"；键值对仍用 split('=',1) 且值为字符串；忽略空键（--=v）与非字符串 token；遇到单独的 \"--\" 终止解析。可见测试全部通过。"}
+  判定: 5 passed in 0.01s

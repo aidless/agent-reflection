@@ -1,0 +1,16 @@
+{
+  "id": "recursion-power",
+  "kind": "single",
+  "family": "recursion",
+  "bug_category": "recursion_base",
+  "bug_class": "递归基例错误",
+  "bug_desc": "奇偶分支判断写成 exp>1，奇数次幂结果偏大",
+  "module": "recursion",
+  "src_path": "src/recursion.py",
+  "prompt": "仓库工作区里 src/recursion.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/recursion.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_power_odd",
+  "reference": {
+    "src/recursion.py": "def power(base, exp):\n    if exp == 0:\n        return 1\n    if exp % 2 == 1:\n        return base * power(base, exp - 1)\n    half = power(base, exp // 2)\n    return half * half\n"
+  },
+  "hidden_tests": "from recursion import power\n\ndef test_power_odd():\n    assert power(2, 3) == 8\n\ndef test_power_zero():\n    assert power(5, 0) == 1\n\ndef test_power_ten():\n    assert power(2, 10) == 1024\n\ndef test_power_one():\n    assert power(7, 1) == 7\n"
+}

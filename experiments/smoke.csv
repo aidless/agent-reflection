@@ -1,0 +1,11 @@
+arm,task_id,family,success,judge_detail,failure_mode,steps,calls,tool_calls,plan_calls,reflect_calls,prompt_tokens,completion_tokens,reflect_tokens,total_tokens,cached_tokens,latency_s,rollback_used,rollback_verified,rollback_checks,test_runs,memory_injected,memory_injected_count,error
+no_memory__baseline,multi-boundary-last_le-x-mutable_default-merge_defaults,boundary+mutable_default,1,9 passed in 0.02s,,14,15,7,1,0,17926,2544,0,20470,14848,44.2,0,0,0,1,,0,
+no_memory__baseline,paging-between_inclusive,paging,1,5 passed in 0.02s,,10,11,8,1,0,11632,2117,0,13749,0,97.3,0,0,0,1,,0,
+no_memory__baseline,multi-boundary-last_le-x-parsing-parse_flags,boundary+parsing,0,"3 failed, 6 passed in 0.06s",wrong_fix,12,13,8,1,0,16092,3356,0,19448,13184,56.7,0,0,0,1,,0,
+no_memory__baseline,paging-chunk_list,paging,1,5 passed in 0.02s,,10,11,7,1,0,10751,1090,0,11841,8320,31.7,0,0,0,1,,0,
+no_memory__baseline,multi-boundary-lower_bound-x-cache_state-counter_reset,boundary+cache_state,1,8 passed in 0.03s,,9,10,8,1,0,10015,1453,0,11468,7680,33.8,0,0,0,1,,0,
+mem_v2__baseline,multi-boundary-last_le-x-mutable_default-merge_defaults,boundary+mutable_default,1,9 passed in 0.04s,,10,11,8,1,0,12773,2252,0,15025,0,106.1,0,0,0,1,,0,
+mem_v2__baseline,paging-between_inclusive,paging,1,5 passed in 0.04s,,9,10,7,1,0,9688,2856,0,12544,0,158.6,0,0,0,1,,0,
+mem_v2__baseline,multi-boundary-last_le-x-parsing-parse_flags,boundary+parsing,0,"3 failed, 6 passed in 0.06s",wrong_fix,14,15,10,1,2,21739,3403,2457,27599,4480,205.9,0,0,1,2,,0,"reflection_parse_failed: 我们需要回答 JSON only. Need analyze trace. Need identify bug category likely parsing_robustness. Need infer root cause from failure? Trace: modified search.py, parsing.py. Step12 r"
+mem_v2__baseline,paging-chunk_list,paging,1,5 passed in 0.02s,,8,9,6,1,0,8780,1979,0,10759,6272,34.7,0,0,0,1,,0,
+mem_v2__baseline,multi-boundary-lower_bound-x-cache_state-counter_reset,boundary+cache_state,0,"1 failed, 7 passed in 0.06s",wrong_fix,11,12,8,1,2,12921,1887,2536,17344,10496,75.0,0,0,0,1,,0,"reflection_parse_failed: 我们需要分析轨迹。最终判定 1 failed, 7 passed。可见测试通过，但隐藏测试失败一处。任务要求修复所有缺陷。执行轨迹只提到两个文件 search.py 和 state.py。失败可能是什么？需要从 bug 类别中选最贴切。轨迹中修复 search.py lower_bound 上界改为 len(arr)，修复 state.py res"

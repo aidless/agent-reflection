@@ -1,0 +1,21 @@
+{
+  "id": "multi-paging-between_inclusive-x-types-add_numbers",
+  "kind": "multi",
+  "family": "paging+types",
+  "bug_category": "paging_index",
+  "bug_categories": [
+    "paging_index",
+    "type_conversion"
+  ],
+  "bug_class": "切片/分页 off-by-one + 类型转换/空值处理",
+  "bug_desc": "闭区间切片写成半开区间，右端点丢一个；加法未做数值转换，两个字符串被拼接",
+  "module": "paging+normalize",
+  "src_path": "src/paging.py,src/normalize.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/paging.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_between_adjacent",
+  "reference": {
+    "src/paging.py": "def between_inclusive(items, lo, hi):\n    if hi < lo:\n        return []\n    return items[lo:hi + 1]\n",
+    "src/normalize.py": "def add_numbers(a, b):\n    return float(a) + float(b)\n"
+  },
+  "hidden_tests": "from paging import between_inclusive\n\ndef test_between_adjacent():\n    assert between_inclusive([0, 1, 2], 1, 2) == [1, 2]\n\ndef test_between_same():\n    assert between_inclusive([0, 1, 2], 1, 1) == [1]\n\ndef test_between_reverse():\n    assert between_inclusive([0, 1, 2], 2, 1) == []\n\n\nfrom normalize import add_numbers\n\ndef test_add_numeric_strings():\n    assert add_numbers(\"1\", \"2\") == 3.0\n\ndef test_add_mixed():\n    assert add_numbers(\"3\", 4) == 7.0\n\ndef test_add_floats():\n    assert abs(add_numbers(\"1.5\", \"2.5\") - 4.0) < 1e-9\n"
+}

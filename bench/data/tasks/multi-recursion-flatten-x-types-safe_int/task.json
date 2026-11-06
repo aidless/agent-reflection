@@ -1,0 +1,21 @@
+{
+  "id": "multi-recursion-flatten-x-types-safe_int",
+  "kind": "multi",
+  "family": "recursion+types",
+  "bug_category": "recursion_base",
+  "bug_categories": [
+    "recursion_base",
+    "type_conversion"
+  ],
+  "bug_class": "递归基例错误 + 类型转换/空值处理",
+  "bug_desc": "递归条件漏掉空列表，空嵌套被当作叶子元素保留；safe_int 未先转 float，'3.7' 这类合法数字字符串走 default",
+  "module": "recursion+normalize",
+  "src_path": "src/recursion.py,src/normalize.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/recursion.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_flatten_empty_nested",
+  "reference": {
+    "src/recursion.py": "def flatten(items):\n    out = []\n    for it in items:\n        if isinstance(it, list):\n            out.extend(flatten(it))\n        else:\n            out.append(it)\n    return out\n",
+    "src/normalize.py": "def safe_int(value, default=0):\n    try:\n        return int(float(str(value).strip()))\n    except (TypeError, ValueError):\n        return default\n"
+  },
+  "hidden_tests": "from recursion import flatten\n\ndef test_flatten_empty_nested():\n    assert flatten([1, [], [2, [3]]]) == [1, 2, 3]\n\ndef test_flatten_all_empty():\n    assert flatten([[], [], []]) == []\n\ndef test_flatten_deep():\n    assert flatten([1, [2, [3, [4]]]]) == [1, 2, 3, 4]\n\n\nfrom normalize import safe_int\n\ndef test_safe_int_float_string():\n    assert safe_int(\"3.7\") == 3\n\ndef test_safe_int_invalid():\n    assert safe_int(\"abc\", -1) == -1\n\ndef test_safe_int_none():\n    assert safe_int(None, -5) == -5\n\ndef test_safe_int_padded():\n    assert safe_int(\"  42 \") == 42\n"
+}

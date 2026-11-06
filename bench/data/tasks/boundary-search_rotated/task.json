@@ -1,0 +1,16 @@
+{
+  "id": "boundary-search_rotated",
+  "kind": "single",
+  "family": "boundary",
+  "bug_category": "boundary_compare",
+  "bug_class": "二分/边界 off-by-one",
+  "bug_desc": "旋转数组二分中，目标等于左端点时被排除",
+  "module": "search",
+  "src_path": "src/search.py",
+  "prompt": "仓库工作区里 src/search.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/search.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_target_is_left_edge",
+  "reference": {
+    "src/search.py": "def search_rotated(arr, target):\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid\n        if arr[lo] <= arr[mid]:\n            if arr[lo] <= target < arr[mid]:\n                hi = mid - 1\n            else:\n                lo = mid + 1\n        else:\n            if arr[mid] < target <= arr[hi]:\n                lo = mid + 1\n            else:\n                hi = mid - 1\n    return -1\n"
+  },
+  "hidden_tests": "from search import search_rotated\n\ndef test_target_is_left_edge():\n    assert search_rotated([4, 5, 6, 7, 1, 2, 3], 4) == 0\n\ndef test_target_missing():\n    assert search_rotated([4, 5, 6, 7], 3) == -1\n\ndef test_single():\n    assert search_rotated([7], 7) == 0\n\ndef test_target_is_right_edge():\n    assert search_rotated([5, 1, 3], 3) == 2\n"
+}

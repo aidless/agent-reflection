@@ -1,0 +1,48 @@
+task: 仓库工作区里 src/normalize.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/normalize.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和相关文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (42B)
+[dir] tests
+      tests/test_visible.py  (191B)
+[step 2] 思考: 读取源码与可见测试
+  动作: read_file {"path": "src/normalize.py"}
+  观察: src/normalize.py (2 行)
+   1| def sort_ids(ids):
+   2|     return sorted(ids)
+[step 3] 思考: 读取可见测试以了解期望行为
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from normalize import sort_ids
+   3| 
+   4| def test_sort_single_digit():
+   5|     assert sort_ids(["2", "1"]) == [1, 2]
+   6| 
+   7| 
+   8| 
+   9| def test_sort_numeric_order():
+  10|     assert sort_ids(["10", "2", "1"]) == [1, 2, 10]
+[step 4] 思考: 测试要求把字符串 ID 转为整数并按数值排序返回 int 列表。当前 sorted 对字符串做字典序且返回字符串。修复为转为 int 后排序。
+  动作: edit_file {"path": "src/normalize.py", "old": "def sort_ids(ids):\n    return sorted(ids)", "new": "def sort_ids(ids):\n    \"\"\"Normalize a collection of IDs to integers and return them in ascending numeric o
+  观察: 已修改 src/normalize.py（替换 1 处）
+[step 5] 思考: 运行全量测试确认
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 6] 解析失败：{"thought":"验证若干边界输入（整数、带空白、前导零、生成器）","action":"run_python","args":{"code":"import sys; sys.path.insert(0,'src')\nfrom n
+[step 7] 思考: 验证边界输入（整数、空白、前导零、生成器、空列表）
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom normalize import sort_ids\nprint(sort_ids([3,1,2]))\nprint(sort_ids([' 10','2','007']))\nprint(sort_ids(x for x in ['-1','10','2']))\nprint(sort_id
+  观察: exit=0
+[1, 2, 3]
+[2, 7, 10]
+[-1, 2, 10]
+[]
+
+[step 8] 思考: 根因是按字典序对字符串排序且未转 int。已改为 int 转换后数值排序，可见测试与边界验证均通过。
+  动作: finish {"summary": "修复 src/normalize.py 的 sort_ids：将输入元素统一转换为 int 后按数值升序排序并返回 int 列表（原实现按字符串字典序排序且返回字符串）。验证了整数输入、带空白/前导零字符串、生成器及空列表等边界情况均正确。"}
+  判定: 5 passed in 0.02s

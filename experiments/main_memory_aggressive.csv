@@ -1,0 +1,7 @@
+arm,task_id,family,success,judge_detail,failure_mode,steps,calls,tool_calls,plan_calls,reflect_calls,prompt_tokens,completion_tokens,reflect_tokens,total_tokens,cached_tokens,latency_s,rollback_used,rollback_verified,rollback_checks,test_runs,memory_injected,memory_injected_count,error
+memory__aggressive,multi-paging-between_inclusive-x-types-add_numbers,paging+types,0,"7 failed, 1 passed in 0.04s",wrong_fix,14,14,11,0,2,12061,766,2390,15217,512,185.8,0,0,0,0,,0,"reflection_parse_failed: 我们需要输出一个 JSON 对象，分析这次失败的 Agent 执行，产出可迁移的结构化教训。需要具体、可执行，字段 scenario, error_type, root_cause, fix_pattern, rule。必须包含真实函数名/文件名/命令名。要分析轨迹。
+
+轨迹：任务说 src/ 下可能存在多处缺陷，tests/test_visibl"
+memory__aggressive,parsing-parse_bool,parsing,0,"4 failed, 2 passed in 0.03s",wrong_fix,14,14,10,0,2,12791,1171,2501,16463,8320,39.9,0,0,0,0,,0,reflection_retry_ok
+memory__aggressive,multi-paging-chunk_list-x-types-compare_values,paging+types,0,"6 failed, 2 passed in 0.05s",wrong_fix,14,14,11,0,2,12787,1310,2558,16655,8192,43.1,0,0,0,0,,0,reflection_retry_ok
+memory__aggressive,parsing-parse_csv_line,parsing,0,"3 failed, 3 passed in 0.04s",wrong_fix,14,14,4,0,2,16580,3338,2453,22371,13312,65.2,0,0,1,1,,0,"reflection_parse_failed: 我们需要回答一个 JSON 对象，不要推理过程。需要分析失败 Agent 执行，产出结构化教训。字段 scenario, error_type, root_cause, fix_pattern, rule。必须具体可执行。root_cause 或 fix_pattern 里必须出现真实函数名/文件名/命令名，例如 src/parsing.py, t"

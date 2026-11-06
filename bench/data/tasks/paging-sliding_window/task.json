@@ -1,0 +1,16 @@
+{
+  "id": "paging-sliding_window",
+  "kind": "single",
+  "family": "paging",
+  "bug_category": "paging_index",
+  "bug_class": "切片/分页 off-by-one",
+  "bug_desc": "窗口滑动次数少算一次，最后一个窗口缺失",
+  "module": "paging",
+  "src_path": "src/paging.py",
+  "prompt": "仓库工作区里 src/paging.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/paging.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_window_full_length",
+  "reference": {
+    "src/paging.py": "def sliding_window(items, k):\n    if k < 1:\n        raise ValueError(\"k must be >= 1\")\n    return [items[i:i + k] for i in range(len(items) - k + 1)]\n"
+  },
+  "hidden_tests": "from paging import sliding_window\n\ndef test_window_full_length():\n    assert sliding_window([1, 2, 3], 3) == [[1, 2, 3]]\n\ndef test_window_larger_than_list():\n    assert sliding_window([1], 5) == []\n\ndef test_window_one():\n    assert sliding_window([1, 2], 1) == [[1], [2]]\n"
+}

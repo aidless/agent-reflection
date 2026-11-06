@@ -1,0 +1,21 @@
+{
+  "id": "multi-mutable_default-merge_defaults-x-parsing-split_path",
+  "kind": "multi",
+  "family": "mutable_default+parsing",
+  "bug_category": "mutable_default",
+  "bug_categories": [
+    "mutable_default",
+    "parsing_robustness"
+  ],
+  "bug_class": "可变默认参数/共享状态 + 解析边界情况",
+  "bug_desc": "输出直接引用传入的 defaults 字典，覆盖时污染调用方数据；路径切分未处理引号，带引号且含斜杠的分段被拆散",
+  "module": "collect+parsing",
+  "src_path": "src/collect.py,src/parsing.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_caller_dict_not_mutated",
+  "reference": {
+    "src/collect.py": "def merge_defaults(overrides, defaults=None):\n    if defaults is None:\n        defaults = {\"level\": 1, \"tags\": []}\n    out = dict(defaults)\n    out.update(overrides)\n    return out\n",
+    "src/parsing.py": "def split_path(path):\n    out = []\n    cur = \"\"\n    in_quotes = False\n    for ch in path:\n        if ch == '\"':\n            in_quotes = not in_quotes\n        elif ch == \"/\" and not in_quotes:\n            if cur:\n                out.append(cur)\n            cur = \"\"\n        else:\n            cur += ch\n    if cur:\n        out.append(cur)\n    return out\n"
+  },
+  "hidden_tests": "from collect import merge_defaults\n\ndef test_defaults_not_polluted():\n    merge_defaults({\"level\": 3})\n    assert merge_defaults({})[\"level\"] == 1\n\ndef test_caller_dict_not_mutated():\n    base = {\"level\": 1}\n    out = merge_defaults({\"level\": 3}, base)\n    assert base == {\"level\": 1}\n    assert out[\"level\"] == 3\n\ndef test_nested_tags_copied():\n    base = {\"tags\": [\"a\"]}\n    out = merge_defaults({\"tags\": [\"b\"]}, base)\n    assert base[\"tags\"] == [\"a\"]\n\n\nfrom parsing import split_path\n\ndef test_path_quoted_slash():\n    assert split_path('a/\"b/c\"/d') == [\"a\", \"b/c\", \"d\"]\n\ndef test_path_leading_slash():\n    assert split_path(\"/a/b\") == [\"a\", \"b\"]\n\ndef test_path_empty():\n    assert split_path(\"\") == []\n"
+}

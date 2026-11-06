@@ -1,0 +1,21 @@
+{
+  "id": "multi-parsing-parse_csv_line-x-reduce_init-min_or_none",
+  "kind": "multi",
+  "family": "parsing+reduce_init",
+  "bug_category": "parsing_robustness",
+  "bug_categories": [
+    "parsing_robustness",
+    "reduce_init"
+  ],
+  "bug_class": "解析边界情况 + 归约初值/比较器错误",
+  "bug_desc": "CSV 行解析用裸 split，忽略引号内的分隔符；空输入时返回 inf 而不是 None",
+  "module": "parsing+stats",
+  "src_path": "src/parsing.py,src/stats.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_csv_quoted_comma",
+  "reference": {
+    "src/parsing.py": "def parse_csv_line(line):\n    parts = []\n    cur = \"\"\n    in_quotes = False\n    for ch in line:\n        if ch == '\"':\n            in_quotes = not in_quotes\n        elif ch == \",\" and not in_quotes:\n            parts.append(cur)\n            cur = \"\"\n        else:\n            cur += ch\n    parts.append(cur)\n    return parts\n",
+    "src/stats.py": "def min_or_none(values):\n    if not values:\n        return None\n    best = values[0]\n    for v in values[1:]:\n        if v < best:\n            best = v\n    return best\n"
+  },
+  "hidden_tests": "from parsing import parse_csv_line\n\ndef test_csv_quoted_comma():\n    assert parse_csv_line('1,\"x,y\",3') == [\"1\", \"x,y\", \"3\"]\n\ndef test_csv_trailing_empty():\n    assert parse_csv_line(\"a,b,\") == [\"a\", \"b\", \"\"]\n\ndef test_csv_single():\n    assert parse_csv_line(\"only\") == [\"only\"]\n\ndef test_csv_quoted_semicolon():\n    assert parse_csv_line('\"a;b\",c') == [\"a;b\", \"c\"]\n\n\nfrom stats import min_or_none\n\ndef test_min_empty():\n    assert min_or_none([]) is None\n\ndef test_min_negative():\n    assert min_or_none([3, -4, 2]) == -4\n\ndef test_min_single():\n    assert min_or_none([8]) == 8\n"
+}

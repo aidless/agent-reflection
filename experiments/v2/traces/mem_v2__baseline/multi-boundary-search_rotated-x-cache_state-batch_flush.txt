@@ -1,0 +1,81 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/search.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/search.py  (467B)
+      src/state.py  (227B)
+[dir] tests
+      tests/test_visible.py  (211B)
+[step 2] 思考: 读取全部源码与测试
+  动作: read_file {"path": "src/search.py", "start_line": 1, "end_line": 60}
+  观察: src/search.py (17 行)
+   1| def search_rotated(arr, target):
+   2|     lo, hi = 0, len(arr) - 1
+   3|     while lo <= hi:
+   4|         mid = (lo + hi) // 2
+   5|         if arr[mid] == target:
+   6|             return mid
+   7|         if arr[lo] <= arr[mid]:
+   8|             if arr[lo] < target <=
+[step 3] 思考: 读取 state.py 与可见测试
+  动作: read_file {"path": "src/state.py", "start_line": 1, "end_line": 60}
+  观察: src/state.py (10 行)
+   1| class BatchStats:
+   2|     def __init__(self):
+   3|         self.items = []
+   4| 
+   5|     def add(self, x):
+   6|         self.items.append(x)
+   7| 
+   8|     def flush(self):
+   9|         vals = list(self.items)
+  10|         return sum(vals) / len(vals) if vals els
+[step 4] 思考: 读取可见测试
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 40}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from search import search_rotated
+   3| 
+   4| def test_rotated_plain():
+   5|     assert search_rotated([4, 5, 6, 7, 1, 2, 3], 2) == 5
+   6| 
+   7| 
+   8| 
+   9| def test_target_is_left_edge():
+  10|     assert search_rotated([4, 5, 6, 7, 1, 2, 3], 4) == 0
+[step 5] 思考: search.py 左半段条件用了 < 和 <= 错位（应 arr[lo] <= target < arr[mid]）；state.py 的 flush 未清空批次，需与名称语义一致
+  动作: edit_file {"path": "src/search.py", "old": "            if arr[lo] < target <= arr[mid]:", "new": "            if arr[lo] <= target < arr[mid]:"}
+  观察: 已修改 src/search.py（替换 1 处）
+[step 6] 思考: state.py: flush 应返回均值并清空批次；空批次返回 None
+  动作: edit_file {"path": "src/state.py", "old": "    def flush(self):\n        vals = list(self.items)\n        return sum(vals) / len(vals) if vals else None", "new": "    def flush(self):\n        vals = list(self.
+  观察: 已修改 src/state.py（替换 1 处）
+[step 7] 思考: 运行可见测试
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.08s
+
+[step 8] 思考: 构造边界用例验证
+  动作: run_python {"code": "from search import search_rotated as s\nfrom state import BatchStats\ncases=[([1],1,0),([1],2,-1),([4,5,6,7,1,2,3],1,4),([4,5,6,7,1,2,3],3,6),([4,5,6,7,1,2,3],7,3),([4,5,6,7,1,2,3],8,-1),([1
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v2__baseline/multi-boundary-search_rotated-x-cache_state-batch_flush/.agent_tmp/run_1.py", line 1, in <module>
+    from search import search_rotated as s
+ModuleNotFoundError: 
+[step 9] 思考: 需要把 src 加入路径
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom search import search_rotated as s\nfrom state import BatchStats\ncases=[([1],1,0),([1],2,-1),([4,5,6,7,1,2,3],1,4),([4,5,6,7,1,2,3],3,6),([4,5,6,7,
+  观察: exit=0
+ok
+
+[step 10] 思考: 再验证含重复元素与全相等数组的边界
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom search import search_rotated as s\nprint(s([1,1,1,3,1],3), s([1,1,1],1), s([1,1,1],2), s([2,2,1,2],1))"}
+  观察: exit=0
+3 1 -1 2
+
+[step 11] 思考: 已修复 search.py 二分边界比较（arr[lo] <= target < arr[mid]）与 state.py flush 未清空批次的问题，并通过可见测试及自建边界用例（单元素、无匹配、端点、旋转点、重复值、空批次/多次批次）
+  动作: finish {"summary": "修 search.py 左半段比较方向错位；修 state.py flush 未清空批次"}
+  判定: 8 passed in 0.02s

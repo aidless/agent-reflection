@@ -1,0 +1,73 @@
+task: 仓库工作区里 src/normalize.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/normalize.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="path" string="true">.</｜DSML｜ parameter>
+</｜D
+[step 2] 思考: 先查看工作区文件结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (55B)
+[dir] tests
+      tests/test_visible.py  (185B)
+[step 3] 思考: 读取源码和测试
+  动作: read_file {"path": "src/normalize.py"}
+  观察: src/normalize.py (2 行)
+   1| def compare_values(a, b):
+   2|     return (a > b) - (a < b)
+[step 4] 思考: 查看可见测试内容
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from normalize import compare_values
+   3| 
+   4| def test_compare_numbers():
+   5|     assert compare_values(2, 1) == 1
+   6| 
+   7| 
+   8| 
+   9| def test_compare_numeric_strings():
+  10|     assert compare_values("10", "9") == 1
+[step 5] 思考: 运行测试复现失败
+  动作: run_tests {"selector": "tests"}
+  观察: .F                                                                       [100%]
+=================================== FAILURES ===================================
+_________________________ test_compare_numeric_strings _________________________
+
+    def test_compare_numeric_strings():
+>       assert co
+[step 6] 思考: 搜索是否有其他线索或文档说明预期行为
+  动作: grep {"pattern": "compare_values", "path": "."}
+  观察: tests/test_visible.py:2: from normalize import compare_values
+tests/test_visible.py:5: assert compare_values(2, 1) == 1
+tests/test_visible.py:10: assert compare_values("10", "9") == 1
+src/normalize.py:1: def compare_values(a, b):
+[step 7] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="write_file">
+<｜DSML｜ parameter name="path" string="true">src/normalize.py</｜DSML｜ 
+[step 8] 解析失败：{"thought":"根因是直接比较原值，字符串按字典序比较导致 \"10\" < \"9\"。修复：两侧都能解析为数字时按数值比较，否则回退到直接比较（类型不同时用字符串形式避免 TypeError）","action":"write_
+[step 9] 思考: 根因：字符串按字典序比较。修复为：可解析为数值时按数值比较，否则安全回退（同类型直接比较，不同类型比较字符串）
+  动作: write_file {"path": "src/normalize.py", "content": "from decimal import Decimal, InvalidOperation\n\n\ndef _as_decimal(value):\n    if isinstance(value, bool):\n        return Decimal(int(value))\n    if isinsta
+  观察: 已写入 src/normalize.py（792 字符）
+[step 10] 思考: 运行测试确认
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 11] 思考: 加固边界：NaN 的 Decimal 比较会抛 InvalidOperation，需回退处理；同时避免非有限值异常
+  动作: edit_file {"path": "src/normalize.py", "old": "    if da is not None and db is not None:\n        return (da > db) - (da < db)", "new": "    if da is not None and db is not None:\n        try:\n            retu
+  观察: 已修改 src/normalize.py（替换 1 处）
+[step 12] 思考: 验证若干边界情况并跑测试
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom normalize import compare_values as c\nprint(c('10','9'), c('10','10'), c('9','10'))\nprint(c(2,1), c(1,2), c(1,1))\nprint(c('1e3', 999), c(' 10 ', 
+  观察: exit=0
+1 0 -1
+1 -1 0
+1 1 -1
+0 1
+0 -1

@@ -1,0 +1,9 @@
+模型=openai:opencode-go/deepseek-v4.1-flash 任务=24 arms=memory__aggressive
+[memory__aggressive] 1/24 multi-paging-between_inclusive-x-types-add_numbers FAIL(wrong_fix) steps=14 tok=15217 calls=14 185.8s
+    记忆: 0 条 拒收={}
+[memory__aggressive] 2/24 parsing-parse_bool FAIL(wrong_fix) steps=14 tok=16463 calls=14 39.9s
+    记忆: 1 条 拒收={}
+[memory__aggressive] 3/24 multi-paging-chunk_list-x-types-compare_values FAIL(wrong_fix) steps=14 tok=16655 calls=14 43.1s
+    记忆: 1 条 拒收={'boilerplate': 1}
+[memory__aggressive] 4/24 parsing-parse_csv_line FAIL(wrong_fix) steps=14 tok=22371 calls=14 65.2s
+    记忆: 1 条 拒收={'boilerplate': 1}

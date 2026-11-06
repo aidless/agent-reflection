@@ -1,0 +1,16 @@
+{
+  "id": "boundary-first_nonnegative",
+  "kind": "single",
+  "family": "boundary",
+  "bug_category": "boundary_compare",
+  "bug_class": "二分/边界 off-by-one",
+  "bug_desc": "线性扫描被误写成 arr[:-1]，最后一个元素被跳过",
+  "module": "search",
+  "src_path": "src/search.py",
+  "prompt": "仓库工作区里 src/search.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/search.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_last_element_is_zero",
+  "reference": {
+    "src/search.py": "def first_nonnegative(arr):\n    for i, v in enumerate(arr):\n        if v >= 0:\n            return i\n    return len(arr)\n"
+  },
+  "hidden_tests": "from search import first_nonnegative\n\ndef test_last_element_is_zero():\n    assert first_nonnegative([-5, -2, 0]) == 2\n\ndef test_no_negative():\n    assert first_nonnegative([1, 2]) == 0\n\ndef test_all_negative():\n    assert first_nonnegative([-1, -2]) == 2\n\ndef test_empty():\n    assert first_nonnegative([]) == 0\n"
+}

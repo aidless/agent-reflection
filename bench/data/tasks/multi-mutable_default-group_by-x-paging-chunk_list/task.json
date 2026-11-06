@@ -1,0 +1,21 @@
+{
+  "id": "multi-mutable_default-group_by-x-paging-chunk_list",
+  "kind": "multi",
+  "family": "mutable_default+paging",
+  "bug_category": "mutable_default",
+  "bug_categories": [
+    "mutable_default",
+    "paging_index"
+  ],
+  "bug_class": "可变默认参数/共享状态 + 切片/分页 off-by-one",
+  "bug_desc": "分组结果放进模块级缓存字典，两次调用互相污染；分块循环终点少了 n，最后一块被丢掉",
+  "module": "collect+paging",
+  "src_path": "src/collect.py,src/paging.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_group_calls_independent",
+  "reference": {
+    "src/collect.py": "def group_by(items, key):\n    out = {}\n    for it in items:\n        out.setdefault(key(it), []).append(it)\n    return out\n",
+    "src/paging.py": "def chunk_list(items, n):\n    if n < 1:\n        raise ValueError(\"n must be >= 1\")\n    return [items[i:i + n] for i in range(0, len(items), n)]\n"
+  },
+  "hidden_tests": "from collect import group_by\n\ndef test_group_calls_independent():\n    a = group_by([1, 2], lambda x: x % 2)\n    b = group_by([10], lambda x: x % 2)\n    assert a == {1: [1], 0: [2]}\n    assert b == {0: [10]}\n\ndef test_group_empty():\n    assert group_by([], lambda x: x) == {}\n\n\nfrom paging import chunk_list\n\ndef test_chunk_tail():\n    assert chunk_list([1, 2, 3, 4, 5], 2) == [[1, 2], [3, 4], [5]]\n\ndef test_chunk_single():\n    assert chunk_list([1, 2, 3], 9) == [[1, 2, 3]]\n\ndef test_chunk_empty():\n    assert chunk_list([], 2) == []\n"
+}

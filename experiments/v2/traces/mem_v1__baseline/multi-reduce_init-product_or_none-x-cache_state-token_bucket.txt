@@ -1,0 +1,81 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/state.py  (310B)
+      src/stats.py  (133B)
+[dir] tests
+      tests/test_visible.py  (173B)
+[step 2] 思考: 读取所有源码和可见测试。
+  动作: read_file {"path": "src/stats.py"}
+  观察: src/stats.py (7 行)
+   1| def product_or_none(values):
+   2|     if not values:
+   3|         return None
+   4|     out = 0
+   5|     for v in values:
+   6|         out *= v
+   7|     return out
+[step 3] 思考: stats.py 的乘法初始值应为 1。继续读 state.py 和测试。
+  动作: read_file {"path": "src/state.py"}
+  观察: src/state.py (13 行)
+   1| class TokenBucket:
+   2|     def __init__(self, capacity):
+   3|         self.capacity = capacity
+   4|         self.tokens = capacity
+   5| 
+   6|     def take(self, n=1):
+   7|         if self.tokens >= n:
+   8|             self.tokens -= n
+   9|             return True
+ 
+[step 4] 思考: 读可见测试，确认预期 API 与行为。
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from stats import product_or_none
+   3| 
+   4| def test_product_basic():
+   5|     assert product_or_none([2, 3, 4]) == 24
+   6| 
+   7| 
+   8| 
+   9| def test_product_single():
+  10|     assert product_or_none([5]) == 5
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="args":{"path":"src/stats.py","old":"    out = 
+[step 6] 思考: 修复 stats.py 乘法初始值 0 改为 1。
+  动作: edit_file {"path": "src/stats.py", "old": "    out = 0\n    for v in values:", "new": "    out = 1\n    for v in values:"}
+  观察: 已修改 src/stats.py（替换 1 处）
+[step 7] 思考: state.py 的 refill 未限制上限，会超过 capacity；改为 min(capacity, tokens+n)。
+  动作: edit_file {"path": "src/state.py", "old": "    def refill(self, n):\n        self.tokens = self.tokens + n", "new": "    def refill(self, n):\n        self.tokens = min(self.capacity, self.tokens + n)"}
+  观察: 已修改 src/state.py（替换 1 处）
+[step 8] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args":{"selector":"tests"}}</｜DSML｜ parameter>
+[step 9] 思考: 运行可见测试。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.11s
+
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args":{"code":"import sys; sys.path.insert(0,
+[step 11] 思考: 验证 product_or_none 边界：空返回 None，单元素，负数和浮点。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom stats import product_or_none\nprint(product_or_none([]), product_or_none([2,3]), product_or_none([-2,3]), product_or_none([0.5,4]), product_or_none
+  观察: exit=0
+None 6 -6 2.0 0
+
+[step 12] 思考: state.py 的 take 对负数 n 会让 tokens 超出容量，refill 对负数也可能降到 0 以下；加健壮性处理。
+  动作: edit_file {"path": "src/state.py", "old": "    def take(self, n=1):\n        if self.tokens >= n:", "new": "    def take(self, n=1):\n        if n <= 0:\n            return True\n        if self.tokens >= n:"}
+  观察: 已修改 src/state.py（替换 1 处）

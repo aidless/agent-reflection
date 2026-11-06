@@ -1,0 +1,16 @@
+{
+  "id": "types-join_ids",
+  "kind": "single",
+  "family": "types",
+  "bug_category": "type_conversion",
+  "bug_class": "类型转换/空值处理",
+  "bug_desc": "拼接未把元素转字符串，整型列表抛 TypeError",
+  "module": "normalize",
+  "src_path": "src/normalize.py",
+  "prompt": "仓库工作区里 src/normalize.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/normalize.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_join_ints",
+  "reference": {
+    "src/normalize.py": "def join_ids(ids):\n    return \",\".join(str(i) for i in ids)\n"
+  },
+  "hidden_tests": "from normalize import join_ids\n\ndef test_join_ints():\n    assert join_ids([1, 2, 3]) == \"1,2,3\"\n\ndef test_join_mixed():\n    assert join_ids([1, \"a\"]) == \"1,a\"\n\ndef test_join_single():\n    assert join_ids([7]) == \"7\"\n"
+}

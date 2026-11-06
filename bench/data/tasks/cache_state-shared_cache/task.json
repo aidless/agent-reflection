@@ -1,0 +1,16 @@
+{
+  "id": "cache_state-shared_cache",
+  "kind": "single",
+  "family": "cache_state",
+  "bug_category": "cache_state",
+  "bug_class": "状态/缓存失效错误",
+  "bug_desc": "缓存挂在类属性上，所有实例共享",
+  "module": "state",
+  "src_path": "src/state.py",
+  "prompt": "仓库工作区里 src/state.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/state.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_cache_not_shared_across_instances",
+  "reference": {
+    "src/state.py": "class Memo:\n    def __init__(self):\n        self.cache = {}\n\n    def compute(self, x):\n        if x not in self.cache:\n            self.cache[x] = x * 3\n        return self.cache[x]\n"
+  },
+  "hidden_tests": "from state import Memo\n\ndef test_instances_isolated():\n    a, b = Memo(), Memo()\n    a.compute(2)\n    assert b.compute(4) == 12\n    assert a.compute(2) == 6\n\ndef test_cache_len():\n    m = Memo()\n    m.compute(1)\n    assert len(m.cache) == 1\n\ndef test_cache_not_shared_across_instances():\n    a = Memo()\n    a.compute(1)\n    a.compute(2)\n    b = Memo()\n    assert len(b.cache) == 0\n"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "multi-cache_state-shared_cache-x-paging-between_inclusive",
+  "kind": "multi",
+  "family": "cache_state+paging",
+  "bug_category": "cache_state",
+  "bug_categories": [
+    "cache_state",
+    "paging_index"
+  ],
+  "bug_class": "状态/缓存失效错误 + 切片/分页 off-by-one",
+  "bug_desc": "缓存挂在类属性上，所有实例共享；闭区间切片写成半开区间，右端点丢一个",
+  "module": "state+paging",
+  "src_path": "src/state.py,src/paging.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/state.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_cache_not_shared_across_instances",
+  "reference": {
+    "src/state.py": "class Memo:\n    def __init__(self):\n        self.cache = {}\n\n    def compute(self, x):\n        if x not in self.cache:\n            self.cache[x] = x * 3\n        return self.cache[x]\n",
+    "src/paging.py": "def between_inclusive(items, lo, hi):\n    if hi < lo:\n        return []\n    return items[lo:hi + 1]\n"
+  },
+  "hidden_tests": "from state import Memo\n\ndef test_instances_isolated():\n    a, b = Memo(), Memo()\n    a.compute(2)\n    assert b.compute(4) == 12\n    assert a.compute(2) == 6\n\ndef test_cache_len():\n    m = Memo()\n    m.compute(1)\n    assert len(m.cache) == 1\n\ndef test_cache_not_shared_across_instances():\n    a = Memo()\n    a.compute(1)\n    a.compute(2)\n    b = Memo()\n    assert len(b.cache) == 0\n\n\nfrom paging import between_inclusive\n\ndef test_between_adjacent():\n    assert between_inclusive([0, 1, 2], 1, 2) == [1, 2]\n\ndef test_between_same():\n    assert between_inclusive([0, 1, 2], 1, 1) == [1]\n\ndef test_between_reverse():\n    assert between_inclusive([0, 1, 2], 2, 1) == []\n"
+}

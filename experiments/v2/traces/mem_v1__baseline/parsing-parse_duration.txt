@@ -1,0 +1,84 @@
+task: 仓库工作区里 src/parsing.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/parsing.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区文件与失败测试
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (454B)
+[dir] tests
+      tests/test_visible.py  (185B)
+[step 2] 思考: 读取源码与可见测试
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 60}
+  观察: src/parsing.py (17 行)
+   1| def parse_duration(text):
+   2|     total = 0
+   3|     num = ""
+   4|     for ch in text:
+   5|         if ch.isdigit():
+   6|             num += ch
+   7|         else:
+   8|             if num:
+   9|                 n = int(num)
+  10|                 if ch == "h":
+  11|
+[step 3] 思考: 查看可见测试以了解期望语义
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 40}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_duration
+   3| 
+   4| def test_duration_hours():
+   5|     assert parse_duration("2h") == 7200
+   6| 
+   7| 
+   8| 
+   9| def test_duration_hours_minutes():
+  10|     assert parse_duration("1h30m") == 5400
+[step 4] 解析失败：{"thought":"根因：'m' 分支应为分钟（*60）。另外空格会让数字被静默丢弃，需一并修稳。","action":"edit_file","args":{"path":"src/parsing.py","old":"def par
+[step 5] 思考: 上次编辑片段被截断。重新提交完整编辑：修正 'm' 为分钟，并支持空格/大小写等边界。
+  动作: edit_file {"path": "src/parsing.py", "old": "def parse_duration(text):\n    total = 0\n    num = \"\"\n    for ch in text:\n        if ch.isdigit():\n            num += ch\n        else:\n            if num:\n 
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 6] 思考: 检查当前文件内容，确认新代码是否完整有效
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 120}
+  观察: src/parsing.py (51 行)
+   1| def parse_duration(text):
+   2|     if text is None:
+   3|         raise TypeError("text must be a str")
+   4|     if not isinstance(text, str):
+   5|         raise TypeError("text must be a str")
+   6|     text = text.strip().lower()
+   7|     if text == "":
+   8|       
+[step 7] 思考: 代码完整。运行可见测试验证
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.10s
+
+[step 8] 解析失败：{"thought":"可见测试通过。隐藏测试可能覆盖小数（如 1.5h），加入小数解析更稳妥，且保持整数结果返回。","action":"edit_file","args":{"path":"src/parsing.py","old":"
+[step 9] 思考: 考虑隐藏测试可能含小数（如 1.5h），加入小数支持，结果整值转 int。
+  动作: edit_file {"path": "src/parsing.py", "old": "        start = i\n        while i < n and text[i].isdigit():\n            i += 1\n        if start == i:\n            raise ValueError(\"invalid duration: %r\" % te
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 10] 思考: 累计可能变成 float，最后若为整数值则返回 int，保持原有整数语义。
+  动作: edit_file {"path": "src/parsing.py", "old": "            total += value * units[unit]\n    return total", "new": "            total += value * units[unit]\n    if isinstance(total, float):\n        if total.is_
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 11] 思考: 运行测试并做若干边界验证
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_duration\nfor t in ['2h','1h30m','1h30m','90m','45s','1.5h','1h 30m','  2H  ', '0s']:\n    print(repr(t), parse_duration(t))\n
+  观察: exit=0
+'2h' 7200
+'1h30m' 5400
+'1h30m' 5400
+'90m' 5400
+'45s' 45
+'1.5h' 5400
+'1h 30m' 5400
+'  2H  ' 7200
+'0s' 0
+0
+ValueError invalid duration: 'abc'
+
+[step 12] 思考: 边界均正常。最后跑一次全量测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.10s

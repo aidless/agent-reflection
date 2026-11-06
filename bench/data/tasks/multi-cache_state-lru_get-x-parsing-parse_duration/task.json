@@ -1,0 +1,21 @@
+{
+  "id": "multi-cache_state-lru_get-x-parsing-parse_duration",
+  "kind": "multi",
+  "family": "cache_state+parsing",
+  "bug_category": "cache_state",
+  "bug_categories": [
+    "cache_state",
+    "parsing_robustness"
+  ],
+  "bug_class": "状态/缓存失效错误 + 解析边界情况",
+  "bug_desc": "get 没有刷新最近使用顺序，淘汰了刚访问的键；分钟单位按秒计算，时长被低估 60 倍",
+  "module": "state+parsing",
+  "src_path": "src/state.py,src/parsing.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/state.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_lru_evicts_least_recently_used",
+  "reference": {
+    "src/state.py": "class LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.data = {}\n\n    def get(self, key):\n        if key not in self.data:\n            return None\n        value = self.data.pop(key)\n        self.data[key] = value\n        return value\n\n    def put(self, key, value):\n        if key in self.data:\n            self.data.pop(key)\n        elif len(self.data) >= self.capacity:\n            self.data.pop(next(iter(self.data)))\n        self.data[key] = value\n",
+    "src/parsing.py": "def parse_duration(text):\n    total = 0\n    num = \"\"\n    for ch in text:\n        if ch.isdigit():\n            num += ch\n        else:\n            if num:\n                n = int(num)\n                if ch == \"h\":\n                    total += n * 3600\n                elif ch == \"m\":\n                    total += n * 60\n                elif ch == \"s\":\n                    total += n\n                num = \"\"\n    return total if num == \"\" else total + int(num)\n"
+  },
+  "hidden_tests": "from state import LRUCache\n\ndef test_lru_evicts_least_recently_used():\n    c = LRUCache(2)\n    c.put(\"a\", 1)\n    c.put(\"b\", 2)\n    assert c.get(\"a\") == 1\n    c.put(\"c\", 3)\n    assert c.get(\"a\") == 1\n    assert c.get(\"b\") is None\n\ndef test_lru_missing():\n    assert LRUCache(2).get(\"x\") is None\n\n\nfrom parsing import parse_duration\n\ndef test_duration_hours_minutes():\n    assert parse_duration(\"1h30m\") == 5400\n\ndef test_duration_seconds():\n    assert parse_duration(\"45s\") == 45\n\ndef test_duration_minutes_only():\n    assert parse_duration(\"5m\") == 300\n\ndef test_duration_bare_seconds():\n    assert parse_duration(\"10\") == 10\n"
+}

@@ -1,0 +1,74 @@
+task: 仓库工作区里 src/parsing.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/parsing.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区文件结构和相关源码/测试。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (53B)
+[dir] tests
+      tests/test_visible.py  (206B)
+[step 2] 思考: 读取源码与可见测试。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 120}
+  观察: src/parsing.py (2 行)
+   1| def parse_csv_line(line):
+   2|     return line.split(",")
+[step 3] 思考: 读取可见测试看期望行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 80}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_csv_line
+   3| 
+   4| def test_csv_simple():
+   5|     assert parse_csv_line("a,b,c") == ["a", "b", "c"]
+   6| 
+   7| 
+   8| 
+   9| def test_csv_quoted_comma():
+  10|     assert parse_csv_line('1,"x,y",3') == ["1", "x,y", "3"]
+[step 4] 解析失败：{"thought
+[step 5] 思考: 可见测试要求支持引号内的逗号。隐藏测试很可能覆盖转义双引号、空字段、空行等标准 CSV 语义，因此用 csv 模块实现最稳妥。先验证 csv 对边界输入的行为。
+  动作: run_python {"code": "import csv, io\nfor s in ['', '\\n', 'a,b,c', '1,\"x,y\",3', '\"a\"\"b\",c', 'a,,c', 'a,b,', '\"a,b\"']:\n    r = csv.reader(io.StringIO(s))\n    try:\n        row = next(r)\n    except Stop
+  观察: exit=0
+'' -> None
+'\n' -> []
+'a,b,c' -> ['a', 'b', 'c']
+'1,"x,y",3' -> ['1', 'x,y', '3']
+'"a""b",c' -> ['a"b', 'c']
+'a,,c' -> ['a', '', 'c']
+'a,b,' -> ['a', 'b', '']
+'"a,b"' -> ['a,b']
+
+[step 6] 思考: 用标准 csv 模块重写，处理空行与引号转义等边界。
+  动作: write_file {"path": "src/parsing.py", "content": "import csv\nimport io\n\n\ndef parse_csv_line(line):\n    \"\"\"Parse a single CSV line into a list of fields.\n\n    Handles quoted fields, embedded commas, dou
+  观察: 已写入 src/parsing.py（528 字符）
+[step 7] 思考: 运行可见测试验证。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 8] 思考: 验证更多边界输入，确保隐藏测试通过。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_csv_line\ncases = ['', 'a', 'a,b', '1,\"x,y\",3', '\"a\"\"b\",c', 'a,,c', ',', '\"\"', '\" a , b \"', 'a\\r\\n', '\"unclosed,x
+  观察: exit=0
+'' -> []
+'a' -> ['a']
+'a,b' -> ['a', 'b']
+'1,"x,y",3' -> ['1', 'x,y', '3']
+'"a""b",c' -> ['a"b', 'c']
+'a,,c' -> ['a', '', 'c']
+',' -> ['', '']
+'""' -> ['']
+'" a , b "' -> [' a , b ']
+'a\r\n' -> ['a']
+'"unclosed,x' -> ['unclosed,x']
+[]
+
+[step 9] 思考: 边界行为符合标准 CSV 语义：空行返回空列表，空字段保留，双引号转义，未闭合引号容错。再跑一次全量测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 10] 思考: 根因已修复：原实现用裸 split(',') 无法处理引号内逗号、转义双引号、空字段与换行。改用标准 csv 模块解析，并处理 None、行尾换行符与空行返回空列表。可见测试与边界验证均通过。
+  动作: finish {"summary": "重写 src/parsing.py 的 parse_csv_line：使用 csv.reader 正确解析引号包裹字段、字段内逗号、双引号转义（\"\" -> \"）、空字段与空行；处理 None 输入和行尾 \\r\\n/\\n/\\r；未闭合引号容错。可见测试 2 项全部通过，边界用例验证符合标准 CSV 语义。"}
+  判定: 6 passed in 0.02s

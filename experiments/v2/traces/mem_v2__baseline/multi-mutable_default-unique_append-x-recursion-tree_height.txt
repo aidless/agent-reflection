@@ -1,0 +1,94 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (189B)
+      src/recursion.py  (288B)
+[dir] tests
+      tests/test_visible.py  (253B)
+[step 2] 思考: 读取所有源码与可见测试
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 60}
+  观察: src/collect.py (7 行)
+   1| def unique_append(items, value, seen=set()):
+   2|     if seen is None:
+   3|         seen = set()
+   4|     if value in seen:
+   5|         return list(items)
+   6|     seen.add(value)
+   7|     return list(items) + [value]
+[step 3] 思考: 读取 recursion.py 与测试文件
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 60}
+  观察: src/recursion.py (12 行)
+   1| class Node:
+   2|     def __init__(self, value, children=None):
+   3|         self.value = value
+   4|         self.children = children or []
+   5| 
+   6| 
+   7| def tree_height(node):
+   8|     if node is None:
+   9|         return 0
+  10|     if not node.children:
+  1
+[step 4] 思考: 读取可见测试
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import unique_append
+   3| 
+   4| def test_unique_basic():
+   5|     assert unique_append([1, 2], 3) == [1, 2, 3]
+   6| 
+   7| 
+   8| 
+   9| def test_unique_leak():
+  10|     first = unique_append([], 7)
+  11|     second = unique_append([], 7)
+ 
+[step 5] 解析失败：Two defects:
+
+1. `unique_append` mutable default `seen=set()` shared across calls. Should be `seen=None` — it already ch
+[step 6] 思考: collect.py: 默认参数是可变 set，导致跨调用泄漏。应该用 None 默认，并且以 items 本身判断重复更符合语义。recursion.py: tree_height 叶子应返回 1（高度定义），当前返回 0 导致少 1；另外 children 为 None 或含 None 需处理。先用 run_python 验证假设。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import unique_append\nfrom recursion import Node, tree_height\nprint(unique_append([],7), unique_append([],7), unique_append([1,2],3), uniq
+  观察: exit=0
+[7] [] [1, 2, 3] [1, 2, 2]
+0 1
+
+[step 7] 思考: 确认两处缺陷：unique_append 跨调用泄漏且未按 items 判重；tree_height 叶子应为 1（当前返回 0）。修改源码。
+  动作: write_file {"path": "src/collect.py", "content": "def unique_append(items, value, seen=None):\n    \"\"\"Return a new list with value appended only if not already present.\n\n    Uniqueness is judged against bot
+  观察: 已写入 src/collect.py（664 字符）
+[step 8] 思考: 修正 recursion.tree_height：空节点高度为0，叶子为1，并容忍 children 中的 None。
+  动作: write_file {"path": "src/recursion.py", "content": "class Node:\n    def __init__(self, value, children=None):\n        self.value = value\n        self.children = list(children) if children else []\n\n\ndef tre
+  观察: 已写入 src/recursion.py（384 字符）
+[step 9] 思考: 验证递归与收集行为并跑测试
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import unique_append\nfrom recursion import Node, tree_height\nassert unique_append([],7)==[7]\nassert unique_append([],7)==[7]\nassert uni
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v2__baseline/multi-mutable_default-unique_append-x-recursion-tree_height/.agent_tmp/run_2.py", line 15, in <module>
+    assert tree_height(Node(1,[None]))==2
+           ^^^^^^
+[step 10] 思考: 该断言是我自己写错：Node(1,[None]) 高度应为 1+tree_height(None)=1，代码正确。重新验证其余。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import unique_append\nfrom recursion import Node, tree_height\nassert unique_append([],7)==[7] and unique_append([],7)==[7]\nassert unique_
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v2__baseline/multi-mutable_default-unique_append-x-recursion-tree_height/.agent_tmp/run_3.py", line 10, in <module>
+    assert unique_append([[1]],[1])==[[1],[1]]
+           ^
+[step 11] 思考: 不可哈希分支按等值判重返回 [[1]]，符合去重语义，是我断言写错。继续验证并跑测试。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import unique_append\nfrom recursion import Node, tree_height\nassert unique_append([],7)==[7] and unique_append([],7)==[7]\nassert unique_
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v2__baseline/multi-mutable_default-unique_append-x-recursion-tree_height/.agent_tmp/run_4.py", line 11, in <module>
+    assert unique_append([[1]],[2])==[[1],[2]]
+           ^
+[step 12] 思考: 不可哈希分支里 `value in seen`（set）也会抛 TypeError。改用列表比较逻辑。
+  动作: edit_file {"path": "src/collect.py", "old": "    else:\n        if value in result or value in seen:\n            return result", "new": "    else:\n        if any(value == v for v in result) or any(value == v 
+  观察: 已修改 src/collect.py（替换 1 处）

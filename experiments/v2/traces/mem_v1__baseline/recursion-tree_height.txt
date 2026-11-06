@@ -1,0 +1,73 @@
+task: 仓库工作区里 src/recursion.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/recursion.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区文件结构和测试内容。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/recursion.py  (288B)
+[dir] tests
+      tests/test_visible.py  (214B)
+[step 2] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path": "src/recursion.py"}}</｜DSML｜ pa
+[step 3] 思考: 读取源码文件内容。
+  动作: read_file {"path": "src/recursion.py"}
+  观察: src/recursion.py (12 行)
+   1| class Node:
+   2|     def __init__(self, value, children=None):
+   3|         self.value = value
+   4|         self.children = children or []
+   5| 
+   6| 
+   7| def tree_height(node):
+   8|     if node is None:
+   9|         return 0
+  10|     if not node.children:
+  1
+[step 4] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path": "tests/test_visible.py"}}</｜DSM
+[step 5] 思考: 读取测试文件以确认期望行为。
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (11 行)
+   1| 
+   2| from recursion import Node, tree_height
+   3| 
+   4| def test_height_root_only():
+   5|     assert tree_height(Node(1)) == 1
+   6| 
+   7| 
+   8| 
+   9| def test_height_two_levels():
+  10|     root = Node(1, [Node(2), Node(3)])
+  11|     assert tree_height(ro
+[step 6] 思考: 叶子节点应返回 1（单节点高度为 1），空树/None 返回 0。修改叶子分支。
+  动作: edit_file {"path": "src/recursion.py", "old": "    if not node.children:\n        return 0\n    return 1 + max(tree_height(c) for c in node.children)", "new": "    if not node.children:\n        return 1\n    r
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 7] 思考: 运行可见测试验证。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.11s
+
+[step 8] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args":{"code":"from src.recursion import Node
+[step 9] 思考: 用 run_python 验证边界情况：None、单节点、链式、空 children 列表。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom recursion import Node, tree_height\nprint(tree_height(None))\nprint(tree_height(Node(1)))\nprint(tree_height(Node(1,[Node(2)])))\nprint(tree_height
+  观察: exit=0
+0
+1
+2
+4
+1
+
+[step 10] 思考: 边界情况均正确：None→0，单节点→1，链式深度正确，空 children 列表→1。根因（叶子返回 0）已修复。
+  动作: finish {"summary": "修复 src/recursion.py 中 tree_height 的叶子节点返回值：叶子节点（无子节点）高度应为 1 而非 0，使单节点树返回 1、空树(None)仍返回 0，深层树高度正确。"}
+  判定: 5 passed in 0.02s

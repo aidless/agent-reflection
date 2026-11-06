@@ -1,0 +1,5 @@
+arm,task_id,family,success,judge_detail,failure_mode,steps,calls,tool_calls,plan_calls,reflect_calls,prompt_tokens,completion_tokens,reflect_tokens,total_tokens,cached_tokens,latency_s,rollback_used,rollback_verified,rollback_checks,test_runs,memory_injected,memory_injected_count,error
+no_memory__baseline,boundary-count_occurrences,boundary,1,6 passed in 0.01s,,9,10,7,1,0,11421,1864,0,13285,8704,36.4,0,0,0,1,,0,
+no_memory__baseline,boundary-first_nonnegative,boundary,0,"2 failed, 4 passed in 0.02s",wrong_fix,9,10,8,1,0,9486,1288,0,10774,7296,27.7,0,0,0,1,,0,
+mem_v2__baseline,boundary-count_occurrences,boundary,1,6 passed in 0.01s,,12,13,6,1,0,15662,1692,0,17354,12672,35.0,0,0,0,0,,0,
+mem_v2__baseline,boundary-first_nonnegative,boundary,1,6 passed in 0.01s,,9,10,8,1,0,15278,2653,0,17931,12032,45.4,0,0,1,2,,0,

@@ -1,0 +1,47 @@
+task: 仓库工作区里 src/normalize.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/normalize.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (42B)
+[dir] tests
+      tests/test_visible.py  (191B)
+[step 2] 思考: 读取源码与可见测试。
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 120}
+  观察: src/normalize.py (2 行)
+   1| def sort_ids(ids):
+   2|     return sorted(ids)
+[step 3] 思考: 查看可见测试，确认期望行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from normalize import sort_ids
+   3| 
+   4| def test_sort_single_digit():
+   5|     assert sort_ids(["2", "1"]) == [1, 2]
+   6| 
+   7| 
+   8| 
+   9| def test_sort_numeric_order():
+  10|     assert sort_ids(["10", "2", "1"]) == [1, 2, 10]
+[step 4] 思考: 复现失败：测试期望输入字符串转换为整数并按数值排序。
+  动作: run_tests {"selector": "tests"}
+  观察: FF                                                                       [100%]
+=================================== FAILURES ===================================
+____________________________ test_sort_single_digit ____________________________
+
+    def test_sort_single_digit():
+>       assert sort_ids
+[step 5] 思考: 根因是未将字符串 id 转成整数就排序，导致字典序和类型都不对。用 int() 归一化后再排序，可覆盖负数、前导零、空白等边界。
+  动作: edit_file {"path": "src/normalize.py", "old": "def sort_ids(ids):\n    return sorted(ids)", "new": "def sort_ids(ids):\n    return sorted(int(i) for i in ids)"}
+  观察: 已修改 src/normalize.py（替换 1 处）
+[step 6] 思考: 运行全量测试确认通过。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 7] 思考: 可见测试通过；int() 归一化同时能处理已是整数的输入、前后空白与前导零，符合边界情况。
+  动作: finish {"summary": "修复 src/normalize.py：sort_ids 原先直接对字符串排序导致字典序和类型错误，改为 sorted(int(i) for i in ids)，先转换为整数再按数值排序。"}
+  判定: 5 passed in 0.01s

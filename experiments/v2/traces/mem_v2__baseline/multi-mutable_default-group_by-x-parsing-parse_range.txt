@@ -1,0 +1,97 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，通读源码。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (117B)
+      src/parsing.py  (295B)
+[dir] tests
+      tests/test_visible.py  (312B)
+[step 2] 思考: 读取全部源码与可见测试。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 120}
+  观察: src/collect.py (4 行)
+   1| def group_by(items, key, out={}):
+   2|     for it in items:
+   3|         out.setdefault(key(it), []).append(it)
+   4|     return out
+[step 3] 思考: collect 有可变默认参数缺陷。读取 parsing.py 与测试。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 120}
+  观察: src/parsing.py (12 行)
+   1| def parse_range(spec):
+   2|     out = []
+   3|     for part in spec.split(","):
+   4|         part = part.strip()
+   5|         if not part:
+   6|             continue
+   7|         if "-" in part:
+   8|             a, b = part.split("-", 1)
+   9|             out.append(
+[step 4] 思考: 读取可见测试了解风格与预期。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 80}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import group_by
+   3| 
+   4| def test_group_basic():
+   5|     assert group_by([1, 2, 3, 4], lambda x: x % 2) == {1: [1, 3], 0: [2, 4]}
+   6| 
+   7| 
+   8| 
+   9| def test_group_calls_independent():
+  10|     a = group_by([1, 2], lambda x: x % 2
+[step 5] 思考: collect 修默认参数；parsing 实现区间展开与负号处理。
+  动作: edit_file {"path": "src/collect.py", "old": "def group_by(items, key, out={}):", "new": "def group_by(items, key, out=None):\n    if out is None:\n        out = {}"}
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 6] 思考: 搜索 parse_range 的其他引用以确定语义。
+  动作: grep {"pattern": "parse_range|group_by", "path": "."}
+  观察: tests/test_visible.py:2: from collect import group_by
+tests/test_visible.py:5: assert group_by([1, 2, 3, 4], lambda x: x % 2) == {1: [1, 3], 0: [2, 4]}
+tests/test_visible.py:10: a = group_by([1, 2], lambda x: x % 2)
+tests/test_visible.py:11: b = group_by([10], lambda x: x % 2)
+src/collect.py:1: def 
+[step 7] 思考: 重写 parse_range：用正则支持负数、展开区间、无效输入报错。
+  动作: write_file {"path": "src/parsing.py", "content": "import re\n\n_RANGE_RE = re.compile(r\"^(-?\\d+)\\s*-\\s*(-?\\d+)$\")\n_INT_RE = re.compile(r\"^-?\\d+$\")\n\n\ndef parse_range(spec):\n    \"\"\"Parse a comma s
+  观察: 已写入 src/parsing.py（1032 字符）
+[step 8] 思考: 检查写入的 parsing.py 结尾是否被截断。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 60}
+  观察: src/parsing.py (34 行)
+   1| import re
+   2| 
+   3| _RANGE_RE = re.compile(r"^(-?\d+)\s*-\s*(-?\d+)$")
+   4| _INT_RE = re.compile(r"^-?\d+$")
+   5| 
+   6| 
+   7| def parse_range(spec):
+   8|     """Parse a comma separated spec such as '1-3, 5, -2' into a list of ints.
+   9| 
+  10|     Ranges are incl
+[step 9] 思考: 跑可见测试并构造边界用例验证两模块。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 10] 思考: 构造边界用例验证。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import group_by\nfrom parsing import parse_range\na=group_by([1,2],lambda x:x%2)\nb=group_by([10],lambda x:x%2)\nassert a=={1:[1],0:[2]} an
+  观察: exit=1
+[1, 2, 3, 5, -2]
+[3, 2, 1]
+[1, 2, 3, 5]
+[]
+ok a
+ok 1-
+ok -
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v2__baseline/multi-mutable_default-group_by-x-parsing-parse_range/.agent_tmp/run_1.py", line 17, in <module>
+    els
+[step 11] 思考: 1--2 视为区间可接受，调整用例后复测。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import group_by\nfrom parsing import parse_range\nassert parse_range('1-3')==[1,2,3]\nassert parse_range('-3--1')==[-3,-2,-1]\nassert parse
+  观察: exit=0
+ALL OK
+
+[step 12] 思考: 两个模块缺陷已修复并通过边界验证。
+  动作: finish {"summary": "collect 去掉可变默认参数；parsing 重写 parse_range 支持区间展开、负数、空项与非法输入校验"}
+  判定: 7 passed in 0.02s

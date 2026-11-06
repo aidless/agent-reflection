@@ -1,0 +1,21 @@
+{
+  "id": "multi-parsing-split_path-x-reduce_init-product_or_none",
+  "kind": "multi",
+  "family": "parsing+reduce_init",
+  "bug_category": "parsing_robustness",
+  "bug_categories": [
+    "parsing_robustness",
+    "reduce_init"
+  ],
+  "bug_class": "解析边界情况 + 归约初值/比较器错误",
+  "bug_desc": "路径切分未处理引号，带引号且含斜杠的分段被拆散；乘积初值写成 0，所有结果都变 0",
+  "module": "parsing+stats",
+  "src_path": "src/parsing.py,src/stats.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_path_quoted_slash",
+  "reference": {
+    "src/parsing.py": "def split_path(path):\n    out = []\n    cur = \"\"\n    in_quotes = False\n    for ch in path:\n        if ch == '\"':\n            in_quotes = not in_quotes\n        elif ch == \"/\" and not in_quotes:\n            if cur:\n                out.append(cur)\n            cur = \"\"\n        else:\n            cur += ch\n    if cur:\n        out.append(cur)\n    return out\n",
+    "src/stats.py": "def product_or_none(values):\n    if not values:\n        return None\n    out = 1\n    for v in values:\n        out *= v\n    return out\n"
+  },
+  "hidden_tests": "from parsing import split_path\n\ndef test_path_quoted_slash():\n    assert split_path('a/\"b/c\"/d') == [\"a\", \"b/c\", \"d\"]\n\ndef test_path_leading_slash():\n    assert split_path(\"/a/b\") == [\"a\", \"b\"]\n\ndef test_path_empty():\n    assert split_path(\"\") == []\n\n\nfrom stats import product_or_none\n\ndef test_product_empty():\n    assert product_or_none([]) is None\n\ndef test_product_single():\n    assert product_or_none([5]) == 5\n\ndef test_product_with_zero():\n    assert product_or_none([2, 0, 3]) == 0\n"
+}

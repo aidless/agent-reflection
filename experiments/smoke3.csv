@@ -1,0 +1,7 @@
+arm,task_id,family,success,judge_detail,failure_mode,steps,calls,tool_calls,plan_calls,reflect_calls,prompt_tokens,completion_tokens,reflect_tokens,total_tokens,cached_tokens,latency_s,rollback_used,rollback_verified,memory_injected,memory_injected_count,error
+no_memory__baseline,multi-boundary-count_occurrences-x-parsing-parse_bool,boundary+parsing,1,10 passed in 0.02s,,14,15,9,1,0,32136,7289,0,39425,27008,69.8,0,0,,0,
+no_memory__baseline,multi-boundary-first_nonnegative-x-parsing-parse_csv_line,boundary+parsing,1,10 passed in 0.04s,,13,14,11,1,0,21283,3417,0,24700,17152,47.4,0,0,,0,
+no_memory__baseline,multi-boundary-insert_position_desc-x-parsing-parse_duration,boundary+parsing,1,9 passed in 0.03s,,13,14,10,1,0,19077,3332,0,22409,16000,46.0,0,0,,0,
+memory__baseline,multi-boundary-count_occurrences-x-parsing-parse_bool,boundary+parsing,1,10 passed in 0.02s,,14,15,11,1,0,29036,5669,0,34705,24192,67.1,0,0,,0,
+memory__baseline,multi-boundary-first_nonnegative-x-parsing-parse_csv_line,boundary+parsing,1,10 passed in 0.02s,,14,15,11,1,0,18756,6026,0,24782,15616,84.8,0,0,,0,
+memory__baseline,multi-boundary-insert_position_desc-x-parsing-parse_duration,boundary+parsing,0,"2 failed, 7 passed in 0.05s",wrong_fix,14,15,8,1,1,31862,10648,989,43499,27264,133.7,0,0,,0,

@@ -1,0 +1,21 @@
+{
+  "id": "multi-reduce_init-max_or_none-x-cache_state-lru_get",
+  "kind": "multi",
+  "family": "reduce_init+cache_state",
+  "bug_category": "reduce_init",
+  "bug_categories": [
+    "reduce_init",
+    "cache_state"
+  ],
+  "bug_class": "归约初值/比较器错误 + 状态/缓存失效错误",
+  "bug_desc": "求最大值用 0 作初值，全负数组返回 0；get 没有刷新最近使用顺序，淘汰了刚访问的键",
+  "module": "stats+state",
+  "src_path": "src/stats.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_max_all_negative",
+  "reference": {
+    "src/stats.py": "def max_or_none(values):\n    if not values:\n        return None\n    best = values[0]\n    for v in values[1:]:\n        if v > best:\n            best = v\n    return best\n",
+    "src/state.py": "class LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.data = {}\n\n    def get(self, key):\n        if key not in self.data:\n            return None\n        value = self.data.pop(key)\n        self.data[key] = value\n        return value\n\n    def put(self, key, value):\n        if key in self.data:\n            self.data.pop(key)\n        elif len(self.data) >= self.capacity:\n            self.data.pop(next(iter(self.data)))\n        self.data[key] = value\n"
+  },
+  "hidden_tests": "from stats import max_or_none\n\ndef test_max_all_negative():\n    assert max_or_none([-5, -2, -9]) == -2\n\ndef test_max_single_negative():\n    assert max_or_none([-7]) == -7\n\ndef test_max_empty():\n    assert max_or_none([]) is None\n\ndef test_max_zero_included():\n    assert max_or_none([-3, 0, -1]) == 0\n\n\nfrom state import LRUCache\n\ndef test_lru_evicts_least_recently_used():\n    c = LRUCache(2)\n    c.put(\"a\", 1)\n    c.put(\"b\", 2)\n    assert c.get(\"a\") == 1\n    c.put(\"c\", 3)\n    assert c.get(\"a\") == 1\n    assert c.get(\"b\") is None\n\ndef test_lru_missing():\n    assert LRUCache(2).get(\"x\") is None\n"
+}

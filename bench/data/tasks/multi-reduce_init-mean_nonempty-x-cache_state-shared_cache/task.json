@@ -1,0 +1,21 @@
+{
+  "id": "multi-reduce_init-mean_nonempty-x-cache_state-shared_cache",
+  "kind": "multi",
+  "family": "reduce_init+cache_state",
+  "bug_category": "reduce_init",
+  "bug_categories": [
+    "reduce_init",
+    "cache_state"
+  ],
+  "bug_class": "归约初值/比较器错误 + 状态/缓存失效错误",
+  "bug_desc": "空输入保护被注释掉，空列表抛 ZeroDivisionError；缓存挂在类属性上，所有实例共享",
+  "module": "stats+state",
+  "src_path": "src/stats.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_mean_empty_none",
+  "reference": {
+    "src/stats.py": "def mean_nonempty(values):\n    if not values:\n        return None\n    return sum(values) / len(values)\n",
+    "src/state.py": "class Memo:\n    def __init__(self):\n        self.cache = {}\n\n    def compute(self, x):\n        if x not in self.cache:\n            self.cache[x] = x * 3\n        return self.cache[x]\n"
+  },
+  "hidden_tests": "from stats import mean_nonempty\n\ndef test_mean_empty_none():\n    assert mean_nonempty([]) is None\n\ndef test_mean_single():\n    assert mean_nonempty([5]) == 5.0\n\ndef test_mean_float():\n    assert abs(mean_nonempty([1.5, 2.5]) - 2.0) < 1e-9\n\n\nfrom state import Memo\n\ndef test_instances_isolated():\n    a, b = Memo(), Memo()\n    a.compute(2)\n    assert b.compute(4) == 12\n    assert a.compute(2) == 6\n\ndef test_cache_len():\n    m = Memo()\n    m.compute(1)\n    assert len(m.cache) == 1\n\ndef test_cache_not_shared_across_instances():\n    a = Memo()\n    a.compute(1)\n    a.compute(2)\n    b = Memo()\n    assert len(b.cache) == 0\n"
+}

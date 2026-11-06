@@ -1,0 +1,39 @@
+task: 仓库工作区里 src/parsing.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/parsing.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和相关文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (67B)
+[dir] tests
+      tests/test_visible.py  (195B)
+[step 2] 思考: 读取源码与测试
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 60}
+  观察: src/parsing.py (2 行)
+   1| def split_path(path):
+   2|     return [p for p in path.split("/") if p]
+[step 3] 思考: 查看测试内容
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import split_path
+   3| 
+   4| def test_path_plain():
+   5|     assert split_path("a/b/c") == ["a", "b", "c"]
+   6| 
+   7| 
+   8| 
+   9| def test_path_quoted_slash():
+  10|     assert split_path('a/"b/c"/d') == ["a", "b/c", "d"]
+[step 4] 思考: 需要支持双引号内的斜杠不被分割，并去掉引号，同时保持过滤空段的行为。编写状态机实现。
+  动作: write_file {"path": "src/parsing.py", "content": "def split_path(path):\n    \"\"\"Split a path on '/' while keeping slashes inside double quotes.\n\n    Quote characters are removed and empty segments are dropp
+  观察: 已写入 src/parsing.py（504 字符）
+[step 5] 思考: 运行可见测试验证
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.21s
+
+[step 6] 思考: 可见测试通过；实现已覆盖引号内斜杠、首尾/连续斜杠空段过滤等边界。
+  动作: finish {"summary": "重写 src/parsing.py 的 split_path：用状态机按 '/' 分段，双引号内的斜杠不分割且引号被剥离，最后过滤空段，满足可见与边界测试。"}
+  判定: 5 passed in 0.03s

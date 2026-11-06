@@ -1,0 +1,4 @@
+task: 仓库工作区里 src/collect.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/collect.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+  反思异常: reflection_parse_failed: 我们需要回答一个JSON对象，不要推理过程。需要分析失败Agent执行，产出结构化教训。任务：src/collect.py有缺陷，tests/test_visible.py失败，需定位并修复根因，通过隐藏测试，tests只读，修好调用finish。最终判定: 4 failed in 0.04s。执行轨迹只给了任务和最终判定，无详细操作。我们需要推断可能的失败场景并给出具体可执行教训，必须包含真实函 || We need answer directly JSON first char { no reasoning. Need infer task? We need actually inspect files? As ChatGPT in environment? We have no tool listed, only text. We need perhaps output JSON conta

@@ -1,0 +1,21 @@
+{
+  "id": "multi-cache_state-counter_reset-x-mutable_default-append_tag",
+  "kind": "multi",
+  "family": "cache_state+mutable_default",
+  "bug_category": "cache_state",
+  "bug_categories": [
+    "cache_state",
+    "mutable_default"
+  ],
+  "bug_class": "状态/缓存失效错误 + 可变默认参数/共享状态",
+  "bug_desc": "reset 没有清零累计值；可变默认参数列表在多次调用间共享",
+  "module": "state+collect",
+  "src_path": "src/state.py,src/collect.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/state.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_reset_clears",
+  "reference": {
+    "src/state.py": "class Counter:\n    def __init__(self):\n        self.total = 0\n\n    def add(self, x=1):\n        self.total += x\n        return self.total\n\n    def reset(self):\n        self.total = 0\n        return self\n",
+    "src/collect.py": "def append_tag(tag, tags=None):\n    if tags is None:\n        tags = []\n    tags.append(tag)\n    return tags\n"
+  },
+  "hidden_tests": "from state import Counter\n\ndef test_reset_clears():\n    c = Counter()\n    c.add(5)\n    c.reset()\n    assert c.add(1) == 1\n\ndef test_reset_returns_self():\n    c = Counter()\n    assert c.reset() is c\n\n\nfrom collect import append_tag\n\ndef test_no_leak_between_calls():\n    first = append_tag(\"a\")\n    second = append_tag(\"b\")\n    assert first == [\"a\"]\n    assert second == [\"b\"]\n\ndef test_explicit_list_reused():\n    box = [\"x\"]\n    assert append_tag(\"y\", box) == [\"x\", \"y\"]\n"
+}

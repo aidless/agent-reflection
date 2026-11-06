@@ -1,0 +1,73 @@
+task: 仓库工作区里 src/normalize.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/normalize.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区文件结构和相关源码。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (40B)
+[dir] tests
+      tests/test_visible.py  (168B)
+[step 2] 思考: 读取源码和可见测试。
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 120}
+  观察: src/normalize.py (2 行)
+   1| def add_numbers(a, b):
+   2|     return a + b
+[step 3] 思考: 查看测试内容以了解期望行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from normalize import add_numbers
+   3| 
+   4| def test_add_ints():
+   5|     assert add_numbers(1, 2) == 3.0
+   6| 
+   7| 
+   8| 
+   9| def test_add_numeric_strings():
+  10|     assert add_numbers("1", "2") == 3.0
+[step 4] 思考: 先运行测试确认失败。
+  动作: run_tests {"selector": "tests"}
+  观察: .F                                                                       [100%]
+=================================== FAILURES ===================================
+___________________________ test_add_numeric_strings ___________________________
+
+    def test_add_numeric_strings():
+>       assert add_nu
+[step 5] 思考: 缺陷根因：未做数值归一化，字符串直接拼接且返回类型不保证 float。将两个输入统一转为 float 再相加，非数值输入自然抛出 TypeError/ValueError。
+  动作: edit_file {"path": "src/normalize.py", "old": "def add_numbers(a, b):\n    return a + b", "new": "def add_numbers(a, b):\n    return float(a) + float(b)"}
+  观察: 已修改 src/normalize.py（替换 1 处）
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D
+[step 7] 思考: 修改完成，运行全量测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.13s
+
+[step 8] 思考: 可见测试通过。验证更多边界情况（小数、负数、空白字符串、混合类型）以确保隐藏测试覆盖的归一化行为正确。
+  动作: run_python {"code": "from src.normalize import add_numbers\nprint(add_numbers('1.5', 2))\nprint(add_numbers('-3', '4'))\nprint(add_numbers(' 2 ', '3.5'))\nfor bad in ['abc', '', None]:\n    try:\n        add_num
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/no_memory__baseline/types-add_numbers/.agent_tmp/run_1.py", line 1, in <module>
+    from src.normalize import add_numbers
+ModuleNotFoundError: No module named 'src'
+
+[step 9] 思考: 工作目录结构导致导入路径问题，改用 sys.path 插入 src 后验证边界情况。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom normalize import add_numbers\nprint(add_numbers('1.5', 2))\nprint(add_numbers('-3', '4'))\nprint(add_numbers(' 2 ', '3.5'))\nprint(add_numbers(1, 2
+  观察: exit=0
+3.5
+1.0
+5.5
+3.0 <class 'float'>
+ValueError 'abc'
+ValueError ''
+TypeError None
+
+[step 10] 思考: 边界情况验证通过：小数、负数、空白字符串均正确归一化为 float 相加；非数值输入抛出标准 ValueError/TypeError。根因已修复，可见测试全通过。
+  动作: finish {"summary": "修复 src/normalize.py 的 add_numbers：将两个参数统一 float() 后再相加，解决了字符串拼接（'12'）和返回类型问题，返回 float 且支持小数、负数、带空格数字字符串，非法输入抛标准异常。"}
+  判定: 5 passed in 0.02s

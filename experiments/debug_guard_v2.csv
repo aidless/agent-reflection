@@ -1,0 +1,6 @@
+arm,task_id,family,success,judge_detail,failure_mode,steps,calls,tool_calls,plan_calls,reflect_calls,prompt_tokens,completion_tokens,reflect_tokens,total_tokens,cached_tokens,latency_s,rollback_used,rollback_verified,rollback_checks,memory_injected,memory_injected_count,error
+no_memory_debug,multi-paging-between_inclusive-x-types-add_numbers,paging+types,0,"7 failed, 1 passed in 0.07s",wrong_fix,12,13,7,1,0,16511,3098,0,19609,13184,49.2,0,0,1,,0,
+no_memory_debug,parsing-parse_bool,parsing,1,6 passed in 0.03s,,9,10,7,1,0,9495,2871,0,12366,640,28.6,0,0,0,,0,
+no_memory_debug,multi-paging-chunk_list-x-types-compare_values,paging+types,0,"2 failed, 6 passed in 0.07s",wrong_fix,12,13,7,1,0,18199,4116,0,22315,2816,43.9,0,0,1,,0,
+no_memory_debug,parsing-parse_csv_line,parsing,1,6 passed in 0.03s,,12,13,8,1,0,20168,6501,0,26669,16128,91.8,0,0,0,,0,
+no_memory_debug,multi-paging-drop_head-x-types-count_nonnull,paging+types,1,9 passed in 0.03s,,11,12,10,1,0,13730,2322,0,16052,11904,33.9,0,0,0,,0,

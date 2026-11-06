@@ -1,0 +1,9 @@
+arm,task_id,family,success,judge_detail,failure_mode,steps,calls,tool_calls,plan_calls,reflect_calls,prompt_tokens,completion_tokens,reflect_tokens,total_tokens,cached_tokens,latency_s,rollback_used,rollback_verified,rollback_checks,memory_injected,memory_injected_count,error
+memory_debug,multi-paging-between_inclusive-x-types-add_numbers,paging+types,0,"3 failed, 5 passed in 0.06s",wrong_fix,12,13,6,1,2,14213,2040,2421,18674,11904,45.3,0,0,0,,0,reflection_retry_ok
+memory_debug,parsing-parse_bool,parsing,1,6 passed in 0.03s,,12,13,10,1,0,17515,3425,0,20940,14336,46.4,0,0,0,,0,
+memory_debug,multi-paging-chunk_list-x-types-compare_values,paging+types,0,"6 failed, 2 passed in 0.11s",wrong_fix,12,13,7,1,1,15307,4976,1689,21972,12544,73.3,0,0,0,,0,
+memory_debug,parsing-parse_csv_line,parsing,1,6 passed in 0.05s,,12,13,8,1,0,19186,7115,0,26301,15616,93.6,0,0,0,,0,
+memory_debug,multi-paging-drop_head-x-types-count_nonnull,paging+types,1,9 passed in 0.02s,,12,13,10,1,0,15277,3060,0,18337,12032,41.6,0,0,0,,0,
+memory_debug,parsing-parse_duration,parsing,1,6 passed in 0.03s,,12,13,6,1,0,17405,4685,0,22090,7552,62.0,0,0,1,,0,
+memory_debug,multi-paging-last_page-x-types-format_price,paging+types,0,"3 failed, 5 passed in 0.06s",wrong_fix,12,13,5,1,2,13854,2406,2444,18704,1152,65.2,0,0,0,,0,"reflection_parse_failed: {""scenario"":""多缺陷仓库，tests/test_visible.py 仅覆盖 src/paging.py 的 last_page；执行中多次 read_file/edit_file/shell 调用因 JSON 截断或格式错误解析失败，最终只修复了 paging.py"",""error_type"":""缺陷发现不完整 + 工具调用格式错误"""
+memory_debug,parsing-parse_flags,parsing,1,5 passed in 0.03s,,11,12,7,1,0,14287,2116,0,16403,1664,46.4,0,0,0,,0,

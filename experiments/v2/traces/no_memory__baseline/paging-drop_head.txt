@@ -1,0 +1,51 @@
+task: 仓库工作区里 src/paging.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/paging.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和测试文件，复现失败。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/paging.py  (92B)
+[dir] tests
+      tests/test_visible.py  (164B)
+[step 2] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"src/paging.py"}</｜DSML｜ paramet
+[step 3] 思考: 读取源码和可见测试。
+  动作: read_file {"path": "src/paging.py", "start_line": 1, "end_line": 120}
+  观察: src/paging.py (4 行)
+   1| def drop_head(items, n):
+   2|     if n <= 0:
+   3|         return list(items)
+   4|     return items[n - 1:]
+[step 4] 思考: 读取可见测试了解期望行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 80}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from paging import drop_head
+   3| 
+   4| def test_drop_basic():
+   5|     assert drop_head([1, 2, 3, 4], 2) == [3, 4]
+   6| 
+   7| 
+   8| 
+   9| def test_drop_all():
+  10|     assert drop_head([1, 2], 2) == []
+[step 5] 思考: 根因是切片索引错误：丢弃前 n 个应为 items[n:]，而写了 items[n-1:]。n 超过长度时 items[n:] 自然为空，无需特判。
+  动作: edit_file {"path": "src/paging.py", "old": "    return items[n - 1:]", "new": "    return list(items[n:])"}
+  观察: 已修改 src/paging.py（替换 1 处）
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D
+[step 7] 思考: 运行测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.15s
+
+[step 8] 思考: 可见测试通过。已用 items[n:] 处理 n 超过长度（返回空）和 n<=0（返回副本）的边界情况，根因已修复。
+  动作: finish {"summary": "修复 src/paging.py 中 drop_head 的切片索引错误：由 items[n-1:] 改为 list(items[n:])，正确丢弃前 n 个元素，并正确处理 n<=0 与 n 超过长度（越界返回空列表）的边界情况。"}
+  判定: 5 passed in 0.04s

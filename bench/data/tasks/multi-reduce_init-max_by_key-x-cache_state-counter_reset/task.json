@@ -1,0 +1,21 @@
+{
+  "id": "multi-reduce_init-max_by_key-x-cache_state-counter_reset",
+  "kind": "multi",
+  "family": "reduce_init+cache_state",
+  "bug_category": "reduce_init",
+  "bug_categories": [
+    "reduce_init",
+    "cache_state"
+  ],
+  "bug_class": "归约初值/比较器错误 + 状态/缓存失效错误",
+  "bug_desc": "max_by_key 直接比较元素本身，忽略 key 函数；reset 没有清零累计值",
+  "module": "stats+state",
+  "src_path": "src/stats.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_max_by_key_dict",
+  "reference": {
+    "src/stats.py": "def max_by_key(items, key):\n    if not items:\n        return None\n    best = items[0]\n    for it in items[1:]:\n        if key(it) > key(best):\n            best = it\n    return best\n",
+    "src/state.py": "class Counter:\n    def __init__(self):\n        self.total = 0\n\n    def add(self, x=1):\n        self.total += x\n        return self.total\n\n    def reset(self):\n        self.total = 0\n        return self\n"
+  },
+  "hidden_tests": "from stats import max_by_key\n\ndef test_max_by_key_dict():\n    rows = [{\"v\": 1}, {\"v\": 9}, {\"v\": 5}]\n    assert max_by_key(rows, lambda r: r[\"v\"]) == {\"v\": 9}\n\ndef test_max_by_key_empty():\n    assert max_by_key([], len) is None\n\ndef test_max_by_key_tie():\n    assert max_by_key([\"bb\", \"aa\"], len) == \"bb\"\n\n\nfrom state import Counter\n\ndef test_reset_clears():\n    c = Counter()\n    c.add(5)\n    c.reset()\n    assert c.add(1) == 1\n\ndef test_reset_returns_self():\n    c = Counter()\n    assert c.reset() is c\n"
+}

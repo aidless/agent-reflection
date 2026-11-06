@@ -1,0 +1,65 @@
+task: 仓库工作区里 src/stats.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/stats.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区文件结构，定位源码和测试。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/stats.py  (159B)
+[dir] tests
+      tests/test_visible.py  (185B)
+[step 2] 思考: 读取源码与可见测试，了解缺陷。
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 120}
+  观察: src/stats.py (5 行)
+   1| def second_largest(values):
+   2|     if len(values) < 2:
+   3|         return None
+   4|     uniq = sorted(values, reverse=True)
+   5|     return uniq[1] if len(uniq) >= 2 else None
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "tests/test_visi
+[step 4] 思考: 刚才格式出错，重新读取可见测试文件。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from stats import second_largest
+   3| 
+   4| def test_second_largest_basic():
+   5|     assert second_largest([3, 9, 1, 7]) == 7
+   6| 
+   7| 
+   8| 
+   9| def test_duplicates_max():
+  10|     assert second_largest([5, 5, 3]) == 3
+[step 5] 思考: 根因是未去重：重复最大值被当作第二大的值。应先去重再取第二。
+  动作: write_file {"path": "src/stats.py", "content": "def second_largest(values):\n    \"\"\"Return the second largest distinct value, or None if it does not exist.\"\"\"\n    if values is None:\n        return None\n
+  观察: 已写入 src/stats.py（259 字符）
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D
+[step 7] 思考: 运行测试确认修复。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.08s
+
+[step 8] 思考: 验证边界情况：全相同、单元素、空、负数等。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom stats import second_largest\ncases=[([],None),([1],None),([2,2],None),([2,2,1],1),([1,2,3],2),([-1,-5,-3],-3),([3,9,1,7],7),([5,5,3],3)]\nfor v,e i
+  观察: exit=0
+[] None None OK
+[1] None None OK
+[2, 2] None None OK
+[2, 2, 1] 1 1 OK
+[1, 2, 3] 2 2 OK
+[-1, -5, -3] -3 -3 OK
+[3, 9, 1, 7] 7 7 OK
+[5, 5, 3] 3 3 OK
+2 None
+
+[step 9] 思考: 所有边界用例均正确，测试通过，修复完成。
+  动作: finish {"summary": "修复 src/stats.py 的 second_largest：根因是原实现未对值去重，导致重复的最大值被当作第二大的值（如 [5,5,3] 返回 5）。改为先 set 去重，去重后元素少于 2 返回 None，否则返回降序排序后的第二个（第二大不同值）；并兼容 None 输入。已通过可见测试及空、单元素、全相同、负数、元组等边界验证。"}
+  判定: 6 passed in 0.01s

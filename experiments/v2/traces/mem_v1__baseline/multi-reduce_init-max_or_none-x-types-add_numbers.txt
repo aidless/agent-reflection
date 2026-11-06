@@ -1,0 +1,83 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="path" string="true">.</｜DSML｜ parameter>
+</｜D
+[step 2] 思考: 先列出工作区文件，了解仓库结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (40B)
+      src/stats.py  (160B)
+[dir] tests
+      tests/test_visible.py  (171B)
+[step 3] 思考: 读取源码与可见测试
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 120}
+  观察: src/stats.py (8 行)
+   1| def max_or_none(values):
+   2|     if not values:
+   3|         return None
+   4|     best = 0
+   5|     for v in values[1:]:
+   6|         if v > best:
+   7|             best = v
+   8|     return best
+[step 4] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">src/normalize.py</｜DSML｜ p
+[step 5] 思考: 读取 normalize.py 与可见测试
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 60}
+  观察: src/normalize.py (2 行)
+   1| def add_numbers(a, b):
+   2|     return a + b
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">tests/test_visible.py</｜DS
+[step 7] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="shell">
+<｜DSML｜ parameter name="cmd" string="true">ls -a; ls -a src tests; git log
+[step 8] 思考: 需要查看可见测试内容，才能推断隐藏测试对 normalize.add_numbers 的期望
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from stats import max_or_none
+   3| 
+   4| def test_max_positive():
+   5|     assert max_or_none([3, 9, 4]) == 9
+   6| 
+   7| 
+   8| 
+   9| def test_max_all_negative():
+  10|     assert max_or_none([-5, -2, -9]) == -2
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="write_file">
+<｜DSML｜ parameter name="path" string="true">src/stats.py</｜DSML｜ para
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="write_file">
+<｜DSML｜ parameter name="path" string="true">src/stats.py</｜DSML｜ para
+[step 11] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="shell">
+<｜DSML｜ parameter name="cmd" string="true">grep -rn "add_numbers" . 2>/dev
+[step 12] 思考: 需要确认 add_numbers 的语义/缺陷线索，查看仓库中是否有其他说明文件
+  动作: grep {"pattern": "add_numbers|def ", "path": "."}
+  观察: tests/test_visible.py:4: def test_max_positive():
+tests/test_visible.py:9: def test_max_all_negative():
+src/stats.py:1: def max_or_none(values):
+src/normalize.py:1: def add_numbers(a, b):
+  反思异常: reflection_retry_ok
+  反思丢弃: 记忆层判定为 prompt 复述

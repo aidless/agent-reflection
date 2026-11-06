@@ -1,0 +1,75 @@
+task: 仓库工作区里 src/stats.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/stats.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="path" string="true">.</｜DSML｜ parameter>
+</｜D
+[step 2] 思考: 先查看工作区文件结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/stats.py  (133B)
+[dir] tests
+      tests/test_visible.py  (173B)
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">src/stats.py</｜DSML｜ param
+[step 4] 思考: 读取源码和可见测试
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 80}
+  观察: src/stats.py (7 行)
+   1| def product_or_none(values):
+   2|     if not values:
+   3|         return None
+   4|     out = 0
+   5|     for v in values:
+   6|         out *= v
+   7|     return out
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">tests/test_visible.py</｜DS
+[step 6] 思考: 读取可见测试内容
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 80}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from stats import product_or_none
+   3| 
+   4| def test_product_basic():
+   5|     assert product_or_none([2, 3, 4]) == 24
+   6| 
+   7| 
+   8| 
+   9| def test_product_single():
+  10|     assert product_or_none([5]) == 5
+[step 7] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="path" string="true">src/stats.py</｜DSML｜ param
+[step 8] 思考: 根因：out 初始化为 0 导致乘积恒为 0；且未处理生成器等可迭代对象。改为 out=1，并先物化为 list 以支持一次性迭代器，同时保留空输入返回 None。
+  动作: write_file {"path": "src/stats.py", "content": "def product_or_none(values):\n    if values is None:\n        return None\n    values = list(values)\n    if not values:\n        return None\n    out = 1\n    for
+  观察: 已写入 src/stats.py（202 字符）
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="selector" string="true">tests</｜DSML｜ paramete
+[step 10] 思考: 运行可见测试确认修复
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 11] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="finish">
+<｜DSML｜ parameter name="summary" string="true">修复 src/stats.py 的 product_
+[step 12] 思考: 已修复并通过可见测试，提交完成
+  动作: finish {"summary": "修复 src/stats.py 的 product_or_none 根因：累乘初值从 0 改为 1（原实现使任何非空输入乘积恒为 0）；并先将入参物化为 list 以支持生成器等一次性可迭代对象，空序列/None 仍返回 None。可见测试 2 passed。"}
+  判定: 5 passed in 0.02s

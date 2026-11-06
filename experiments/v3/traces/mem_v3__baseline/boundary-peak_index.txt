@@ -1,0 +1,87 @@
+task: 仓库工作区里 src/search.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/search.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和相关文件。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/search.py  (212B)
+[dir] tests
+      tests/test_visible.py  (100B)
+[step 2] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">src/search.py</｜DSML｜ para
+[step 3] 思考: 读取源码和测试文件以定位缺陷。
+  动作: read_file {"path": "src/search.py", "start_line": 1, "end_line": 120}
+  观察: src/search.py (9 行)
+   1| def peak_index(arr):
+   2|     lo, hi = 0, len(arr) - 1
+   3|     while lo < hi:
+   4|         mid = (lo + hi) // 2
+   5|         if arr[mid] > arr[mid + 1]:
+   6|             hi = mid - 1
+   7|         else:
+   8|             lo = mid + 1
+   9|     return lo
+[step 4] 思考: 两次读取结果不一致，需重新确认实际源码内容，并查看测试。
+  动作: read_file {"path": "src/search.py", "start_line": 1, "end_line": 30}
+  观察: src/search.py (9 行)
+   1| def peak_index(arr):
+   2|     lo, hi = 0, len(arr) - 1
+   3|     while lo < hi:
+   4|         mid = (lo + hi) // 2
+   5|         if arr[mid] > arr[mid + 1]:
+   6|             hi = mid - 1
+   7|         else:
+   8|             lo = mid + 1
+   9|     return lo
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">tests/test_visible.py</｜DS
+[step 6] 思考: 查看可见测试内容。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 50}
+  观察: tests/test_visible.py (5 行)
+   1| 
+   2| from search import peak_index
+   3| 
+   4| def test_peak_middle():
+   5|     assert peak_index([1, 3, 5, 4, 2]) == 2
+[step 7] 思考: 根因：当 arr[mid] > arr[mid+1] 时峰值在 mid 或左侧，应设置 hi=mid，而不是 mid-1（mid-1 会跳过可能的峰值索引，导致返回错误位置）。修复它。
+  动作: edit_file {"path": "src/search.py", "old": "            hi = mid - 1", "new": "            hi = mid"}
+  观察: 已修改 src/search.py（替换 1 处）
+[step 8] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D
+[step 9] 思考: 运行测试确认修复。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+.                                                                        [100%]
+1 passed in 0.15s
+
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜
+[step 11] 思考: 测试通过。为隐藏边界测试做准备，先确认文件当前内容并用 run_python 验证空数组、单元素、递增、递减、重复值等边界。
+  动作: read_file {"path": "src/search.py", "start_line": 1, "end_line": 20}
+  观察: src/search.py (9 行)
+   1| def peak_index(arr):
+   2|     lo, hi = 0, len(arr) - 1
+   3|     while lo < hi:
+   4|         mid = (lo + hi) // 2
+   5|         if arr[mid] > arr[mid + 1]:
+   6|             hi = mid
+   7|         else:
+   8|             lo = mid + 1
+   9|     return lo
+[step 12] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ parameter name="code" string="true">import sys; sys.path.insert(0,'src')
+from search import pea

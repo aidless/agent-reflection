@@ -1,0 +1,21 @@
+{
+  "id": "multi-parsing-split_path-x-recursion-tree_height",
+  "kind": "multi",
+  "family": "parsing+recursion",
+  "bug_category": "parsing_robustness",
+  "bug_categories": [
+    "parsing_robustness",
+    "recursion_base"
+  ],
+  "bug_class": "解析边界情况 + 递归基例错误",
+  "bug_desc": "路径切分未处理引号，带引号且含斜杠的分段被拆散；叶子节点高度返回 0，整棵树高度偏低 1",
+  "module": "parsing+recursion",
+  "src_path": "src/parsing.py,src/recursion.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_path_quoted_slash",
+  "reference": {
+    "src/parsing.py": "def split_path(path):\n    out = []\n    cur = \"\"\n    in_quotes = False\n    for ch in path:\n        if ch == '\"':\n            in_quotes = not in_quotes\n        elif ch == \"/\" and not in_quotes:\n            if cur:\n                out.append(cur)\n            cur = \"\"\n        else:\n            cur += ch\n    if cur:\n        out.append(cur)\n    return out\n",
+    "src/recursion.py": "class Node:\n    def __init__(self, value, children=None):\n        self.value = value\n        self.children = children or []\n\n\ndef tree_height(node):\n    if node is None:\n        return 0\n    if not node.children:\n        return 1\n    return 1 + max(tree_height(c) for c in node.children)\n"
+  },
+  "hidden_tests": "from parsing import split_path\n\ndef test_path_quoted_slash():\n    assert split_path('a/\"b/c\"/d') == [\"a\", \"b/c\", \"d\"]\n\ndef test_path_leading_slash():\n    assert split_path(\"/a/b\") == [\"a\", \"b\"]\n\ndef test_path_empty():\n    assert split_path(\"\") == []\n\n\nfrom recursion import Node, tree_height\n\ndef test_height_two_levels():\n    root = Node(1, [Node(2), Node(3)])\n    assert tree_height(root) == 2\n\ndef test_height_nested():\n    root = Node(1, [Node(2, [Node(3)])])\n    assert tree_height(root) == 3\n\ndef test_height_none():\n    assert tree_height(None) == 0\n"
+}

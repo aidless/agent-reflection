@@ -1,0 +1,85 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/recursion.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构，了解 src 与 tests 文件。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/recursion.py  (127B)
+      src/stats.py  (171B)
+[dir] tests
+      tests/test_visible.py  (150B)
+[step 2] 思考: 读取源码与可见测试。
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 200}
+  观察: src/recursion.py (6 行)
+   1| def to_binary(n):
+   2|     if n == 0:
+   3|         return ""
+   4|     if n == 1:
+   5|         return "1"
+   6|     return to_binary(n // 2) + str(n % 2)
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"src/stats.py","start_line":1,"e
+[step 4] 思考: 继续读取 stats.py 和可见测试。
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 200}
+  观察: src/stats.py (8 行)
+   1| def max_by_key(items, key):
+   2|     if not items:
+   3|         return None
+   4|     best = items[0]
+   5|     for it in items[1:]:
+   6|         if it > best:
+   7|             best = it
+   8|     return best
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"tests/test_visible.py","start_l
+[step 6] 思考: 读取可见测试，理解预期行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 200}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from recursion import to_binary
+   3| 
+   4| def test_binary_simple():
+   5|     assert to_binary(2) == "10"
+   6| 
+   7| 
+   8| 
+   9| def test_binary_zero():
+  10|     assert to_binary(0) == "0"
+[step 7] 思考: 发现两处缺陷：to_binary(0) 返回空串（应为 "0"），且未处理负数；stats.max_by_key 完全忽略了 key 参数，直接比较元素。修复两处。
+  动作: edit_file {"path": "src/recursion.py", "old": "def to_binary(n):\n    if n == 0:\n        return \"\"\n    if n == 1:\n        return \"1\"\n    return to_binary(n // 2) + str(n % 2)", "new": "def to_binary(n):
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 8] 思考: 现在修复 stats.max_by_key，让其真正使用 key 函数（默认恒等），正确处理空输入与生成器输入。
+  动作: edit_file {"path": "src/stats.py", "old": "def max_by_key(items, key):\n    if not items:\n        return None\n    best = items[0]\n    for it in items[1:]:\n        if it > best:\n            best = it\n    r
+  观察: 已修改 src/stats.py（替换 1 处）
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args":{"code":"import sys; sys.path.insert(0,
+[step 10] 思考: 运行验证脚本，检查两处修复的边界行为。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom recursion import to_binary\nfrom stats import max_by_key\nprint(repr(to_binary(0)), repr(to_binary(1)), repr(to_binary(2)), repr(to_binary(10)), re
+  观察: exit=0
+'0' '1' '10' '1010' '-101'
+None
+3
+aaa
+9
+-9
+TypeError ok
+
+[step 11] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args":{"selector":"tests"}}</｜DSML｜ parameter>
+[step 12] 思考: 可见测试需要确认结果；调用 run_tests 查看。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s

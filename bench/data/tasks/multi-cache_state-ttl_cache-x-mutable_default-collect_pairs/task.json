@@ -1,0 +1,21 @@
+{
+  "id": "multi-cache_state-ttl_cache-x-mutable_default-collect_pairs",
+  "kind": "multi",
+  "family": "cache_state+mutable_default",
+  "bug_category": "cache_state",
+  "bug_categories": [
+    "cache_state",
+    "mutable_default"
+  ],
+  "bug_class": "状态/缓存失效错误 + 可变默认参数/共享状态",
+  "bug_desc": "TTL 过期判断被禁用，过期键仍然返回值；输出列表作为可变默认参数，多次调用累积",
+  "module": "state+collect",
+  "src_path": "src/state.py,src/collect.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/state.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_ttl_expires",
+  "reference": {
+    "src/state.py": "import time\n\n\nclass TTLCache:\n    def __init__(self, ttl):\n        self.ttl = ttl\n        self._data = {}\n\n    def set(self, k, v):\n        self._data[k] = (v, time.time())\n\n    def get(self, k):\n        if k not in self._data:\n            return None\n        v, ts = self._data[k]\n        if time.time() - ts > self.ttl:\n            del self._data[k]\n            return None\n        return v\n",
+    "src/collect.py": "def collect_pairs(rows):\n    out = []\n    for a, b in rows:\n        out.append((a, b))\n    return out\n"
+  },
+  "hidden_tests": "import time\nfrom state import TTLCache\n\ndef test_ttl_expires():\n    c = TTLCache(0.05)\n    c.set(\"a\", 1)\n    time.sleep(0.12)\n    assert c.get(\"a\") is None\n\ndef test_ttl_missing():\n    assert TTLCache(1).get(\"z\") is None\n\n\nfrom collect import collect_pairs\n\ndef test_pairs_no_leak():\n    a = collect_pairs([(1, 2)])\n    b = collect_pairs([(3, 4)])\n    assert a == [(1, 2)]\n    assert b == [(3, 4)]\n\ndef test_pairs_empty():\n    assert collect_pairs([]) == []\n"
+}

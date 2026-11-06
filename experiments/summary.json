@@ -1,0 +1,67 @@
+{
+  "summary": {
+    "no_memory__baseline": {
+      "n": 64,
+      "success_rate": 0.84375,
+      "successes": 54,
+      "ci": [
+        0.75,
+        0.921875
+      ],
+      "tokens_mean": 17859.5,
+      "tokens_median": 19000,
+      "calls_mean": 12.5,
+      "steps_mean": 11.5,
+      "cached_tokens_mean": 9868.0,
+      "latency_mean": 65.36875,
+      "fail_modes": {
+        "": 52,
+        "budget_time": 2,
+        "wrong_fix": 10
+      },
+      "memory_injected_mean": 0.0
+    },
+    "memory__baseline": {
+      "n": 64,
+      "success_rate": 0.859375,
+      "successes": 55,
+      "ci": [
+        0.765625,
+        0.9375
+      ],
+      "tokens_mean": 17022.75,
+      "tokens_median": 15512,
+      "calls_mean": 11.9375,
+      "steps_mean": 10.9375,
+      "cached_tokens_mean": 9712.0,
+      "latency_mean": 62.228125,
+      "fail_modes": {
+        "": 53,
+        "budget_time": 2,
+        "wrong_fix": 9
+      },
+      "memory_injected_mean": 0.0
+    },
+    "memory__optimized": {
+      "n": 64,
+      "success_rate": 0.734375,
+      "successes": 47,
+      "ci": [
+        0.625,
+        0.84375
+      ],
+      "tokens_mean": 12882.046875,
+      "tokens_median": 12543,
+      "calls_mean": 9.96875,
+      "steps_mean": 9.96875,
+      "cached_tokens_mean": 5900.0,
+      "latency_mean": 39.721875,
+      "fail_modes": {
+        "": 47,
+        "wrong_fix": 17
+      },
+      "memory_injected_mean": 0.0625
+    }
+  },
+  "n_rows": 192
+}

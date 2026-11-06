@@ -1,0 +1,21 @@
+{
+  "id": "multi-reduce_init-argmax-x-cache_state-batch_flush",
+  "kind": "multi",
+  "family": "reduce_init+cache_state",
+  "bug_category": "reduce_init",
+  "bug_categories": [
+    "reduce_init",
+    "cache_state"
+  ],
+  "bug_class": "归约初值/比较器错误 + 状态/缓存失效错误",
+  "bug_desc": "argmax 返回最大值本身而不是下标；flush 后未清空缓冲，下次统计重复计入",
+  "module": "stats+state",
+  "src_path": "src/stats.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_argmax_first",
+  "reference": {
+    "src/stats.py": "def argmax(values):\n    if not values:\n        return None\n    best_i, best_v = 0, values[0]\n    for i, v in enumerate(values[1:], start=1):\n        if v > best_v:\n            best_i, best_v = i, v\n    return best_i\n",
+    "src/state.py": "class BatchStats:\n    def __init__(self):\n        self.items = []\n\n    def add(self, x):\n        self.items.append(x)\n\n    def flush(self):\n        vals = list(self.items)\n        self.items = []\n        return sum(vals) / len(vals) if vals else None\n"
+  },
+  "hidden_tests": "from stats import argmax\n\ndef test_argmax_first():\n    assert argmax([9, 1]) == 0\n\ndef test_argmax_last():\n    assert argmax([1, 2, 8]) == 2\n\ndef test_argmax_empty():\n    assert argmax([]) is None\n\ndef test_argmax_equal():\n    assert argmax([3, 3]) == 0\n\n\nfrom state import BatchStats\n\ndef test_flush_clears():\n    b = BatchStats()\n    b.add(1)\n    b.add(3)\n    b.flush()\n    assert b.flush() is None\n\ndef test_flush_then_add():\n    b = BatchStats()\n    b.add(2)\n    b.flush()\n    b.add(6)\n    assert b.flush() == 6.0\n"
+}

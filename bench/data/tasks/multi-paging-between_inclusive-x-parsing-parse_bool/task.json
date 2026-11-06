@@ -1,0 +1,21 @@
+{
+  "id": "multi-paging-between_inclusive-x-parsing-parse_bool",
+  "kind": "multi",
+  "family": "paging+parsing",
+  "bug_category": "paging_index",
+  "bug_categories": [
+    "paging_index",
+    "parsing_robustness"
+  ],
+  "bug_class": "切片/分页 off-by-one + 解析边界情况",
+  "bug_desc": "闭区间切片写成半开区间，右端点丢一个；布尔解析直接对原始字符串取真值，\"false\" 被判为真",
+  "module": "paging+parsing",
+  "src_path": "src/paging.py,src/parsing.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/paging.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_between_adjacent",
+  "reference": {
+    "src/paging.py": "def between_inclusive(items, lo, hi):\n    if hi < lo:\n        return []\n    return items[lo:hi + 1]\n",
+    "src/parsing.py": "def parse_bool(text):\n    return str(text).strip().lower() in (\"1\", \"true\", \"yes\", \"on\")\n"
+  },
+  "hidden_tests": "from paging import between_inclusive\n\ndef test_between_adjacent():\n    assert between_inclusive([0, 1, 2], 1, 2) == [1, 2]\n\ndef test_between_same():\n    assert between_inclusive([0, 1, 2], 1, 1) == [1]\n\ndef test_between_reverse():\n    assert between_inclusive([0, 1, 2], 2, 1) == []\n\n\nfrom parsing import parse_bool\n\ndef test_bool_false_string():\n    assert parse_bool(\"false\") is False\n\ndef test_bool_zero_string():\n    assert parse_bool(\"0\") is False\n\ndef test_bool_off():\n    assert parse_bool(\"off\") is False\n\ndef test_bool_true_variants():\n    assert parse_bool(\"TRUE\") is True\n    assert parse_bool(\" 1 \") is True\n"
+}

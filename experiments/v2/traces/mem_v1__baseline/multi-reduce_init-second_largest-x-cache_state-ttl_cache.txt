@@ -1,0 +1,92 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解 src/ 与 tests/ 结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/state.py  (371B)
+      src/stats.py  (159B)
+[dir] tests
+      tests/test_visible.py  (185B)
+[step 2] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"src/stats.py","start_line":1,"e
+[step 3] 思考: 读取 stats.py 与 state.py，以及可见测试。
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 60}
+  观察: src/stats.py (5 行)
+   1| def second_largest(values):
+   2|     if len(values) < 2:
+   3|         return None
+   4|     uniq = sorted(values, reverse=True)
+   5|     return uniq[1] if len(uniq) >= 2 else None
+[step 4] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"src/state.py","start_line":1,"e
+[step 5] 思考: 读取 state.py 内容。
+  动作: read_file {"path": "src/state.py", "start_line": 1, "end_line": 80}
+  观察: src/state.py (19 行)
+   1| import time
+   2| 
+   3| 
+   4| class TTLCache:
+   5|     def __init__(self, ttl):
+   6|         self.ttl = ttl
+   7|         self._data = {}
+   8| 
+   9|     def set(self, k, v):
+  10|         self._data[k] = (v, time.time())
+  11| 
+  12|     def get(self, k):
+  13|       
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"tests/test_visible.py","start_l
+[step 7] 思考: 查看可见测试内容，确认期望行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 40}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from stats import second_largest
+   3| 
+   4| def test_second_largest_basic():
+   5|     assert second_largest([3, 9, 1, 7]) == 7
+   6| 
+   7| 
+   8| 
+   9| def test_duplicates_max():
+  10|     assert second_largest([5, 5, 3]) == 3
+[step 8] 思考: 修复 stats.py（去重后取第二大）与 state.py（TTL 过期判断失效）。
+  动作: edit_file {"path": "src/stats.py", "old": "def second_largest(values):\n    if len(values) < 2:\n        return None\n    uniq = sorted(values, reverse=True)\n    return uniq[1] if len(uniq) >= 2 else None", "n
+  观察: 已修改 src/stats.py（替换 1 处）
+[step 9] 思考: 修复 state.py 的过期逻辑，并让 TTL=None 表示永不过期、ttl<=0 立即过期，同时提供 contains/delete 辅助。
+  动作: edit_file {"path": "src/state.py", "old": "    def set(self, k, v):\n        self._data[k] = (v, time.time())\n\n    def get(self, k):\n        if k not in self._data:\n            return None\n        v, ts = 
+  观察: 已修改 src/state.py（替换 1 处）
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path":"src/state.py","start_line":1,"e
+[step 11] 思考: 查看 state.py 当前内容，确认编辑是否完整。
+  动作: read_file {"path": "src/state.py", "start_line": 1, "end_line": 80}
+  观察: src/state.py (40 行)
+   1| import time
+   2| 
+   3| 
+   4| class TTLCache:
+   5|     def __init__(self, ttl):
+   6|         self.ttl = ttl
+   7|         self._data = {}
+   8| 
+   9|     def set(self, k, v):
+  10|         self._data[k] = (v, time.time())
+  11| 
+  12|     def _expired(self, ts):
+  13| 
+[step 12] 思考: 清理 __len__ 中未使用的 now 变量，然后运行测试并验证边界用例。
+  动作: edit_file {"path": "src/state.py", "old": "    def __len__(self):\n        now = time.time()\n        for k in list(self._data):", "new": "    def __len__(self):\n        for k in list(self._data):"}
+  观察: 已修改 src/state.py（替换 1 处）

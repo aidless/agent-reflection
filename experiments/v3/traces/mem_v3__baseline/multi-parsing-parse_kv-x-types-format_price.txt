@@ -1,0 +1,93 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/parsing.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (58B)
+      src/parsing.py  (184B)
+[dir] tests
+      tests/test_visible.py  (196B)
+[step 2] 思考: 读取全部源码与可见测试。
+  动作: read_file {"path": "src/parsing.py"}
+  观察: src/parsing.py (8 行)
+   1| def parse_kv(text):
+   2|     out = {}
+   3|     for part in text.split(","):
+   4|         if not part.strip():
+   5|             continue
+   6|         k, v = part.split("=", 1)
+   7|         out[k] = v
+   8|     return out
+[step 3] 思考: 读取结果似乎与文件名不一致，重新读取 parsing.py 全文，并读 normalize.py 与测试。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 60}
+  观察: src/parsing.py (8 行)
+   1| def parse_kv(text):
+   2|     out = {}
+   3|     for part in text.split(","):
+   4|         if not part.strip():
+   5|             continue
+   6|         k, v = part.split("=", 1)
+   7|         out[k] = v
+   8|     return out
+[step 4] 思考: 读取 normalize.py 和可见测试。
+  动作: read_file {"path": "src/normalize.py"}
+  观察: src/normalize.py (2 行)
+   1| def format_price(cents):
+   2|     return f"${cents / 100:.1f}"
+[step 5] 思考: 文件内容与路径映射似有错乱，用 grep 搜出 src 下所有函数定义以确认实际内容。
+  动作: grep {"pattern": "def ", "path": "."}
+  观察: tests/test_visible.py:4: def test_kv_simple():
+tests/test_visible.py:9: def test_kv_spaces():
+src/normalize.py:1: def format_price(cents):
+src/parsing.py:1: def parse_kv(text):
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args" string="false">true</｜DSML｜ parameter>
+
+[step 7] 思考: 用 run_python 直接打印三个文件内容，避免观察结果混乱。
+  动作: run_python {"code": "import pathlib\nfor p in ['src/parsing.py','src/normalize.py','tests/test_visible.py']:\n    print('===',p)\n    print(pathlib.Path(p).read_text())\n    print('--- end')"}
+  观察: exit=0
+=== src/parsing.py
+def parse_kv(text):
+    out = {}
+    for part in text.split(","):
+        if not part.strip():
+            continue
+        k, v = part.split("=", 1)
+        out[k] = v
+    return out
+
+--- end
+=== src/normalize.py
+def format_price(cents):
+    return f"${cents / 100:.1f}"
+
+-
+[step 8] 解析失败：{"thought":"实际情况：parsing.py 只有 parse_kv（未 strip 空格，导致可见测试 test_kv_spaces 失败），normalize.py 的 format_price 用了 .1f，丢失分位精度。另
+[step 9] 思考: 重写 parsing.py：parse_kv 去除键值空白、跳过空段、非法段抛 ValueError，并补充 parse_bool/parse_int 的显式解析（历史教训）。
+  动作: write_file {"path": "src/parsing.py", "content": "def parse_kv(text):\n    \"\"\"Parse 'k=v,k2=v2' into dict, trimming whitespace around keys/values.\"\"\"\n    if text is None:\n        raise ValueError(\"text 
+  观察: 已写入 src/parsing.py（1831 字符）
+[step 10] 思考: 写入内容可能被截断，先读取文件确认。
+  动作: run_python {"code": "import pathlib\nprint(pathlib.Path('src/parsing.py').read_text())"}
+  观察: exit=0
+def parse_kv(text):
+    """Parse 'k=v,k2=v2' into dict, trimming whitespace around keys/values."""
+    if text is None:
+        raise ValueError("text must not be None")
+    out = {}
+    for part in str(text).split(","):
+        part = part.strip()
+        if not part:
+            continue
+  
+[step 11] 思考: 修复 normalize.py 的 format_price：按分四舍五入到 2 位小数，处理负数与浮点输入。
+  动作: write_file {"path": "src/normalize.py", "content": "import math\n\n\ndef format_price(cents):\n    \"\"\"Format an amount in cents as a dollar string with 2 decimals.\n\n    >>> format_price(1234)\n    '$12.34'\
+  观察: 已写入 src/normalize.py（853 字符）
+[step 12] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="args" string="false">{"code": "import sys; sy

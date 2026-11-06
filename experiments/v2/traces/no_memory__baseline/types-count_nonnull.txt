@@ -1,0 +1,42 @@
+task: 仓库工作区里 src/normalize.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/normalize.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和相关文件。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (66B)
+[dir] tests
+      tests/test_visible.py  (177B)
+[step 2] 解析失败：Let me read the files.
+[step 3] 思考: 读取源码和测试文件。
+  动作: read_file {"path": "src/normalize.py"}
+  观察: src/normalize.py (2 行)
+   1| def count_nonnull(values):
+   2|     return sum(1 for v in values if v)
+[step 4] 解析失败：The bug: counts truthy values rather than non-null. Should count v is not None. Also handle maybe NaN? Secret test "type
+[step 5] 思考: 读取可见测试以确认预期语义。
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from normalize import count_nonnull
+   3| 
+   4| def test_count_plain():
+   5|     assert count_nonnull([1, 2]) == 2
+   6| 
+   7| 
+   8| 
+   9| def test_count_zero_counts():
+  10|     assert count_nonnull([0, 1, None]) == 2
+[step 6] 思考: 缺陷在于用真值判断而非判断非 None，导致 0、False、''、[] 等被漏计。修复为 `v is not None`。
+  动作: edit_file {"path": "src/normalize.py", "old": "    return sum(1 for v in values if v)", "new": "    return sum(1 for v in values if v is not None)"}
+  观察: 已修改 src/normalize.py（替换 1 处）
+[step 7] 解析失败：Run tests. But consider float('nan') — NaN is not None, so counts as non-null. That's likely correct for "non-null" sema
+[step 8] 思考: 运行全量测试确认修复。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.13s
+
+[step 9] 思考: 根因已修复：原实现按真值过滤，漏计 0、False、空字符串等合法值；改为 `v is not None` 后可见测试全部通过，隐藏边界情况（0、False、''、[]、NaN 均被视为非空）也符合非空计数语义。
+  动作: finish {"summary": "修复 src/normalize.py 的 count_nonnull：将 `if v` 改为 `if v is not None`，使其正确统计所有非 None 值（包括 0、False、空字符串、空容器等假值），而不是按真值过滤。tests 未改动，全量测试通过。"}
+  判定: 6 passed in 0.03s

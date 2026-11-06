@@ -1,0 +1,52 @@
+task: 仓库工作区里 src/collect.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/collect.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区文件结构，定位源码和测试。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (142B)
+[dir] tests
+      tests/test_visible.py  (258B)
+[step 2] 思考: 读取源码和可见测试。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 200}
+  观察: src/collect.py (5 行)
+   1| def add_metric(name, value, store={}):
+   2|     if store is None:
+   3|         store = {}
+   4|     store.setdefault(name, []).append(value)
+   5|     return store
+[step 3] 思考: 读取可见测试了解期望行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 200}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import add_metric
+   3| 
+   4| def test_metric_basic():
+   5|     assert add_metric("x", 1) == {"x": [1]}
+   6| 
+   7| 
+   8| 
+   9| def test_metric_no_leak():
+  10|     first = add_metric("x", 1)
+  11|     second = add_metric("y", 2)
+  12|     
+[step 4] 思考: 根因是可变默认参数 store={} 在多次调用间共享同一个 dict，导致泄漏。改为默认 None 并在函数内新建 dict。
+  动作: edit_file {"path": "src/collect.py", "old": "def add_metric(name, value, store={}):", "new": "def add_metric(name, value, store=None):"}
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 5] 思考: 验证修改后代码并跑测试。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 6] 思考: 可见测试通过。确认最终源码符合边界情况（None 时新建 dict，传入的 store 被复用）。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 20}
+  观察: src/collect.py (5 行)
+   1| def add_metric(name, value, store=None):
+   2|     if store is None:
+   3|         store = {}
+   4|     store.setdefault(name, []).append(value)
+   5|     return store
+[step 7] 思考: 根因已修复：可变默认参数改为 None 并在内部新建 dict，既避免跨调用泄漏，又保留显式传入 store 时的复用行为。可见测试全部通过。
+  动作: finish {"summary": "将 add_metric 的可变默认参数 store={} 改为 store=None，并在函数内按需新建 dict，消除多次调用间共享同一字典导致的泄漏问题。"}
+  判定: 5 passed in 0.01s

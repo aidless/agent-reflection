@@ -1,0 +1,21 @@
+{
+  "id": "multi-paging-between_inclusive-x-recursion-to_binary",
+  "kind": "multi",
+  "family": "paging+recursion",
+  "bug_category": "paging_index",
+  "bug_categories": [
+    "paging_index",
+    "recursion_base"
+  ],
+  "bug_class": "切片/分页 off-by-one + 递归基例错误",
+  "bug_desc": "闭区间切片写成半开区间，右端点丢一个；n=0 的基例返回空串，导致 0 的二进制表示丢失",
+  "module": "paging+recursion",
+  "src_path": "src/paging.py,src/recursion.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/paging.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_between_adjacent",
+  "reference": {
+    "src/paging.py": "def between_inclusive(items, lo, hi):\n    if hi < lo:\n        return []\n    return items[lo:hi + 1]\n",
+    "src/recursion.py": "def to_binary(n):\n    if n == 0:\n        return \"0\"\n    if n == 1:\n        return \"1\"\n    return to_binary(n // 2) + str(n % 2)\n"
+  },
+  "hidden_tests": "from paging import between_inclusive\n\ndef test_between_adjacent():\n    assert between_inclusive([0, 1, 2], 1, 2) == [1, 2]\n\ndef test_between_same():\n    assert between_inclusive([0, 1, 2], 1, 1) == [1]\n\ndef test_between_reverse():\n    assert between_inclusive([0, 1, 2], 2, 1) == []\n\n\nfrom recursion import to_binary\n\ndef test_binary_zero():\n    assert to_binary(0) == \"0\"\n\ndef test_binary_one():\n    assert to_binary(1) == \"1\"\n\ndef test_binary_five():\n    assert to_binary(5) == \"101\"\n\ndef test_binary_eight():\n    assert to_binary(8) == \"1000\"\n"
+}

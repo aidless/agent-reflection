@@ -1,0 +1,97 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (142B)
+      src/paging.py  (256B)
+[dir] tests
+      tests/test_visible.py  (258B)
+[step 2] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args":{"path": "src/collect.py"}</｜DSML｜ param
+[step 3] 思考: 读取 collect.py 源码。
+  动作: read_file {"path": "src/collect.py"}
+  观察: src/collect.py (5 行)
+   1| def add_metric(name, value, store={}):
+   2|     if store is None:
+   3|         store = {}
+   4|     store.setdefault(name, []).append(value)
+   5|     return store
+[step 4] 思考: collect.py 的可变默认参数 store={} 会跨调用共享状态，需修根因。先看 paging.py 和测试。
+  动作: read_file {"path": "src/paging.py"}
+  观察: src/paging.py (9 行)
+   1| def paginate_pairs(items, size):
+   2|     if size < 1:
+   3|         raise ValueError("size must be >= 1")
+   4|     out = []
+   5|     start = 0
+   6|     while start < len(items) - size:
+   7|         out.append((start + 1, items[start:start + size]))
+   8|         start
+[step 5] 思考: 查看可见测试以确认预期行为。
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import add_metric
+   3| 
+   4| def test_metric_basic():
+   5|     assert add_metric("x", 1) == {"x": [1]}
+   6| 
+   7| 
+   8| 
+   9| def test_metric_no_leak():
+  10|     first = add_metric("x", 1)
+  11|     second = add_metric("y", 2)
+  12|     
+[step 6] 思考: paging.py 的循环条件 `start < len(items) - size` 漏掉最后一块（当长度恰为 size 倍数时尤其明显），应改为 `start < len(items)`。collect.py 的可变默认参数导致跨调用泄漏，改用 None 哨兵。
+  动作: edit_file {"path": "src/paging.py", "old": "    while start < len(items) - size:", "new": "    while start < len(items):"}
+  观察: 已修改 src/paging.py（替换 1 处）
+[step 7] 思考: 刚才并行中的编辑结果只返回了第一条，重新单独验证。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import add_metric\nfrom paging import paginate_pairs\na=add_metric('x',1); b=add_metric('y',2)\nprint(a,b,a is b)\nprint(add_metric('x',1,{
+  观察: exit=0
+{'x': [1], 'y': [2]} {'x': [1], 'y': [2]} True
+{'x': [1]}
+{'q': [1]}
+[(1, [1, 2]), (3, [3, 4])]
+[(1, [1, 2]), (3, [3])]
+[]
+[(1, [1])]
+ok size must be >= 1
+
+[step 8] 思考: paging.py 已修好；collect.py 的默认参数仍是共享的，需实际改掉默认值。
+  动作: read_file {"path": "src/collect.py"}
+  观察: src/collect.py (5 行)
+   1| def add_metric(name, value, store={}):
+   2|     if store is None:
+   3|         store = {}
+   4|     store.setdefault(name, []).append(value)
+   5|     return store
+[step 9] 思考: 已把默认参数改为 None 哨兵，需验证隔离性并跑测试。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import add_metric\na=add_metric('x',1); b=add_metric('y',2)\nprint(a,b,a is b)\ns={'k':[0]}\nprint(add_metric('k',5,s), s)\nprint(add_metri
+  观察: exit=0
+{'x': [1], 'y': [2]} {'x': [1], 'y': [2]} True
+{'k': [0, 5]} {'k': [0, 5]}
+{'z': [1]}
+
+[step 10] 思考: a 与 b 仍共享，说明 collect.py 的修改没落盘。读取确认。
+  动作: read_file {"path": "src/collect.py"}
+  观察: src/collect.py (5 行)
+   1| def add_metric(name, value, store={}):
+   2|     if store is None:
+   3|         store = {}
+   4|     store.setdefault(name, []).append(value)
+   5|     return store
+[step 11] 思考: 之前的编辑未落盘，改用 write_file 整体重写 collect.py，保留行为但去掉可变默认参数。
+  动作: write_file {"path": "src/collect.py", "content": "\n\ndef add_metric(name, value, store=None):\n    if store is None:\n        store = {}\n    store.setdefault(name, []).append(value)\n    return store\n"}
+  观察: 已写入 src/collect.py（146 字符）
+[step 12] 思考: 已重写，验证隔离性与边界并跑全量测试。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom collect import add_metric\na=add_metric('x',1); b=add_metric('y',2)\nprint(a,b,a is b)\ns={'k':[0]}\nprint(add_metric('k',5,s), s)\nprint(add_metri
+  观察: exit=0
+{'x': [1]} {'y': [2]} False
+{'k': [0, 5]} {'k': [0, 5]}
+{'z': [1]}
+{'x': [1]}

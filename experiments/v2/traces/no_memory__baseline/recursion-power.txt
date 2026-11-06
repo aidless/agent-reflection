@@ -1,0 +1,54 @@
+task: 仓库工作区里 src/recursion.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/recursion.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="args" string="false">{"path": "."}</｜DSML｜ pa
+[step 2] 思考: 先列出工作区文件和结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/recursion.py  (171B)
+[dir] tests
+      tests/test_visible.py  (135B)
+[step 3] 思考: 读取源码与测试文件
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 100}
+  观察: src/recursion.py (7 行)
+   1| def power(base, exp):
+   2|     if exp == 0:
+   3|         return 1
+   4|     if exp > 1:
+   5|         return base * power(base, exp - 1)
+   6|     half = power(base, exp // 2)
+   7|     return half * half
+[step 4] 思考: 读取可见测试
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 100}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from recursion import power
+   3| 
+   4| def test_power_even():
+   5|     assert power(2, 4) == 16
+   6| 
+   7| 
+   8| 
+   9| def test_power_odd():
+  10|     assert power(2, 3) == 8
+[step 5] 思考: 当 exp==1 时，代码进入快速幂分支，此时 half=power(base,0)=1，返回 1 —— 对 base≠1 就是错的。根因是缺少 exp==1（以及 exp<0）的处理。改成迭代的快速幂，兼容 0、1、负数指数与大指数。
+  动作: edit_file {"path": "src/recursion.py", "old": "def power(base, exp):\n    if exp == 0:\n        return 1\n    if exp > 1:\n        return base * power(base, exp - 1)\n    half = power(base, exp // 2)\n    retur
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 6] 思考: 运行可见测试并验证边界情况
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom recursion import power\nprint(power(2,4), power(2,3), power(2,0), power(5,1), power(0,5), power(0,0), power(2,10), power(-2,3), power(2,-2), power(
+  观察: exit=0
+16 8 1 5 0 1 1024 -8 0.25 946501044
+
+[step 7] 思考: 边界值看起来正确，运行可见测试确认全绿
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 8] 思考: 可见测试全部通过，边界情况（exp=0/1、base=0、负数指数、大指数）均已验证正确，根因是缺少 exp==1 分支导致快速幂回退错误，已改为通用迭代快速幂实现。
+  动作: finish {"summary": "src/recursion.py 的 power 中，当 exp==1 时误入快速幂分支：half=power(base,0)=1，返回 1*1=1，得到错误结果。已重写为迭代快速幂：负数指数走 1/power(base,-exp)，循环按二进制位累乘，正确处理 exp=0、1、负数、大指数及 base=0 等情况，并具备 O(log exp) 复杂度。"}
+  判定: 6 passed in 0.02s

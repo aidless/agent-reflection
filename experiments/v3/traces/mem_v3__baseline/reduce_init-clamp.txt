@@ -1,0 +1,51 @@
+task: 仓库工作区里 src/stats.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/stats.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构与源码、测试文件。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/stats.py  (122B)
+[dir] tests
+      tests/test_visible.py  (144B)
+[step 2] 思考: 读取源码与可见测试。
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 120}
+  观察: src/stats.py (4 行)
+   1| def clamp(value, lo, hi):
+   2|     if hi < lo:
+   3|         raise ValueError("hi must be >= lo")
+   4|     return min(lo, max(hi, value))
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "tests/test_visi
+[step 4] 思考: 查看测试内容以确认期望行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from stats import clamp
+   3| 
+   4| def test_clamp_middle():
+   5|     assert clamp(5, 0, 10) == 5
+   6| 
+   7| 
+   8| 
+   9| def test_clamp_upper():
+  10|     assert clamp(14, 0, 10) == 10
+[step 5] 思考: clamp 逻辑写反了：min(lo, max(hi, value)) 会把值压到 lo 之上/之下错误方向。正确应为 max(lo, min(hi, value))。
+  动作: edit_file {"path": "src/stats.py", "old": "    return min(lo, max(hi, value))", "new": "    return max(lo, min(hi, value))"}
+  观察: 已修改 src/stats.py（替换 1 处）
+[step 6] 思考: 运行测试验证。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.12s
+
+[step 7] 思考: 快速验证边界行为（超下界、超上界、lo==hi、浮点）。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom stats import clamp\nprint(clamp(-5,0,10), clamp(5,-10,10), clamp(3,3,3), clamp(3.5,0.0,10.0))"}
+  观察: exit=0
+0 5 3 3.5
+
+[step 8] 思考: 根因已修复：clamp 的上下界夹取顺序颠倒，改为 max(lo, min(hi, value))；边界（低于下界、高于上界、lo==hi、浮点）验证正确，可见测试全通过。
+  动作: finish {"summary": "修复 src/stats.py 中 clamp 的根因：原实现 min(lo, max(hi, value)) 把边界夹取顺序颠倒（会把值错误地推到 hi 以上/lo 以下）。改为 max(lo, min(hi, value))，并保留 hi < lo 时抛 ValueError 的校验。已验证下界、上界、lo==hi、浮点等边界行为正确，可见测试全部通过。"}
+  判定: 5 passed in 0.01s

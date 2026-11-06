@@ -1,0 +1,16 @@
+{
+  "id": "cache_state-lru_get",
+  "kind": "single",
+  "family": "cache_state",
+  "bug_category": "cache_state",
+  "bug_class": "状态/缓存失效错误",
+  "bug_desc": "get 没有刷新最近使用顺序，淘汰了刚访问的键",
+  "module": "state",
+  "src_path": "src/state.py",
+  "prompt": "仓库工作区里 src/state.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/state.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_lru_evicts_least_recently_used",
+  "reference": {
+    "src/state.py": "class LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.data = {}\n\n    def get(self, key):\n        if key not in self.data:\n            return None\n        value = self.data.pop(key)\n        self.data[key] = value\n        return value\n\n    def put(self, key, value):\n        if key in self.data:\n            self.data.pop(key)\n        elif len(self.data) >= self.capacity:\n            self.data.pop(next(iter(self.data)))\n        self.data[key] = value\n"
+  },
+  "hidden_tests": "from state import LRUCache\n\ndef test_lru_evicts_least_recently_used():\n    c = LRUCache(2)\n    c.put(\"a\", 1)\n    c.put(\"b\", 2)\n    assert c.get(\"a\") == 1\n    c.put(\"c\", 3)\n    assert c.get(\"a\") == 1\n    assert c.get(\"b\") is None\n\ndef test_lru_missing():\n    assert LRUCache(2).get(\"x\") is None\n"
+}

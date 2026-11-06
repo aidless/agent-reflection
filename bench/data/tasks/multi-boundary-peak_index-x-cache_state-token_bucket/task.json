@@ -1,0 +1,21 @@
+{
+  "id": "multi-boundary-peak_index-x-cache_state-token_bucket",
+  "kind": "multi",
+  "family": "boundary+cache_state",
+  "bug_category": "boundary_compare",
+  "bug_categories": [
+    "boundary_compare",
+    "cache_state"
+  ],
+  "bug_class": "二分/边界 off-by-one + 状态/缓存失效错误",
+  "bug_desc": "收缩右边界时多减 1，峰值在末尾时返回错误下标；补充令牌没有受容量上限约束",
+  "module": "search+state",
+  "src_path": "src/search.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/search.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_peak_middle",
+  "reference": {
+    "src/search.py": "def peak_index(arr):\n    lo, hi = 0, len(arr) - 1\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if arr[mid] > arr[mid + 1]:\n            hi = mid\n        else:\n            lo = mid + 1\n    return lo\n",
+    "src/state.py": "class TokenBucket:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.tokens = capacity\n\n    def take(self, n=1):\n        if self.tokens >= n:\n            self.tokens -= n\n            return True\n        return False\n\n    def refill(self, n):\n        self.tokens = min(self.capacity, self.tokens + n)\n"
+  },
+  "hidden_tests": "from search import peak_index\n\ndef test_peak_last():\n    assert peak_index([1, 2, 3]) == 2\n\ndef test_peak_first():\n    assert peak_index([5, 4, 1]) == 0\n\ndef test_single_element():\n    assert peak_index([9]) == 0\n\n\nfrom state import TokenBucket\n\ndef test_bucket_refill_capped():\n    b = TokenBucket(3)\n    assert b.take(3) is True\n    b.refill(10)\n    assert b.tokens == 3\n\ndef test_bucket_exhausted():\n    b = TokenBucket(2)\n    b.take(2)\n    assert b.take(1) is False\n"
+}

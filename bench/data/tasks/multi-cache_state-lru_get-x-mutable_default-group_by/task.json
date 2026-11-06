@@ -1,0 +1,21 @@
+{
+  "id": "multi-cache_state-lru_get-x-mutable_default-group_by",
+  "kind": "multi",
+  "family": "cache_state+mutable_default",
+  "bug_category": "cache_state",
+  "bug_categories": [
+    "cache_state",
+    "mutable_default"
+  ],
+  "bug_class": "状态/缓存失效错误 + 可变默认参数/共享状态",
+  "bug_desc": "get 没有刷新最近使用顺序，淘汰了刚访问的键；分组结果放进模块级缓存字典，两次调用互相污染",
+  "module": "state+collect",
+  "src_path": "src/state.py,src/collect.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/state.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_lru_evicts_least_recently_used",
+  "reference": {
+    "src/state.py": "class LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.data = {}\n\n    def get(self, key):\n        if key not in self.data:\n            return None\n        value = self.data.pop(key)\n        self.data[key] = value\n        return value\n\n    def put(self, key, value):\n        if key in self.data:\n            self.data.pop(key)\n        elif len(self.data) >= self.capacity:\n            self.data.pop(next(iter(self.data)))\n        self.data[key] = value\n",
+    "src/collect.py": "def group_by(items, key):\n    out = {}\n    for it in items:\n        out.setdefault(key(it), []).append(it)\n    return out\n"
+  },
+  "hidden_tests": "from state import LRUCache\n\ndef test_lru_evicts_least_recently_used():\n    c = LRUCache(2)\n    c.put(\"a\", 1)\n    c.put(\"b\", 2)\n    assert c.get(\"a\") == 1\n    c.put(\"c\", 3)\n    assert c.get(\"a\") == 1\n    assert c.get(\"b\") is None\n\ndef test_lru_missing():\n    assert LRUCache(2).get(\"x\") is None\n\n\nfrom collect import group_by\n\ndef test_group_calls_independent():\n    a = group_by([1, 2], lambda x: x % 2)\n    b = group_by([10], lambda x: x % 2)\n    assert a == {1: [1], 0: [2]}\n    assert b == {0: [10]}\n\ndef test_group_empty():\n    assert group_by([], lambda x: x) == {}\n"
+}

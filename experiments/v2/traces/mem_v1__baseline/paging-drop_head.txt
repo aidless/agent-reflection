@@ -1,0 +1,51 @@
+task: 仓库工作区里 src/paging.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/paging.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件并读取相关源码与测试。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/paging.py  (92B)
+[dir] tests
+      tests/test_visible.py  (164B)
+[step 2] 思考: 读取源码与可见测试。
+  动作: read_file {"path": "src/paging.py", "start_line": 1, "end_line": 80}
+  观察: src/paging.py (4 行)
+   1| def drop_head(items, n):
+   2|     if n <= 0:
+   3|         return list(items)
+   4|     return items[n - 1:]
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "tests/test_visi
+[step 4] 思考: 读取可见测试内容以确认预期行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 80}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from paging import drop_head
+   3| 
+   4| def test_drop_basic():
+   5|     assert drop_head([1, 2, 3, 4], 2) == [3, 4]
+   6| 
+   7| 
+   8| 
+   9| def test_drop_all():
+  10|     assert drop_head([1, 2], 2) == []
+[step 5] 思考: 缺陷明确：drop_head 应丢弃前 n 个元素，即返回 items[n:]，而代码写成了 items[n-1:]，导致少丢弃一个元素。n<=0 分支已正确返回副本。修复并跑测试。
+  动作: edit_file {"path": "src/paging.py", "old": "    return items[n - 1:]", "new": "    return list(items[n:])"}
+  观察: 已修改 src/paging.py（替换 1 处）
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D
+[step 7] 思考: 运行全量测试确认修复。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.13s
+
+[step 8] 思考: 可见测试通过；边界情况：n>len 时 items[n:] 返回空列表，n<=0 返回副本，符合“丢弃前 n 个”的语义，无需额外改动。
+  动作: finish {"summary": "修复 src/paging.py 的 drop_head 根因：偏移量由错误的 items[n-1:]（少丢一个元素）改为 items[n:]，并返回列表副本；n<=0 分支行为保持不变。可见测试 2 passed。"}
+  判定: 5 passed in 0.01s

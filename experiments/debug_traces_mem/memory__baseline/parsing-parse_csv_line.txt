@@ -1,0 +1,77 @@
+task: 仓库工作区里 src/parsing.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/parsing.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构与相关文件。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (53B)
+[dir] tests
+      tests/test_visible.py  (206B)
+[step 2] 思考: 读取源码和可见测试。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 120}
+  观察: src/parsing.py (2 行)
+   1| def parse_csv_line(line):
+   2|     return line.split(",")
+[step 3] 思考: 查看可见测试以了解预期行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_csv_line
+   3| 
+   4| def test_csv_simple():
+   5|     assert parse_csv_line("a,b,c") == ["a", "b", "c"]
+   6| 
+   7| 
+   8| 
+   9| def test_csv_quoted_comma():
+  10|     assert parse_csv_line('1,"x,y",3') == ["1", "x,y", "3"]
+[step 4] 思考: 实现一个支持引号字段、双引号转义、空字段与末尾逗号的 CSV 行解析器，并正确处理未闭合引号。
+  动作: edit_file {"path": "src/parsing.py", "old": "def parse_csv_line(line):\n    return line.split(\",\")", "new": "def parse_csv_line(line):\n    \"\"\"Parse a single CSV line into a list of fields.\n\n    Supports
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 5] 思考: 确认修改后的文件内容是否完整。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 120}
+  观察: src/parsing.py (50 行)
+   1| def parse_csv_line(line):
+   2|     """Parse a single CSV line into a list of fields.
+   3| 
+   4|     Supports quoted fields containing commas, doubled quotes ("") used to
+   5|     represent a literal quote inside a quoted field, empty fields, and a
+   6|     trailing c
+[step 6] 解析失败：Let me review edge cases. The issue: `if not field` check for entering quoted mode. But if field is empty list but we al
+[step 7] 解析失败：Let me reconsider. The visible tests pass presumably. But hidden tests may cover edge cases. Let me think about the curr
+[step 8] 思考: 先运行可见测试确认当前实现状态。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.12s
+
+[step 9] 解析失败：Visible tests pass. Now I need to consider hidden edge cases. Let me think about what edge cases might be tested.
+
+The c
+[step 10] 解析失败：Let me think about edge cases in CSV parsing that hidden tests may cover:
+
+1. `""` → empty quoted field, should return `
+[step 11] 思考: 用 run_python 对比标准 csv 模块，检查边界情况。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_csv_line\nimport csv, io\ncases=['a,b,c','1,\"x,y\",3','\"\"','\"a\"\"b\"','a,b,','\"a\",b','a,\"b\"','\"unterminated','a\"b',
+  观察: exit=1
+
+[stderr]
+  File "./experiments/debug_work_mem/memory__baseline/parsing-parse_csv_line/.agent_tmp/run_1.py", line 4
+    cases=['a,b,c','1,"x,y",3','""','"a""b"','a,b,','"a",b','a,"b"','"unterminated','a"b','"""a"""','',',' ,  a , b ']
+                   
+[step 12] 思考: 字符串转义出问题，改用变量避免引号冲突。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_csv_line\nimport csv\nq=chr(34)\ncases=['a,b,c','1,'+q+'x,y'+q+',3',q+q,q+'a'+q+q+'b'+q,'a,b,',q+'a'+q+',b','a,'+q+'b'+q,q+'un
+  观察: exit=0
+'a,b,c' ['a', 'b', 'c'] OK
+'1,"x,y",3' ['1', 'x,y', '3'] OK
+'""' [''] OK
+'"a""b"' ['a"b'] OK
+'a,b,' ['a', 'b', ''] OK
+'"a",b' ['a', 'b'] OK
+'a,"b"' ['a', 'b'] OK
+'"unterminated' ['unterminated'] OK
+'a"b' ['a"b'] OK
+'"""a"""' ['"a"'] OK
+'' [''] DIFF exp=[]
+',' ['', ''] OK
+' ,  a , b ' [' ', ' 

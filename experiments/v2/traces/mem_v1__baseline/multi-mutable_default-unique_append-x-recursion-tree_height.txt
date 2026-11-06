@@ -1,0 +1,78 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (189B)
+      src/recursion.py  (288B)
+[dir] tests
+      tests/test_visible.py  (253B)
+[step 2] 思考: 读取所有源码和测试。
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 100}
+  观察: src/collect.py (7 行)
+   1| def unique_append(items, value, seen=set()):
+   2|     if seen is None:
+   3|         seen = set()
+   4|     if value in seen:
+   5|         return list(items)
+   6|     seen.add(value)
+   7|     return list(items) + [value]
+[step 3] 思考: collect.py 有可变默认参数 bug（seen=set() 跨调用共享）。读 recursion.py 和测试。
+  动作: read_file {"path": "src/recursion.py", "start_line": 1, "end_line": 100}
+  观察: src/recursion.py (12 行)
+   1| class Node:
+   2|     def __init__(self, value, children=None):
+   3|         self.value = value
+   4|         self.children = children or []
+   5| 
+   6| 
+   7| def tree_height(node):
+   8|     if node is None:
+   9|         return 0
+  10|     if not node.children:
+  1
+[step 4] 思考: 读取测试文件，了解期望的语义。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 100}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import unique_append
+   3| 
+   4| def test_unique_basic():
+   5|     assert unique_append([1, 2], 3) == [1, 2, 3]
+   6| 
+   7| 
+   8| 
+   9| def test_unique_leak():
+  10|     first = unique_append([], 7)
+  11|     second = unique_append([], 7)
+ 
+[step 5] 思考: 定位到两处根因：collect.py 的可变默认参数 set() 导致跨调用泄漏（且未检查 value 是否已在 items 中）；recursion.py 的 tree_height 对叶子节点返回 0，应为 1。修复两处。
+  动作: edit_file {"path": "src/collect.py", "old": "def unique_append(items, value, seen=set()):\n    if seen is None:\n        seen = set()\n    if value in seen:\n        return list(items)\n    seen.add(value)\n   
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 6] 思考: 修复 tree_height：叶子节点高度应为 1，单节点树高度为 1。同时 children 使用 `children or []` 是安全的。
+  动作: edit_file {"path": "src/recursion.py", "old": "    if not node.children:\n        return 0\n    return 1 + max(tree_height(c) for c in node.children)", "new": "    if not node.children:\n        return 1\n    r
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 7] 思考: 运行测试并用自构造边界用例验证。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 8] 思考: 递归版在深树上会触发 RecursionError，改为迭代计算高度更稳健，同时保留语义。
+  动作: edit_file {"path": "src/recursion.py", "old": "def tree_height(node):\n    if node is None:\n        return 0\n    if not node.children:\n        return 1\n    return 1 + max(tree_height(c) for c in node.childr
+  观察: 已修改 src/recursion.py（替换 1 处）
+[step 9] 思考: 构造边界用例验证两个模块：空列表、items 中已有重复值、多次调用无泄漏、显式传入 seen、深树、含 None 子节点。
+  动作: run_python {"code": "import sys\nsys.path.insert(0,'src')\nfrom collect import unique_append\nfrom recursion import Node, tree_height\n\nassert unique_append([], 7)==[7]\nassert unique_append([], 7)==[7]\nassert
+  观察: exit=0
+all edge cases ok
+
+[step 10] 思考: 边界用例全部通过。最后再跑一次全量测试确认，然后收尾。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 11] 思考: 两处缺陷均已修复并验证：collect.py 可变默认参数泄漏、recursion.py 叶子高度错误且递归深度不安全。
+  动作: finish {"summary": "修复 src 下全部缺陷：1) src/collect.py 中 unique_append 用可变默认参数 seen=set() 导致跨调用状态泄漏，改为 seen=None 并在函数内新建集合，同时对传入 items 复制为列表、若 value 已存在于 items 或 seen 中则去重返回；2) src/recursion.py 中 tree_height 对叶子
+  判定: 7 passed in 0.02s

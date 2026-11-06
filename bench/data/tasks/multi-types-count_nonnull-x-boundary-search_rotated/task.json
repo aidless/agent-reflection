@@ -1,0 +1,21 @@
+{
+  "id": "multi-types-count_nonnull-x-boundary-search_rotated",
+  "kind": "multi",
+  "family": "types+boundary",
+  "bug_category": "type_conversion",
+  "bug_categories": [
+    "type_conversion",
+    "boundary_compare"
+  ],
+  "bug_class": "类型转换/空值处理 + 二分/边界 off-by-one",
+  "bug_desc": "把 \"非空\" 判断写成真值判断，0 和空串被漏计；旋转数组二分中，目标等于左端点时被排除",
+  "module": "normalize+search",
+  "src_path": "src/normalize.py,src/search.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/normalize.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_count_zero_counts",
+  "reference": {
+    "src/normalize.py": "def count_nonnull(values):\n    return sum(1 for v in values if v is not None)\n",
+    "src/search.py": "def search_rotated(arr, target):\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid\n        if arr[lo] <= arr[mid]:\n            if arr[lo] <= target < arr[mid]:\n                hi = mid - 1\n            else:\n                lo = mid + 1\n        else:\n            if arr[mid] < target <= arr[hi]:\n                lo = mid + 1\n            else:\n                hi = mid - 1\n    return -1\n"
+  },
+  "hidden_tests": "from normalize import count_nonnull\n\ndef test_count_zero_counts():\n    assert count_nonnull([0, 1, None]) == 2\n\ndef test_count_empty_string_counts():\n    assert count_nonnull([\"\", \"a\"]) == 2\n\ndef test_count_all_none():\n    assert count_nonnull([None]) == 0\n\ndef test_count_empty_list():\n    assert count_nonnull([]) == 0\n\n\nfrom search import search_rotated\n\ndef test_target_is_left_edge():\n    assert search_rotated([4, 5, 6, 7, 1, 2, 3], 4) == 0\n\ndef test_target_missing():\n    assert search_rotated([4, 5, 6, 7], 3) == -1\n\ndef test_single():\n    assert search_rotated([7], 7) == 0\n\ndef test_target_is_right_edge():\n    assert search_rotated([5, 1, 3], 3) == 2\n"
+}

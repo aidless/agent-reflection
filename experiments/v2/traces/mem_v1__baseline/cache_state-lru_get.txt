@@ -1,0 +1,52 @@
+task: 仓库工作区里 src/state.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/state.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：Let me start by exploring the workspace.
+[step 2] 思考: 先列出工作区文件并查看源码与测试
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/state.py  (436B)
+[dir] tests
+      tests/test_visible.py  (322B)
+[step 3] 思考: 读取源码与可见测试
+  动作: read_file {"path": "src/state.py", "start_line": 1, "end_line": 120}
+  观察: src/state.py (16 行)
+   1| class LRUCache:
+   2|     def __init__(self, capacity):
+   3|         self.capacity = capacity
+   4|         self.data = {}
+   5| 
+   6|     def get(self, key):
+   7|         if key not in self.data:
+   8|             return None
+   9|         return self.data[key]
+  10| 
+ 
+[step 4] 思考: 读取可见测试了解期望行为
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 80}
+  观察: tests/test_visible.py (18 行)
+   1| 
+   2| from state import LRUCache
+   3| 
+   4| def test_lru_put_get():
+   5|     c = LRUCache(2)
+   6|     c.put("a", 1)
+   7|     assert c.get("a") == 1
+   8| 
+   9| 
+  10| 
+  11| def test_lru_evicts_least_recently_used():
+  12|     c = LRUCache(2)
+  13|     c.put
+[step 5] 思考: 根因：get 命中后未更新最近使用顺序，导致淘汰的是最久未使用判断错误。修复：get 命中时将 key 移到末尾；并处理 capacity<=0 的边界
+  动作: edit_file {"path": "src/state.py", "old": "    def get(self, key):\n        if key not in self.data:\n            return None\n        return self.data[key]\n\n    def put(self, key, value):\n        if key in 
+  观察: 已修改 src/state.py（替换 1 处）
+[step 6] 思考: 运行可见测试验证
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.07s
+
+[step 7] 思考: 可见测试通过，且已修复 get 命中更新顺序的根因并处理 capacity<=0 边界
+  动作: finish {"summary": "修复 LRUCache：get 命中时先将 key 移到字典末尾以更新最近使用顺序（原来 get 不更新顺序导致错误淘汰）；put 中当 capacity<=0 时直接返回避免淘汰空字典；put 已存在的 key 也先弹出再插入以更新顺序。"}
+  判定: 4 passed in 0.01s

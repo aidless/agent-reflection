@@ -1,0 +1,54 @@
+task: 仓库工作区里 src/parsing.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/parsing.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看工作区结构和源码
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (44B)
+[dir] tests
+      tests/test_visible.py  (165B)
+[step 2] 思考: 读取源码和测试
+  动作: read_file {"path": "src/parsing.py"}
+  观察: src/parsing.py (2 行)
+   1| def parse_bool(text):
+   2|     return bool(text)
+[step 3] 思考: 读取可见测试
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_bool
+   3| 
+   4| def test_bool_true():
+   5|     assert parse_bool("yes") is True
+   6| 
+   7| 
+   8| 
+   9| def test_bool_false_string():
+  10|     assert parse_bool("false") is False
+[step 4] 思考: 工作区文件很少，先搜索是否有其他提示（README、配置等）
+  动作: grep {"pattern": "parse_bool", "path": "."}
+  观察: tests/test_visible.py:2: from parsing import parse_bool
+tests/test_visible.py:5: assert parse_bool("yes") is True
+tests/test_visible.py:10: assert parse_bool("false") is False
+src/parsing.py:1: def parse_bool(text):
+[step 5] 解析失败：Need to implement robust parse_bool. Consider hidden edge cases: case-insensitive, whitespace, various true/false words,
+[step 6] 思考: 实现健壮的 parse_bool：大小写不敏感、去空白、支持 true/false/yes/no/on/off/1/0，未知值抛 ValueError，bool/int 输入合理处理
+  动作: write_file {"path": "src/parsing.py", "content": "TRUE_VALUES = {\"true\", \"t\", \"yes\", \"y\", \"on\", \"1\"}\nFALSE_VALUES = {\"false\", \"f\", \"no\", \"n\", \"off\", \"0\"}\n\n\ndef parse_bool(text):\n    
+  [ckpt] step=6 保存 ckpt-1793903478516 丢弃=[]
+  观察: 已写入 src/parsing.py（719 字符）
+[step 7] 思考: 运行可见测试
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.11s
+
+[step 8] 思考: 快速验证边界情况行为
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_bool\nprint(parse_bool(' Yes '), parse_bool('OFF'), parse_bool(True), parse_bool(0), parse_bool(2))\ntry:\n    parse_bool('may
+  观察: exit=0
+True False True False True
+ValueError ok
+None ok
+
+[step 9] 思考: 实现健壮且边界处理完整的 parse_bool，可见测试全部通过，边界验证正常
+  动作: finish {"summary": "重写 src/parsing.py 的 parse_bool：大小写不敏感、去除首尾空白，支持 true/t/yes/y/on/1 与 false/f/no/n/off/0；bool 直接返回，None 抛 ValueError，数值 0 为 False 非 0 为 True，bytes 解码后解析，未知值抛 ValueError。可见测试通过。"}
+  判定: 6 passed in 0.03s

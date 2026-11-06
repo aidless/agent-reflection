@@ -1,0 +1,71 @@
+task: 仓库工作区里 src/parsing.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/parsing.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="args" string="false">{"path": "."}</｜DSML｜ pa
+[step 2] 思考: 先列出工作区文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (289B)
+[dir] tests
+      tests/test_visible.py  (217B)
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "src/parsing.py"
+[step 4] 思考: 读取源码和可见测试
+  动作: read_file {"path": "src/parsing.py"}
+  观察: src/parsing.py (12 行)
+   1| def parse_flags(argv):
+   2|     out = {}
+   3|     for token in argv:
+   4|         if not token.startswith("--"):
+   5|             continue
+   6|         body = token[2:]
+   7|         if "=" in body:
+   8|             k, v = body.split("=", 1)
+   9|             out[k]
+[step 5] 思考: 读取可见测试
+  动作: read_file {"path": "tests/test_visible.py"}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from parsing import parse_flags
+   3| 
+   4| def test_flags_pairs():
+   5|     assert parse_flags(["--a=1", "--b=2"]) == {"a": "1", "b": "2"}
+   6| 
+   7| 
+   8| 
+   9| def test_flag_boolean_type():
+  10|     assert parse_flags(["--verbose"]) == {"verbose": 
+[step 6] 思考: 可见测试要求无值的 flag 返回布尔 True，而当前实现返回字符串 "true"；隐藏边界可能包括空 token、单独的 "--"、空 key 等，需要健壮处理。
+  动作: edit_file {"path": "src/parsing.py", "old": "def parse_flags(argv):\n    out = {}\n    for token in argv:\n        if not token.startswith(\"--\"):\n            continue\n        body = token[2:]\n        if \"
+  观察: 已修改 src/parsing.py（替换 1 处）
+[step 7] 思考: 运行可见测试验证
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.12s
+
+[step 8] 思考: 运行额外边界用例验证健壮性
+  动作: run_python {"code": "from parsing import parse_flags\nassert parse_flags([]) == {}\nassert parse_flags([\"--verbose\"]) == {\"verbose\": True}\nassert parse_flags([\"--a=1\", \"--b=2\"]) == {\"a\":\"1\",\"b\":\"
+  观察: exit=1
+
+[stderr]
+Traceback (most recent call last):
+  File "./experiments/v2/work/mem_v2__baseline/parsing-parse_flags/.agent_tmp/run_1.py", line 1, in <module>
+    from parsing import parse_flags
+ModuleNotFoundError: No module named 'parsing'
+
+[step 9] 思考: 运行脚本需把 src 加入路径
+  动作: run_python {"code": "import sys; sys.path.insert(0, \"src\")\nfrom parsing import parse_flags\nassert parse_flags([]) == {}\nassert parse_flags([\"--verbose\"]) == {\"verbose\": True}\nassert parse_flags([\"--a=
+  观察: exit=0
+ok
+
+[step 10] 思考: 可见测试通过，边界用例（空列表、单独 --、空键、等号多段、重复键、非字符串项）均已验证，根因是无值 flag 应返回布尔 True 而非字符串 "true"，并增加了畸形输入防护。
+  动作: finish {"summary": "修复 src/parsing.py：无值 flag 映射为布尔 True（原为字符串 \"true\"）；忽略空 flag 名/单独 \"--\"/非字符串 token；保留 key=value 以首个等号分割、仅取 body 非空值的行为。"}
+  判定: 5 passed in 0.01s

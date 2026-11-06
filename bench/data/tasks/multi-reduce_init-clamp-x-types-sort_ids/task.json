@@ -1,0 +1,21 @@
+{
+  "id": "multi-reduce_init-clamp-x-types-sort_ids",
+  "kind": "multi",
+  "family": "reduce_init+types",
+  "bug_category": "reduce_init",
+  "bug_categories": [
+    "reduce_init",
+    "type_conversion"
+  ],
+  "bug_class": "归约初值/比较器错误 + 类型转换/空值处理",
+  "bug_desc": "clamp 的 min/max 顺序颠倒，越界时返回错误边界；排序按字符串字典序，\"10\" 排在 \"2\" 前",
+  "module": "stats+normalize",
+  "src_path": "src/stats.py,src/normalize.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_clamp_upper",
+  "reference": {
+    "src/stats.py": "def clamp(value, lo, hi):\n    if hi < lo:\n        raise ValueError(\"hi must be >= lo\")\n    return max(lo, min(hi, value))\n",
+    "src/normalize.py": "def sort_ids(ids):\n    return sorted(int(i) for i in ids)\n"
+  },
+  "hidden_tests": "from stats import clamp\n\ndef test_clamp_upper():\n    assert clamp(14, 0, 10) == 10\n\ndef test_clamp_lower():\n    assert clamp(-3, 0, 10) == 0\n\ndef test_clamp_bad_range():\n    import pytest\n    with pytest.raises(ValueError):\n        clamp(5, 10, 0)\n\n\nfrom normalize import sort_ids\n\ndef test_sort_numeric_order():\n    assert sort_ids([\"10\", \"2\", \"1\"]) == [1, 2, 10]\n\ndef test_sort_negative():\n    assert sort_ids([\"-5\", \"3\"]) == [-5, 3]\n\ndef test_sort_returns_ints():\n    assert all(isinstance(x, int) for x in sort_ids([\"4\"]))\n"
+}

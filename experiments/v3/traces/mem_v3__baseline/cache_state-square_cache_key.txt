@@ -1,0 +1,78 @@
+task: 仓库工作区里 src/state.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/state.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="path" string="true">.</｜DSML｜ parameter>
+</｜D
+[step 2] 思考: 先列出工作区文件，查看结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/state.py  (222B)
+[dir] tests
+      tests/test_visible.py  (230B)
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">src/state.py</｜DSML｜ param
+[step 4] 思考: 查看可见测试内容
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from state import SquareCache
+   3| 
+   4| def test_square_single():
+   5|     assert SquareCache().get(3) == 9
+   6| 
+   7| 
+   8| 
+   9| def test_square_distinct_values():
+  10|     c = SquareCache()
+  11|     assert c.get(2) == 4
+  12|     assert c.get(3)
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">src/state.py</｜DSML｜ param
+[step 6] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"end_line": 60, "path": 
+[step 7] 思考: 读取源码内容
+  动作: read_file {"path": "src/state.py", "start_line": 1, "end_line": 60}
+  观察: src/state.py (9 行)
+   1| class SquareCache:
+   2|     def __init__(self):
+   3|         self.cache = {}
+   4| 
+   5|     def get(self, x):
+   6|         key = type(x).__name__
+   7|         if key not in self.cache:
+   8|             self.cache[key] = x * x
+   9|         return self.cache[key]
+[step 8] 思考: 缓存 key 用了类型名而不是值，导致同类型不同值互相覆盖。应改为以 x 本身为 key。
+  动作: edit_file {"path": "src/state.py", "old": "        key = type(x).__name__", "new": "        key = x"}
+  观察: 已修改 src/state.py（替换 1 处）
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "src/state.py", 
+[step 11] 思考: 为了让缓存 key 同时区分类型与值（如 True 与 1、1 与 1.0 的边界情况），使用 (type(x), x) 作为 key。
+  动作: edit_file {"path": "src/state.py", "old": "        key = x\n        if key not in self.cache:\n            self.cache[key] = x * x\n        return self.cache[key]", "new": "        key = (type(x), x)\n        i
+  观察: 已修改 src/state.py（替换 1 处）
+[step 12] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="args" string="false">{"selector": "tests"}</｜D

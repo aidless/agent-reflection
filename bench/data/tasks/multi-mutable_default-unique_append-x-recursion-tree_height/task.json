@@ -1,0 +1,21 @@
+{
+  "id": "multi-mutable_default-unique_append-x-recursion-tree_height",
+  "kind": "multi",
+  "family": "mutable_default+recursion",
+  "bug_category": "mutable_default",
+  "bug_categories": [
+    "mutable_default",
+    "recursion_base"
+  ],
+  "bug_class": "可变默认参数/共享状态 + 递归基例错误",
+  "bug_desc": "去重集合作为可变默认参数，跨调用残留；叶子节点高度返回 0，整棵树高度偏低 1",
+  "module": "collect+recursion",
+  "src_path": "src/collect.py,src/recursion.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_unique_leak",
+  "reference": {
+    "src/collect.py": "def unique_append(items, value, seen=None):\n    if seen is None:\n        seen = set()\n    if value in seen:\n        return list(items)\n    seen.add(value)\n    return list(items) + [value]\n",
+    "src/recursion.py": "class Node:\n    def __init__(self, value, children=None):\n        self.value = value\n        self.children = children or []\n\n\ndef tree_height(node):\n    if node is None:\n        return 0\n    if not node.children:\n        return 1\n    return 1 + max(tree_height(c) for c in node.children)\n"
+  },
+  "hidden_tests": "from collect import unique_append\n\ndef test_unique_leak():\n    first = unique_append([], 7)\n    second = unique_append([], 7)\n    assert first == [7]\n    assert second == [7]\n\ndef test_unique_duplicate_in_list():\n    assert unique_append([1], 1, {1}) == [1]\n\n\nfrom recursion import Node, tree_height\n\ndef test_height_two_levels():\n    root = Node(1, [Node(2), Node(3)])\n    assert tree_height(root) == 2\n\ndef test_height_nested():\n    root = Node(1, [Node(2, [Node(3)])])\n    assert tree_height(root) == 3\n\ndef test_height_none():\n    assert tree_height(None) == 0\n"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "multi-recursion-to_binary-x-types-compare_values",
+  "kind": "multi",
+  "family": "recursion+types",
+  "bug_category": "recursion_base",
+  "bug_categories": [
+    "recursion_base",
+    "type_conversion"
+  ],
+  "bug_class": "递归基例错误 + 类型转换/空值处理",
+  "bug_desc": "n=0 的基例返回空串，导致 0 的二进制表示丢失；比较前未统一转数值，数字字符串按字典序比较出错",
+  "module": "recursion+normalize",
+  "src_path": "src/recursion.py,src/normalize.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/recursion.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_binary_zero",
+  "reference": {
+    "src/recursion.py": "def to_binary(n):\n    if n == 0:\n        return \"0\"\n    if n == 1:\n        return \"1\"\n    return to_binary(n // 2) + str(n % 2)\n",
+    "src/normalize.py": "def compare_values(a, b):\n    a, b = float(a), float(b)\n    return (a > b) - (a < b)\n"
+  },
+  "hidden_tests": "from recursion import to_binary\n\ndef test_binary_zero():\n    assert to_binary(0) == \"0\"\n\ndef test_binary_one():\n    assert to_binary(1) == \"1\"\n\ndef test_binary_five():\n    assert to_binary(5) == \"101\"\n\ndef test_binary_eight():\n    assert to_binary(8) == \"1000\"\n\n\nfrom normalize import compare_values\n\ndef test_compare_numeric_strings():\n    assert compare_values(\"10\", \"9\") == 1\n\ndef test_compare_equal():\n    assert compare_values(\"2\", 2) == 0\n\ndef test_compare_negative():\n    assert compare_values(\"-1\", \"0\") == -1\n"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "multi-types-safe_int-x-boundary-upper_bound",
+  "kind": "multi",
+  "family": "types+boundary",
+  "bug_category": "type_conversion",
+  "bug_categories": [
+    "type_conversion",
+    "boundary_compare"
+  ],
+  "bug_class": "类型转换/空值处理 + 二分/边界 off-by-one",
+  "bug_desc": "safe_int 未先转 float，'3.7' 这类合法数字字符串走 default；upper_bound 把 <= 写成 <，重复元素后界错误",
+  "module": "normalize+search",
+  "src_path": "src/normalize.py,src/search.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/normalize.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_safe_int_float_string",
+  "reference": {
+    "src/normalize.py": "def safe_int(value, default=0):\n    try:\n        return int(float(str(value).strip()))\n    except (TypeError, ValueError):\n        return default\n",
+    "src/search.py": "def upper_bound(arr, x):\n    lo, hi = 0, len(arr)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if arr[mid] <= x:\n            lo = mid + 1\n        else:\n            hi = mid\n    return lo\n"
+  },
+  "hidden_tests": "from normalize import safe_int\n\ndef test_safe_int_float_string():\n    assert safe_int(\"3.7\") == 3\n\ndef test_safe_int_invalid():\n    assert safe_int(\"abc\", -1) == -1\n\ndef test_safe_int_none():\n    assert safe_int(None, -5) == -5\n\ndef test_safe_int_padded():\n    assert safe_int(\"  42 \") == 42\n\n\nfrom search import upper_bound\n\ndef test_no_match_greater():\n    assert upper_bound([1, 2, 4], 3) == 2\n\ndef test_all_equal():\n    assert upper_bound([2, 2, 2], 2) == 3\n\ndef test_empty():\n    assert upper_bound([], 1) == 0\n"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "paging-last_page",
+  "kind": "single",
+  "family": "paging",
+  "bug_category": "paging_index",
+  "bug_class": "切片/分页 off-by-one",
+  "bug_desc": "末页编号用向下取整，存在余数时少一页",
+  "module": "paging",
+  "src_path": "src/paging.py",
+  "prompt": "仓库工作区里 src/paging.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/paging.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_last_page_partial",
+  "reference": {
+    "src/paging.py": "def last_page(total, size):\n    if size < 1:\n        raise ValueError(\"size must be >= 1\")\n    return (total + size - 1) // size\n"
+  },
+  "hidden_tests": "from paging import last_page\n\ndef test_last_page_partial():\n    assert last_page(11, 5) == 3\n\ndef test_last_page_zero():\n    assert last_page(0, 5) == 0\n\ndef test_last_page_less_than_size():\n    assert last_page(3, 5) == 1\n"
+}

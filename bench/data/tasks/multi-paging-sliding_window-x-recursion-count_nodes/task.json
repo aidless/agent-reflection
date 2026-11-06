@@ -1,0 +1,21 @@
+{
+  "id": "multi-paging-sliding_window-x-recursion-count_nodes",
+  "kind": "multi",
+  "family": "paging+recursion",
+  "bug_category": "paging_index",
+  "bug_categories": [
+    "paging_index",
+    "recursion_base"
+  ],
+  "bug_class": "切片/分页 off-by-one + 递归基例错误",
+  "bug_desc": "窗口滑动次数少算一次，最后一个窗口缺失；节点计数漏算自身，根节点未被计入",
+  "module": "paging+recursion",
+  "src_path": "src/paging.py,src/recursion.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/paging.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_window_full_length",
+  "reference": {
+    "src/paging.py": "def sliding_window(items, k):\n    if k < 1:\n        raise ValueError(\"k must be >= 1\")\n    return [items[i:i + k] for i in range(len(items) - k + 1)]\n",
+    "src/recursion.py": "def count_nodes(tree):\n    if not isinstance(tree, dict):\n        return 0\n    return 1 + sum(count_nodes(v) for v in tree.values())\n"
+  },
+  "hidden_tests": "from paging import sliding_window\n\ndef test_window_full_length():\n    assert sliding_window([1, 2, 3], 3) == [[1, 2, 3]]\n\ndef test_window_larger_than_list():\n    assert sliding_window([1], 5) == []\n\ndef test_window_one():\n    assert sliding_window([1, 2], 1) == [[1], [2]]\n\n\nfrom recursion import count_nodes\n\ndef test_count_nested():\n    assert count_nodes({\"a\": {\"b\": {}}}) == 3\n\ndef test_count_empty():\n    assert count_nodes({}) == 1\n\ndef test_count_scalar():\n    assert count_nodes(5) == 0\n"
+}

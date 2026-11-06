@@ -1,0 +1,75 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/search.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="args" string="false">{"path": "."}</｜DSML｜ pa
+[step 2] 思考: 先查看工作区文件结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/parsing.py  (295B)
+      src/search.py  (467B)
+[dir] tests
+      tests/test_visible.py  (211B)
+[step 3] 思考: 读取所有源码与可见测试。
+  动作: read_file {"path": "src/search.py", "start_line": 1, "end_line": 200}
+  观察: src/search.py (17 行)
+   1| def search_rotated(arr, target):
+   2|     lo, hi = 0, len(arr) - 1
+   3|     while lo <= hi:
+   4|         mid = (lo + hi) // 2
+   5|         if arr[mid] == target:
+   6|             return mid
+   7|         if arr[lo] <= arr[mid]:
+   8|             if arr[lo] < target <=
+[step 4] 思考: search.py 第8行边界应为 arr[lo] <= target。继续读 parsing.py 和测试。
+  动作: read_file {"path": "src/parsing.py", "start_line": 1, "end_line": 200}
+  观察: src/parsing.py (12 行)
+   1| def parse_range(spec):
+   2|     out = []
+   3|     for part in spec.split(","):
+   4|         part = part.strip()
+   5|         if not part:
+   6|             continue
+   7|         if "-" in part:
+   8|             a, b = part.split("-", 1)
+   9|             out.append(
+[step 5] 思考: 查看可见测试以理解预期语义。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 100}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from search import search_rotated
+   3| 
+   4| def test_rotated_plain():
+   5|     assert search_rotated([4, 5, 6, 7, 1, 2, 3], 2) == 5
+   6| 
+   7| 
+   8| 
+   9| def test_target_is_left_edge():
+  10|     assert search_rotated([4, 5, 6, 7, 1, 2, 3], 4) == 0
+[step 6] 思考: 确认两处根因：search.py 第8行左闭判断漏等号；parse_range 忽略区间终点 b，且负数会被 '-' 误判。现在修复 search.py。
+  动作: edit_file {"path": "src/search.py", "old": "            if arr[lo] < target <= arr[mid]:", "new": "            if arr[lo] <= target <= arr[mid]:"}
+  观察: 已修改 src/search.py（替换 1 处）
+[step 7] 思考: 修复 parsing.py：需要正确解析区间 a-b 并展开，支持负数与空端。先验证假设：out 应为展开的整数列表。我来实现健壮的解析：支持 'a-b'（步长默认1，b可空？），支持负数如 -5--1。先实现基本版本。
+  动作: run_python {"code": "import sys\nsys.path.insert(0,'src')\n"}
+  观察: exit=0
+
+[step 8] 思考: 重写 parsing.py：用正则匹配区间（支持负数），并展开 a..b。
+  动作: write_file {"path": "src/parsing.py", "content": "import re\n\n_RANGE_RE = re.compile(r\"^([+-]?\\d+)\\s*-\\s*([+-]?\\d+)$\")\n\n\ndef parse_range(spec):\n    \"\"\"Parse a comma separated spec like '1-3, 5, -2-
+  观察: 已写入 src/parsing.py（650 字符）
+[step 9] 思考: 运行验证用例，覆盖负区间、反向区间、单值。
+  动作: run_python {"code": "import sys; sys.path.insert(0,'src')\nfrom parsing import parse_range\nfrom search import search_rotated\nassert parse_range('1-3,5')==[1,2,3,5]\nassert parse_range('3-1')==[3,2,1]\nassert p
+  观察: exit=0
+ok
+
+[step 10] 思考: 再跑可见测试确认。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.09s
+
+[step 11] 思考: 两处缺陷已修复并验证，包括边界用例（旋转数组单元素、双元素、target 为边界；范围解析含负数/反向/空）。
+  动作: finish {"summary": "search.py: 修正旋转数组二分左半段判断 off-by-one（arr[lo] < target 改为 <=），使 target 等于 lo 边界时能命中；parsing.py: 重写 parse_range，用正则识别 'a-b'（支持负数、反向区间并展开为包含端点的整数列表），修复原先忽略区间终点且负数被误判的问题。"}
+  判定: 9 passed in 0.02s

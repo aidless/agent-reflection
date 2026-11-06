@@ -1,0 +1,21 @@
+{
+  "id": "multi-types-total_amount-x-cache_state-batch_flush",
+  "kind": "multi",
+  "family": "types+cache_state",
+  "bug_category": "type_conversion",
+  "bug_categories": [
+    "type_conversion",
+    "cache_state"
+  ],
+  "bug_class": "类型转换/空值处理 + 状态/缓存失效错误",
+  "bug_desc": "累加未过滤 None，遇到空值抛 TypeError；flush 后未清空缓冲，下次统计重复计入",
+  "module": "normalize+state",
+  "src_path": "src/normalize.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/normalize.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_total_with_none",
+  "reference": {
+    "src/normalize.py": "def total_amount(values):\n    return sum(v for v in values if v is not None)\n",
+    "src/state.py": "class BatchStats:\n    def __init__(self):\n        self.items = []\n\n    def add(self, x):\n        self.items.append(x)\n\n    def flush(self):\n        vals = list(self.items)\n        self.items = []\n        return sum(vals) / len(vals) if vals else None\n"
+  },
+  "hidden_tests": "from normalize import total_amount\n\ndef test_total_with_none():\n    assert total_amount([1, None, 3]) == 4\n\ndef test_total_all_none():\n    assert total_amount([None, None]) == 0\n\ndef test_total_empty():\n    assert total_amount([]) == 0\n\ndef test_total_with_zero():\n    assert total_amount([0, 5]) == 5\n\n\nfrom state import BatchStats\n\ndef test_flush_clears():\n    b = BatchStats()\n    b.add(1)\n    b.add(3)\n    b.flush()\n    assert b.flush() is None\n\ndef test_flush_then_add():\n    b = BatchStats()\n    b.add(2)\n    b.flush()\n    b.add(6)\n    assert b.flush() == 6.0\n"
+}

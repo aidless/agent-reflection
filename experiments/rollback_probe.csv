@@ -1,0 +1,17 @@
+config,task_id,success,rollback_used,rollback_verified,rollback_checks,steps,total_tokens,judge_detail,failure_mode,latency_s
+with_rollback,probe-1,1,1,1,1,9,12631,6 passed in 0.05s,,71.0
+no_rollback,probe-1,1,0,0,0,8,10976,6 passed in 0.03s,,66.0
+with_rollback,probe-2,1,1,1,1,9,11889,6 passed in 0.03s,,28.9
+no_rollback,probe-2,1,0,0,0,5,6474,6 passed in 0.04s,,45.4
+with_rollback,probe-3,1,1,1,1,11,17740,6 passed in 0.04s,,74.8
+no_rollback,probe-3,1,0,0,0,6,7640,6 passed in 0.04s,,38.1
+with_rollback,probe-4,1,1,1,1,11,16970,6 passed in 0.05s,,38.1
+no_rollback,probe-4,1,0,0,0,10,16119,6 passed in 0.04s,,39.6
+with_rollback,probe-5,1,1,1,1,12,20355,6 passed in 0.05s,,50.3
+no_rollback,probe-5,1,0,0,0,8,11196,6 passed in 0.04s,,31.3
+with_rollback,probe-big-1,1,1,1,1,10,15806,126 passed in 0.31s,,31.6
+no_rollback,probe-big-1,1,0,0,0,8,11475,126 passed in 0.62s,,25.7
+with_rollback,probe-big-2,1,1,1,0,13,22202,126 passed in 0.31s,,34.2
+no_rollback,probe-big-2,1,0,0,0,10,16215,126 passed in 0.40s,,41.3
+with_rollback,probe-big-3,1,0,0,0,6,16428,126 passed in 0.38s,,55.7
+no_rollback,probe-big-3,1,0,0,0,14,28260,126 passed in 0.88s,,78.9

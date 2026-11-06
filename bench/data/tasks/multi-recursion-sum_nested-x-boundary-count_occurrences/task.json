@@ -1,0 +1,21 @@
+{
+  "id": "multi-recursion-sum_nested-x-boundary-count_occurrences",
+  "kind": "multi",
+  "family": "recursion+boundary",
+  "bug_category": "recursion_base",
+  "bug_categories": [
+    "recursion_base",
+    "boundary_compare"
+  ],
+  "bug_class": "递归基例错误 + 二分/边界 off-by-one",
+  "bug_desc": "空列表被当作数值返回，求和得到列表而不是 0；计数依赖 lower_bound，但其初始上界写成 len-1，末尾元素统计漏算",
+  "module": "recursion+search",
+  "src_path": "src/recursion.py,src/search.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/recursion.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_sum_empty_list",
+  "reference": {
+    "src/recursion.py": "def sum_nested(x):\n    if isinstance(x, list):\n        return sum(sum_nested(i) for i in x)\n    return x\n",
+    "src/search.py": "def lower_bound(arr, x):\n    lo, hi = 0, len(arr)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if arr[mid] < x:\n            lo = mid + 1\n        else:\n            hi = mid\n    return lo\n\n\ndef upper_bound(arr, x):\n    lo, hi = 0, len(arr)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if arr[mid] <= x:\n            lo = mid + 1\n        else:\n            hi = mid\n    return lo\n\n\ndef count_occurrences(arr, x):\n    return upper_bound(arr, x) - lower_bound(arr, x)\n"
+  },
+  "hidden_tests": "from recursion import sum_nested\n\ndef test_sum_empty_list():\n    assert sum_nested([]) == 0\n\ndef test_sum_nested_empty_inner():\n    assert sum_nested([[], []] ) == 0\n\ndef test_sum_plain_number():\n    assert sum_nested(5) == 5\n\ndef test_sum_mixed():\n    assert sum_nested([1, [2], 3]) == 6\n\n\nfrom search import count_occurrences\n\ndef test_count_absent_greater():\n    assert count_occurrences([1, 2, 4], 5) == 0\n\ndef test_count_all():\n    assert count_occurrences([2, 2], 2) == 2\n\ndef test_count_empty():\n    assert count_occurrences([], 7) == 0\n\ndef test_count_last_element():\n    assert count_occurrences([1, 2, 3, 9], 9) == 1\n"
+}

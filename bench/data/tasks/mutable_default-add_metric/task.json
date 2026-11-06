@@ -1,0 +1,16 @@
+{
+  "id": "mutable_default-add_metric",
+  "kind": "single",
+  "family": "mutable_default",
+  "bug_category": "mutable_default",
+  "bug_class": "可变默认参数/共享状态",
+  "bug_desc": "指标字典作为可变默认参数，跨调用累积",
+  "module": "collect",
+  "src_path": "src/collect.py",
+  "prompt": "仓库工作区里 src/collect.py 存在缺陷，tests/test_visible.py 中有失败的测试。\n请定位并修复 src/collect.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_metric_no_leak",
+  "reference": {
+    "src/collect.py": "def add_metric(name, value, store=None):\n    if store is None:\n        store = {}\n    store.setdefault(name, []).append(value)\n    return store\n"
+  },
+  "hidden_tests": "from collect import add_metric\n\ndef test_metric_no_leak():\n    first = add_metric(\"x\", 1)\n    second = add_metric(\"y\", 2)\n    assert first == {\"x\": [1]}\n    assert second == {\"y\": [2]}\n\ndef test_metric_explicit_store():\n    store = {}\n    add_metric(\"x\", 1, store)\n    add_metric(\"x\", 2, store)\n    assert store == {\"x\": [1, 2]}\n\ndef test_metric_empty_call():\n    assert add_metric(\"x\", 0) == {\"x\": [0]}\n"
+}

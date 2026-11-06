@@ -1,0 +1,85 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/stats.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先列出工作区文件，了解仓库结构。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (58B)
+      src/stats.py  (216B)
+[dir] tests
+      tests/test_visible.py  (145B)
+[step 2] 思考: 读取源码与可见测试。
+  动作: read_file {"path": "src/stats.py", "start_line": 1, "end_line": 120}
+  观察: src/stats.py (8 行)
+   1| def argmax(values):
+   2|     if not values:
+   3|         return None
+   4|     best_i, best_v = 0, values[0]
+   5|     for i, v in enumerate(values[1:], start=1):
+   6|         if v > best_v:
+   7|             best_i, best_v = i, v
+   8|     return best_v
+[step 3] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "src/normalize.p
+[step 4] 思考: 读取 normalize.py。
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 60}
+  观察: src/normalize.py (2 行)
+   1| def format_price(cents):
+   2|     return f"${cents / 100:.1f}"
+[step 5] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "tests/test_visi
+[step 6] 思考: 查看可见测试内容。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from stats import argmax
+   3| 
+   4| def test_argmax_basic():
+   5|     assert argmax([1, 9, 3]) == 1
+   6| 
+   7| 
+   8| 
+   9| def test_argmax_first():
+  10|     assert argmax([9, 1]) == 0
+[step 7] 思考: argmax 返回的是最大值而非下标（可见测试要求下标）。format_price 只保留 1 位小数且浮点除法有精度问题。两处都修：argmax 返回下标（并列取首个，空返回 None，兼容任意可迭代）；format_price 用 Decimal 精确到分、四舍五入、两位小数，支持 int/float/str/Decimal。
+  动作: write_file {"path": "src/stats.py", "content": "def argmax(values):\n    \"\"\"Return the index of the first maximum value, or None if empty.\"\"\"\n    if values is None:\n        return None\n    it = iter(val
+  观察: 已写入 src/stats.py（318 字符）
+[step 8] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="write_file">
+<｜DSML｜ parameter name="args" string="false">{"content": "import deci
+[step 9] 思考: 写入 format_price，用 Decimal 精确处理并强制两位小数、ROUND_HALF_UP，处理负数、字符串/Decimal/float/int 输入及精度上下文。
+  动作: write_file {"path": "src/normalize.py", "content": "import decimal\nfrom decimal import Decimal\n\n\ndef _to_decimal(cents):\n    if isinstance(cents, Decimal):\n        return cents\n    if isinstance(cents, bo
+  观察: 已写入 src/normalize.py（1080 字符）
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "src/normalize.p
+[step 11] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="args" string="false">{"path": "src/normalize.p
+[step 12] 思考: 查看 normalize.py 的当前内容。
+  动作: shell {"cmd": "cat src/normalize.py", "timeout_s": 10}
+  观察: exit=0 mode=bwrap
+import decimal
+from decimal import Decimal
+
+
+def _to_decimal(cents):
+    if isinstance(cents, Decimal):
+        return cents
+    if isinstance(cents, bool):
+        return Decimal(int(cents))
+    if isinstance(cents, int):
+        return Decimal(cents)
+    if isinstance(cents, floa

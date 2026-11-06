@@ -1,0 +1,45 @@
+task: 仓库工作区里 src/normalize.py 存在缺陷，tests/test_visible.py 中有失败的测试。
+请定位并修复 src/normalize.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 思考: 先查看仓库结构和相关源码/测试，复现失败。
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/normalize.py  (44B)
+[dir] tests
+      tests/test_visible.py  (166B)
+[step 2] 思考: 读取源码和可见测试，了解接口与预期。
+  动作: read_file {"path": "src/normalize.py", "start_line": 1, "end_line": 120}
+  观察: src/normalize.py (2 行)
+   1| def join_ids(ids):
+   2|     return ",".join(ids)
+[step 3] 思考: 读取可见测试以确认 join_ids 的期望行为。
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 120}
+  观察: tests/test_visible.py (10 行)
+   1| 
+   2| from normalize import join_ids
+   3| 
+   4| def test_join_strings():
+   5|     assert join_ids(["a", "b"]) == "a,b"
+   6| 
+   7| 
+   8| 
+   9| def test_join_ints():
+  10|     assert join_ids([1, 2, 3]) == "1,2,3"
+[step 4] 思考: 测试表明核心缺陷是 join 只接受字符串，整数 ID 会报 TypeError。需把每个 ID 规范化为字符串，并考虑容器/空值等边界。先搜索是否还有其他引用或说明。
+  动作: grep {"pattern": "join_ids", "path": "."}
+  观察: tests/test_visible.py:2: from normalize import join_ids
+tests/test_visible.py:5: assert join_ids(["a", "b"]) == "a,b"
+tests/test_visible.py:10: assert join_ids([1, 2, 3]) == "1,2,3"
+src/normalize.py:1: def join_ids(ids):
+[step 5] 思考: 根因是直接对可能非字符串的 ID 调用 str.join，整数会触发 TypeError。应将每个 ID 转为字符串，同时天然保留空列表返回空串。
+  动作: edit_file {"path": "src/normalize.py", "old": "def join_ids(ids):\n    return \",\".join(ids)", "new": "def join_ids(ids):\n    return \",\".join(str(id_) for id_ in ids)"}
+  观察: 已修改 src/normalize.py（替换 1 处）
+[step 6] 思考: 运行可见测试确认修复。
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.22s
+
+[step 7] 思考: 可见测试已全部通过；修复将任意 ID 转为字符串后再拼接，兼容整数、混合类型、元组/生成器等可迭代对象，空序列返回空字符串。
+  动作: finish {"summary": "修复 src/normalize.py：join_ids 现在使用 str(id_) 逐个规范化 ID 再拼接，解决整数等非字符串 ID 触发 TypeError 的根因，同时兼容混合类型和空序列。"}
+  判定: 5 passed in 0.03s

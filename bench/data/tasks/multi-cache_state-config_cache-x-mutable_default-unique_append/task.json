@@ -1,0 +1,21 @@
+{
+  "id": "multi-cache_state-config_cache-x-mutable_default-unique_append",
+  "kind": "multi",
+  "family": "cache_state+mutable_default",
+  "bug_category": "cache_state",
+  "bug_categories": [
+    "cache_state",
+    "mutable_default"
+  ],
+  "bug_class": "状态/缓存失效错误 + 可变默认参数/共享状态",
+  "bug_desc": "set 更新后没有失效缓存，读到旧值；去重集合作为可变默认参数，跨调用残留",
+  "module": "state+collect",
+  "src_path": "src/state.py,src/collect.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/state.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_set_invalidates_cache",
+  "reference": {
+    "src/state.py": "class Config:\n    def __init__(self):\n        self._cache = {}\n        self._values = {}\n\n    def set(self, k, v):\n        self._values[k] = v\n        self._cache.pop(k, None)\n\n    def get(self, k, default=None):\n        if k not in self._cache:\n            self._cache[k] = self._values.get(k, default)\n        return self._cache[k]\n",
+    "src/collect.py": "def unique_append(items, value, seen=None):\n    if seen is None:\n        seen = set()\n    if value in seen:\n        return list(items)\n    seen.add(value)\n    return list(items) + [value]\n"
+  },
+  "hidden_tests": "from state import Config\n\ndef test_set_invalidates_cache():\n    c = Config()\n    assert c.get(\"a\") is None\n    c.set(\"a\", 1)\n    assert c.get(\"a\") == 1\n    c.set(\"a\", 2)\n    assert c.get(\"a\") == 2\n\ndef test_default_not_sticky():\n    c = Config()\n    assert c.get(\"a\", 5) == 5\n    c.set(\"a\", 7)\n    assert c.get(\"a\") == 7\n\n\nfrom collect import unique_append\n\ndef test_unique_leak():\n    first = unique_append([], 7)\n    second = unique_append([], 7)\n    assert first == [7]\n    assert second == [7]\n\ndef test_unique_duplicate_in_list():\n    assert unique_append([1], 1, {1}) == [1]\n"
+}

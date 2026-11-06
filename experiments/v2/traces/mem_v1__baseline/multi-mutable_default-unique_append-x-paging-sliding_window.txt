@@ -1,0 +1,79 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/collect.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="path" string="true">.</｜DSML｜ parameter>
+</｜D
+[step 2] 思考: 先列出工作区文件，了解结构
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (189B)
+      src/paging.py  (146B)
+[dir] tests
+      tests/test_visible.py  (253B)
+[step 3] 思考: 读取源码和测试文件
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 60}
+  观察: src/collect.py (7 行)
+   1| def unique_append(items, value, seen=set()):
+   2|     if seen is None:
+   3|         seen = set()
+   4|     if value in seen:
+   5|         return list(items)
+   6|     seen.add(value)
+   7|     return list(items) + [value]
+[step 4] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="read_file">
+<｜DSML｜ parameter name="path" string="true">src/paging.py</｜DSML｜ para
+[step 5] 思考: 读取 paging.py 和可见测试
+  动作: read_file {"path": "src/paging.py", "start_line": 1, "end_line": 60}
+  观察: src/paging.py (4 行)
+   1| def sliding_window(items, k):
+   2|     if k < 1:
+   3|         raise ValueError("k must be >= 1")
+   4|     return [items[i:i + k] for i in range(len(items) - k)]
+[step 6] 思考: 读取可见测试文件
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 40}
+  观察: tests/test_visible.py (13 行)
+   1| 
+   2| from collect import unique_append
+   3| 
+   4| def test_unique_basic():
+   5|     assert unique_append([1, 2], 3) == [1, 2, 3]
+   6| 
+   7| 
+   8| 
+   9| def test_unique_leak():
+  10|     first = unique_append([], 7)
+  11|     second = unique_append([], 7)
+ 
+[step 7] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="path" string="true">src/collect.py</｜DSML｜ par
+[step 8] 思考: 修复 collect.py 的可变默认参数问题：改为 None 并在函数内初始化
+  动作: edit_file {"path": "src/collect.py", "old": "def unique_append(items, value, seen=set()):", "new": "def unique_append(items, value, seen=None):"}
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="path" string="true">src/paging.py</｜DSML｜ para
+[step 10] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="path" string="true">src/paging.py</｜DSML｜ para
+[step 11] 思考: 修复 paging.py 的滑动窗口边界：range 应为 len-k+1，并且当 k>len 时返回空列表（len-k+1 为负数时 range 为空，正确）
+  动作: edit_file {"path": "src/paging.py", "old": "    return [items[i:i + k] for i in range(len(items) - k)]", "new": "    return [items[i:i + k] for i in range(len(items) - k + 1)]"}
+  观察: 已修改 src/paging.py（替换 1 处）
+[step 12] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="selector" string="true">tests</｜DSML｜ paramete

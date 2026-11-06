@@ -1,0 +1,91 @@
+task: 仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/state.py）。
+隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。
+tests/ 目录只读，不能修改测试。修好后调用 finish。
+[step 1] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="list_files">
+<｜DSML｜ parameter name="path" string="true">.</｜DSML｜ parameter>
+</｜D
+[step 2] 思考: 先列出工作区文件
+  动作: list_files {"path": "."}
+  观察: [dir] src
+      src/collect.py  (97B)
+      src/state.py  (371B)
+[dir] tests
+      tests/test_visible.py  (251B)
+[step 3] 思考: 读取源码与测试
+  动作: read_file {"path": "src/state.py", "start_line": 1, "end_line": 60}
+  观察: src/state.py (19 行)
+   1| import time
+   2| 
+   3| 
+   4| class TTLCache:
+   5|     def __init__(self, ttl):
+   6|         self.ttl = ttl
+   7|         self._data = {}
+   8| 
+   9|     def set(self, k, v):
+  10|         self._data[k] = (v, time.time())
+  11| 
+  12|     def get(self, k):
+  13|       
+[step 4] 思考: 读取 collect.py 与测试
+  动作: read_file {"path": "src/collect.py", "start_line": 1, "end_line": 60}
+  观察: src/collect.py (4 行)
+   1| def collect_pairs(rows, out=[]):
+   2|     for a, b in rows:
+   3|         out.append((a, b))
+   4|     return out
+[step 5] 思考: 读测试
+  动作: read_file {"path": "tests/test_visible.py", "start_line": 1, "end_line": 60}
+  观察: tests/test_visible.py (15 行)
+   1| 
+   2| from state import TTLCache
+   3| 
+   4| def test_ttl_immediate():
+   5|     c = TTLCache(10)
+   6|     c.set("a", 1)
+   7|     assert c.get("a") == 1
+   8| 
+   9| import time
+  10| 
+  11| def test_ttl_expires():
+  12|     c = TTLCache(0.05)
+  13|     c.set("
+[step 6] 思考: TTLCache.get 的过期判断被 if False 屏蔽；collect_pairs 用了可变默认参数。修复两处。
+  动作: edit_file {"path": "src/state.py", "old": "        if False:\n", "new": "        if time.time() - ts > self.ttl:\n"}
+  观察: 已修改 src/state.py（替换 1 处）
+[step 7] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="edit_file">
+<｜DSML｜ parameter name="path" string="true">src/collect.py</｜DSML｜ par
+[step 8] 思考: 修复可变默认参数
+  动作: edit_file {"path": "src/collect.py", "old": "def collect_pairs(rows, out=[]):\n    for a, b in rows:\n        out.append((a, b))\n    return out", "new": "def collect_pairs(rows, out=None):\n    if out is None:
+  观察: 已修改 src/collect.py（替换 1 处）
+[step 9] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_tests">
+<｜DSML｜ parameter name="selector" string="true">tests</｜DSML｜ paramete
+[step 10] 思考: 运行可见测试
+  动作: run_tests {"selector": "tests"}
+  观察: 测试全部通过
+..                                                                       [100%]
+2 passed in 0.32s
+
+[step 11] 解析失败：
+
+<｜DSML｜ calls>
+<｜DSML｜ invoke name="run_python">
+<｜DSML｜ parameter name="code" string="true">import sys, time
+sys.path
+[step 12] 思考: 验证边界用例
+  动作: run_python {"code": "import sys,time\nsys.path.insert(0,'src')\nfrom collect import collect_pairs\nfrom state import TTLCache\na=collect_pairs([(1,2)]); b=collect_pairs([(3,4)])\nprint(a,b,a is b)\nout=[]\nr=col
+  观察: exit=0
+[(1, 2)] [(3, 4)] False
+True [(5, 6)]
+[]
+1
+None

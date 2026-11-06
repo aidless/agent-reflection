@@ -1,0 +1,21 @@
+{
+  "id": "multi-types-add_numbers-x-cache_state-lru_get",
+  "kind": "multi",
+  "family": "types+cache_state",
+  "bug_category": "type_conversion",
+  "bug_categories": [
+    "type_conversion",
+    "cache_state"
+  ],
+  "bug_class": "类型转换/空值处理 + 状态/缓存失效错误",
+  "bug_desc": "加法未做数值转换，两个字符串被拼接；get 没有刷新最近使用顺序，淘汰了刚访问的键",
+  "module": "normalize+state",
+  "src_path": "src/normalize.py,src/state.py",
+  "prompt": "仓库 src/ 下可能存在多处缺陷，tests/test_visible.py 只覆盖其中一处（src/normalize.py）。\n隐藏测试会检查 src/ 下所有模块，请通读源码修复全部缺陷，并自行构造边界用例验证。\ntests/ 目录只读，不能修改测试。修好后调用 finish。",
+  "visible_failing_test": "test_add_numeric_strings",
+  "reference": {
+    "src/normalize.py": "def add_numbers(a, b):\n    return float(a) + float(b)\n",
+    "src/state.py": "class LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.data = {}\n\n    def get(self, key):\n        if key not in self.data:\n            return None\n        value = self.data.pop(key)\n        self.data[key] = value\n        return value\n\n    def put(self, key, value):\n        if key in self.data:\n            self.data.pop(key)\n        elif len(self.data) >= self.capacity:\n            self.data.pop(next(iter(self.data)))\n        self.data[key] = value\n"
+  },
+  "hidden_tests": "from normalize import add_numbers\n\ndef test_add_numeric_strings():\n    assert add_numbers(\"1\", \"2\") == 3.0\n\ndef test_add_mixed():\n    assert add_numbers(\"3\", 4) == 7.0\n\ndef test_add_floats():\n    assert abs(add_numbers(\"1.5\", \"2.5\") - 4.0) < 1e-9\n\n\nfrom state import LRUCache\n\ndef test_lru_evicts_least_recently_used():\n    c = LRUCache(2)\n    c.put(\"a\", 1)\n    c.put(\"b\", 2)\n    assert c.get(\"a\") == 1\n    c.put(\"c\", 3)\n    assert c.get(\"a\") == 1\n    assert c.get(\"b\") is None\n\ndef test_lru_missing():\n    assert LRUCache(2).get(\"x\") is None\n"
+}

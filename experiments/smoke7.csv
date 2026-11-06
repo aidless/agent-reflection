@@ -1,0 +1,5 @@
+arm,task_id,family,success,judge_detail,failure_mode,steps,calls,tool_calls,plan_calls,reflect_calls,prompt_tokens,completion_tokens,reflect_tokens,total_tokens,cached_tokens,latency_s,rollback_used,rollback_verified,rollback_checks,memory_injected,memory_injected_count,error
+memory__optimized,multi-boundary-count_occurrences-x-parsing-parse_bool,boundary+parsing,1,10 passed in 0.07s,,13,13,10,0,0,16413,1711,0,18124,8832,47.3,0,0,0,,0,
+memory__optimized,multi-boundary-first_nonnegative-x-parsing-parse_csv_line,boundary+parsing,0,"2 failed, 8 passed in 0.11s",wrong_fix,14,14,8,0,2,16102,2975,2238,21315,11520,89.3,0,0,0,,0,reflection_retry_ok
+memory__optimized,multi-boundary-insert_position_desc-x-parsing-parse_duration,boundary+parsing,1,9 passed in 0.05s,,14,14,10,0,0,17305,2197,0,19502,0,149.3,0,0,0,,0,
+memory__optimized,multi-boundary-last_le-x-parsing-parse_flags,boundary+parsing,0,"7 failed, 2 passed in 0.09s",wrong_fix,14,14,8,0,2,16508,1402,2476,20386,0,182.3,0,0,0,,0,reflection_retry_ok
