@@ -1,0 +1,41 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    # Pinned: ubuntu-latest is 26.04, and actions/python-versions publishes no
+    # 3.9 build for it, so setup-python would fail on the 3.9 leg.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        # The repo declares no requires-python, so these are the two
+        # interpreters this suite has actually been run on: 3.9 and 3.12.
+        python-version: ["3.9", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # The agent itself is stdlib-only; requirements.txt is pytest + matplotlib,
+      # and only the tests touch matplotlib.
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run tests
+        run: python -m pytest tests -q
