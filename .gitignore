@@ -11,3 +11,10 @@ experiments/archive_pre_fix/
 logs/
 *.log
 .env
+
+# 权重/断点/本地运行产物：单文件可能超 GitHub 100 MB 硬限，且可由实验脚本重建
+*.safetensors
+*.pt
+*.bin
+.local_runs/
+data/raw/
