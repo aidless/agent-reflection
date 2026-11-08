@@ -8,6 +8,14 @@ experiments/smoke_traces/
 experiments/smoke_memory/
 experiments/memory/
 experiments/archive_pre_fix/
+# 实验 trace 文本（逐条 jsonl/txt，可由实验脚本重跑生成）
+experiments/v2/traces/
+experiments/v3/traces/
+experiments/debug_traces/
+experiments/debug_traces_mem/
+experiments/v2_smoke_traces/
+experiments/traces_debug/
+experiments/probe_one/trace.txt
 logs/
 *.log
 .env

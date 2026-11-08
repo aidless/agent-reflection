@@ -1,4 +1,0 @@
-task: 仓库工作区里 src/search.py 存在缺陷，tests/test_visible.py 中有失败的测试。
-请定位并修复 src/search.py 的根因，使可见测试通过，并通过未公开的隐藏测试（覆盖边界情况）。
-tests/ 目录只读，不能修改测试。修好后调用 finish。
-  反思异常: reflection_parse_failed: {"scenario":"仓库中 src/search.py 存在缺陷，tests/test_visible.py 只读且有失败用例；执行后 pytest 结果仍为 2 failed, 4 passed，说明修复未覆盖全部失败断言和边界情况。","error_type":"边界条件遗漏与未闭环验证","root_cause":"修改 src/search.py 时没有先运行 pytest -q t || We need answer must be JSON first char { no reasoning. But need actually solve? User asks direct output JSON and mentions repository, tests. We as API assistant don't have tools? We need infer likely 
