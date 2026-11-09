@@ -1,5 +1,7 @@
 # agent-reflection
 
+[![CI](https://github.com/aidless/agent-reflection/actions/workflows/tests.yml/badge.svg)](https://github.com/aidless/agent-reflection/actions/workflows/tests.yml)
+
 一个从零写的 ReAct Agent：工具调用、子目标与快照回滚、结构化反思记忆、成本控制，
 用 **250 个可自动判定的自建任务**跑真实 A/B。所有数字都来自真实 API 调用，没有 mock。
 
