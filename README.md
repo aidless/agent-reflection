@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/aidless/agent-reflection/actions/workflows/tests.yml/badge.svg)](https://github.com/aidless/agent-reflection/actions/workflows/tests.yml)
 
+> **English TL;DR**: A from-scratch ReAct agent (tool calls, subgoals, snapshot rollback, structured reflection memory) evaluated on 250 self-built, automatically judged coding tasks with real API calls and no mocks; run `make repro` for a two-arm smoke and `make experiment` for the full A/B. Its distinctive stance is preregistered negative reporting: the memory retrieval path demonstrably fires (234/250 tasks), yet the +2.4pp gain is a McNemar p=0.451 negative result, stated as such.
+
 一个从零写的 ReAct Agent：工具调用、子目标与快照回滚、结构化反思记忆、成本控制，
 用 **250 个可自动判定的自建任务**跑真实 A/B。所有数字都来自真实 API 调用，没有 mock。
 
