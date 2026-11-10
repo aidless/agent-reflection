@@ -1,3 +1,3 @@
 # 运行期依赖：Agent 本身只用标准库（urllib/json），下面两个用于判定与出图
 pytest>=8.0
-matplotlib>=3.7
+matplotlib>=3.11.2
